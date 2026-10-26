@@ -1,0 +1,245 @@
+// Catalogue des abonnements SEFIKH (source unique pour l'UI, les contrôles d'accès et Stripe).
+// Prix en euros TTC par mois. « ANNUAL » = engagement 12 mois facturé mensuellement.
+
+export type PlanId =
+  | "CLIENT_FREE"
+  | "CLIENT_PRO"
+  | "CLIENT_STUDIO"
+  | "PRO_BASIC"
+  | "PRO_PRO"
+  | "PRO_VISIBILITY"
+  | "PRO_INTELLIGENCE"
+  | "PRO_FOUNDING";
+
+export type Term = "ANNUAL" | "MONTHLY";
+export type Audience = "CLIENT" | "PRO";
+
+export type Plan = {
+  id: PlanId;
+  audience: Audience;
+  name: string;
+  tagline: string;
+  prices: Partial<Record<Term, number>>; // € / mois ; absent = non proposé sur cette durée
+  features: string[];
+  highlight?: boolean;
+  limits: {
+    textSearchesPerMonth: number; // Infinity = illimité
+    imageSearchesPerMonth: number;
+    newConversationsPerMonth: number;
+    portfolioImages: number;
+    seeContactDetails: boolean;
+    savedLibrary: boolean;
+    marketInsights: boolean;
+    analytics: boolean;
+    searchBoost: number; // bonus de classement (pros)
+    featured: boolean;
+  };
+  seatsLimit?: number; // places limitées (Founding Partner)
+};
+
+const UNLIMITED = Number.POSITIVE_INFINITY;
+
+export const PLANS: Record<PlanId, Plan> = {
+  CLIENT_FREE: {
+    id: "CLIENT_FREE",
+    audience: "CLIENT",
+    name: "Free",
+    tagline: "Explore · Search · Discover",
+    prices: { ANNUAL: 0, MONTHLY: 0 },
+    features: [
+      "Search by project (10 / month)",
+      "Search by image (3 / month)",
+      "Search by material or expertise",
+      "AI-powered results and matches",
+      "Contact up to 2 makers / month",
+    ],
+    limits: {
+      textSearchesPerMonth: 10,
+      imageSearchesPerMonth: 3,
+      newConversationsPerMonth: 2,
+      portfolioImages: 0,
+      seeContactDetails: false,
+      savedLibrary: false,
+      marketInsights: false,
+      analytics: false,
+      searchBoost: 0,
+      featured: false,
+    },
+  },
+  CLIENT_PRO: {
+    id: "CLIENT_PRO",
+    audience: "CLIENT",
+    name: "Pro",
+    tagline: "Identify · Source · Save · Connect",
+    prices: { ANNUAL: 39, MONTHLY: 49 },
+    highlight: true,
+    features: [
+      "Unlimited AI-powered searches",
+      "Unlimited image searches",
+      "Full company profiles with contact details",
+      "Unlimited direct messaging",
+      "Supplier library & saved makers",
+      "Personalised suggestions",
+    ],
+    limits: {
+      textSearchesPerMonth: UNLIMITED,
+      imageSearchesPerMonth: UNLIMITED,
+      newConversationsPerMonth: UNLIMITED,
+      portfolioImages: 0,
+      seeContactDetails: true,
+      savedLibrary: true,
+      marketInsights: false,
+      analytics: false,
+      searchBoost: 0,
+      featured: false,
+    },
+  },
+  CLIENT_STUDIO: {
+    id: "CLIENT_STUDIO",
+    audience: "CLIENT",
+    name: "Studio",
+    tagline: "Collaborate at studio scale",
+    prices: { ANNUAL: 79, MONTHLY: 95 },
+    features: [
+      "Everything included in Pro",
+      "Cloud documents for every project",
+      "Full Trends & Insights market data",
+      "Quarterly demand reporting",
+      "Priority support",
+    ],
+    limits: {
+      textSearchesPerMonth: UNLIMITED,
+      imageSearchesPerMonth: UNLIMITED,
+      newConversationsPerMonth: UNLIMITED,
+      portfolioImages: 0,
+      seeContactDetails: true,
+      savedLibrary: true,
+      marketInsights: true,
+      analytics: false,
+      searchBoost: 0,
+      featured: false,
+    },
+  },
+  PRO_BASIC: {
+    id: "PRO_BASIC",
+    audience: "PRO",
+    name: "Essential",
+    tagline: "Get listed for free",
+    prices: { ANNUAL: 0, MONTHLY: 0 },
+    features: ["Business profile", "Up to 6 portfolio pictures", "Receive messages from creatives"],
+    limits: {
+      textSearchesPerMonth: UNLIMITED,
+      imageSearchesPerMonth: 10,
+      newConversationsPerMonth: 0,
+      portfolioImages: 6,
+      seeContactDetails: true,
+      savedLibrary: false,
+      marketInsights: false,
+      analytics: false,
+      searchBoost: 0,
+      featured: false,
+    },
+  },
+  PRO_PRO: {
+    id: "PRO_PRO",
+    audience: "PRO",
+    name: "Pro",
+    tagline: "A complete professional presence",
+    prices: { ANNUAL: 149, MONTHLY: 179 },
+    features: ["Professional profile with verified badge", "Unlimited projects & portfolio", "Visibility analytics"],
+    limits: {
+      textSearchesPerMonth: UNLIMITED,
+      imageSearchesPerMonth: UNLIMITED,
+      newConversationsPerMonth: 0,
+      portfolioImages: 60,
+      seeContactDetails: true,
+      savedLibrary: true,
+      marketInsights: false,
+      analytics: true,
+      searchBoost: 0.04,
+      featured: false,
+    },
+  },
+  PRO_VISIBILITY: {
+    id: "PRO_VISIBILITY",
+    audience: "PRO",
+    name: "Visibility",
+    tagline: "Be seen first",
+    prices: { ANNUAL: 299, MONTHLY: 349 },
+    highlight: true,
+    features: ["Everything in Pro", "Boosted ranking in search results", "Featured on the home page", "Editorial features & dedicated content"],
+    limits: {
+      textSearchesPerMonth: UNLIMITED,
+      imageSearchesPerMonth: UNLIMITED,
+      newConversationsPerMonth: 0,
+      portfolioImages: 120,
+      seeContactDetails: true,
+      savedLibrary: true,
+      marketInsights: false,
+      analytics: true,
+      searchBoost: 0.1,
+      featured: true,
+    },
+  },
+  PRO_INTELLIGENCE: {
+    id: "PRO_INTELLIGENCE",
+    audience: "PRO",
+    name: "Intelligence",
+    tagline: "Understand the demand",
+    prices: { ANNUAL: 499, MONTHLY: 579 },
+    features: ["Everything in Visibility", "Advanced demand analysis", "Full market insights", "Quarterly demand reporting"],
+    limits: {
+      textSearchesPerMonth: UNLIMITED,
+      imageSearchesPerMonth: UNLIMITED,
+      newConversationsPerMonth: 0,
+      portfolioImages: 200,
+      seeContactDetails: true,
+      savedLibrary: true,
+      marketInsights: true,
+      analytics: true,
+      searchBoost: 0.12,
+      featured: true,
+    },
+  },
+  PRO_FOUNDING: {
+    id: "PRO_FOUNDING",
+    audience: "PRO",
+    name: "Founding Partner",
+    tagline: "Launch-phase programme — limited places",
+    prices: { ANNUAL: 149 },
+    features: ["Full Intelligence package", "12-month partnership for launch-phase supporters", "Founding Partner badge", "Price locked for 12 months"],
+    seatsLimit: 50,
+    limits: {
+      textSearchesPerMonth: UNLIMITED,
+      imageSearchesPerMonth: UNLIMITED,
+      newConversationsPerMonth: 0,
+      portfolioImages: 200,
+      seeContactDetails: true,
+      savedLibrary: true,
+      marketInsights: true,
+      analytics: true,
+      searchBoost: 0.12,
+      featured: true,
+    },
+  },
+};
+
+export const CLIENT_PLAN_IDS: PlanId[] = ["CLIENT_FREE", "CLIENT_PRO", "CLIENT_STUDIO"];
+export const PRO_PLAN_IDS: PlanId[] = ["PRO_BASIC", "PRO_PRO", "PRO_VISIBILITY", "PRO_INTELLIGENCE", "PRO_FOUNDING"];
+
+export function getPlan(id: string | null | undefined): Plan {
+  return PLANS[(id as PlanId) ?? "CLIENT_FREE"] ?? PLANS.CLIENT_FREE;
+}
+
+export function defaultPlanFor(role: string): PlanId {
+  return role === "PRO" ? "PRO_BASIC" : "CLIENT_FREE";
+}
+
+export function isPaid(id: string) {
+  const p = getPlan(id);
+  return (p.prices.ANNUAL ?? 0) > 0 || (p.prices.MONTHLY ?? 0) > 0;
+}
+
+export function formatLimit(n: number) {
+  return Number.isFinite(n) ? String(n) : "Unlimited";
+}

@@ -1,0 +1,442 @@
+// Schéma SEFIKH — SQLite en développement, compatible PostgreSQL en production
+// (changer `provider` et DATABASE_URL, puis `npx prisma migrate dev`).
+// SQLite ne gère pas les enums natifs : les valeurs autorisées sont typées dans src/lib/constants.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Comptes & authentification ─────────────────────────────
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  name             String
+  role             String // CLIENT | PRO | ADMIN
+  emailVerifiedAt  DateTime?
+  avatarKey        String?
+  locale           String    @default("en")
+  // Abonnement courant (dénormalisé pour les contrôles d'accès rapides)
+  plan             String    @default("FREE") // voir src/lib/plans.ts
+  stripeCustomerId String?   @unique
+  notifyByEmail    Boolean   @default(true)
+  lastSeenAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  sessions        Session[]
+  tokens          AuthToken[]
+  clientProfile   ClientProfile?
+  company         Company?
+  projects        Project[]
+  conversations   Conversation[]   @relation("ClientConversations")
+  messages        Message[]
+  notifications   Notification[]
+  savedCompanies  SavedCompany[]
+  searches        SearchLog[]
+  subscriptions   Subscription[]
+  payments        Payment[]
+  profileViews    ProfileView[]
+  documents       Document[]
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent  String?
+  ip         String?
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuthToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // VERIFY_EMAIL | RESET_PASSWORD
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, type])
+}
+
+// ───────────────────────────── Profils ─────────────────────────────
+
+/// Parcours « créatif » (architecte, designer, hôtelier, particulier…)
+model ClientProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studioName  String?
+  clientType  String? // PRIVATE | ARCHITECT | INTERIOR_DESIGNER | HOTELIER | RESTAURATEUR | DEVELOPER
+  sector      String?
+  phone       String?
+  street      String?
+  street2     String?
+  city        String?
+  region      String?
+  country     String?
+  website     String?
+  bio         String?
+  keywords    String   @default("[]") // JSON string[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Parcours « pro » : artisan, atelier, fabricant, fournisseur de matériaux
+model Company {
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug               String    @unique
+  name               String
+  tagline            String?
+  about              String?
+  kind               String    @default("ARTISAN") // ARTISAN | WORKSHOP | MANUFACTURER | SUPPLIER | DESIGNER
+  sector             String?
+  publicEmail        String?
+  phone              String?
+  website            String?
+  street             String?
+  street2            String?
+  city               String?
+  region             String?
+  country            String?
+  continent          String?
+  lat                Float?
+  lng                Float?
+  operationAreas     String    @default("[]") // JSON string[] (continents / pays)
+  keywords           String    @default("[]") // JSON string[] — bulles de compétences libres
+  productionCapacity String?
+  leadTimeMin        Int? // en mois
+  leadTimeMax        Int?
+  availability       String    @default("[]") // JSON number[] (mois 1-12 où l'atelier est disponible)
+  foundedYear        Int?
+  teamSize           String?
+  coverKey           String?
+  logoKey            String?
+  verified           Boolean   @default(false)
+  published          Boolean   @default(false)
+  featuredUntil      DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  tags          CompanyTag[]
+  portfolio     PortfolioImage[]
+  conversations Conversation[]
+  savedBy       SavedCompany[]
+  views         ProfileView[]
+  impressions   SearchImpression[]
+
+  @@index([country, city])
+  @@index([published])
+}
+
+/// Vocabulaire contrôlé : compétences, matériaux, techniques, secteurs
+model Tag {
+  id        String       @id @default(cuid())
+  kind      String // SKILL | MATERIAL | TECHNIQUE | SECTOR
+  name      String
+  slug      String
+  companies CompanyTag[]
+
+  @@unique([kind, slug])
+}
+
+model CompanyTag {
+  companyId String
+  tagId     String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, tagId])
+  @@index([tagId])
+}
+
+model PortfolioImage {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  key         String // chemin dans le stockage (ex. portfolio/abc.webp)
+  thumbKey    String?
+  width       Int
+  height      Int
+  title       String?
+  description String?
+  projectName String?
+  location    String?
+  year        Int?
+  // Empreintes pour la recherche par image
+  embedding   Bytes? // Float32Array CLIP (512) normalisé
+  colorVector String? // JSON number[] — histogramme couleur (repli sans CLIP)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([companyId])
+}
+
+// ───────────────────────────── Projets clients ─────────────────────────────
+
+model Project {
+  id                String    @id @default(cuid())
+  ownerId           String
+  owner             User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  title             String
+  projectType       String?
+  description       String?
+  country           String?
+  region            String?
+  city              String?
+  size              String?
+  spaceTypes        String    @default("[]") // JSON string[]
+  style             String?
+  materials         String    @default("[]")
+  colorsFinishes    String?
+  lookingFor        String?
+  productionType    String?
+  quantities        String?
+  technicalReqs     String?
+  timeline          String?
+  budget            String?
+  completionDate    DateTime?
+  professionalTypes String    @default("[]")
+  services          String    @default("[]")
+  reach             String?
+  notes             String?
+  clientType        String?
+  status            String    @default("ACTIVE") // DRAFT | ACTIVE | ARCHIVED
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  files         Document[]
+  conversations Conversation[]
+
+  @@index([ownerId, status])
+}
+
+/// Documents « cloud » (moodboards, plans) — rattachés à un utilisateur et éventuellement à un projet
+model Document {
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  key       String
+  name      String
+  mime      String
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@index([ownerId])
+}
+
+// ───────────────────────────── Messagerie ─────────────────────────────
+
+model Conversation {
+  id               String    @id @default(cuid())
+  clientId         String
+  client           User      @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
+  companyId        String
+  company          Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  projectId        String?
+  project          Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  subject          String?
+  lastMessageAt    DateTime  @default(now())
+  clientArchived   Boolean   @default(false)
+  proArchived      Boolean   @default(false)
+  clientLastReadAt DateTime?
+  proLastReadAt    DateTime?
+  createdAt        DateTime  @default(now())
+
+  messages Message[]
+
+  @@unique([clientId, companyId, projectId])
+  @@index([companyId])
+  @@index([clientId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+  createdAt      DateTime     @default(now())
+
+  attachments Attachment[]
+
+  @@index([conversationId, createdAt])
+}
+
+model Attachment {
+  id        String  @id @default(cuid())
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  key       String
+  name      String
+  mime      String
+  size      Int
+  width     Int?
+  height    Int?
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // MESSAGE | CONTACT_REQUEST | BILLING | SYSTEM
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+}
+
+// ───────────────────────────── Bibliothèque & analytics ─────────────────────────────
+
+model SavedCompany {
+  userId    String
+  companyId String
+  note      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([userId, companyId])
+}
+
+model SearchLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  visitorId    String?
+  mode         String // TEXT | IMAGE | FILTER | PROJECT
+  query        String?
+  terms        String   @default("[]") // JSON — termes du vocabulaire détectés
+  location     String?
+  imageKey     String? // image déposée pour une recherche visuelle
+  embedding    Bytes?
+  resultsCount Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  impressions SearchImpression[]
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+model SearchImpression {
+  id          String    @id @default(cuid())
+  searchId    String
+  search      SearchLog @relation(fields: [searchId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  rank        Int
+  createdAt   DateTime  @default(now())
+
+  @@index([companyId, createdAt])
+}
+
+model ProfileView {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  viewerId  String?
+  viewer    User?    @relation(fields: [viewerId], references: [id], onDelete: SetNull)
+  source    String? // SEARCH | IMAGE | DIRECT
+  createdAt DateTime @default(now())
+
+  @@index([companyId, createdAt])
+}
+
+// ───────────────────────────── Facturation ─────────────────────────────
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                 String
+  term                 String // ANNUAL_COMMITMENT | MONTHLY
+  status               String // INCOMPLETE | ACTIVE | PAST_DUE | CANCELED
+  provider             String    @default("stripe") // stripe | simulated
+  stripeSubscriptionId String?   @unique
+  stripeCheckoutId     String?   @unique
+  amount               Int // centimes / mois
+  currency             String    @default("eur")
+  currentPeriodEnd     DateTime?
+  commitmentEndsAt     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  canceledAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([userId, status])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount          Int
+  currency        String   @default("eur")
+  status          String // PAID | FAILED | REFUNDED
+  description     String?
+  stripeInvoiceId String?  @unique
+  invoiceUrl      String?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Évènements webhook déjà traités (idempotence)
+model WebhookEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now())
+}
+
+// ───────────────────────────── Divers ─────────────────────────────
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  html      String
+  text      String?
+  status    String // SENT | LOGGED | FAILED
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model ContactRequest {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  topic     String
+  message   String
+  createdAt DateTime @default(now())
+}

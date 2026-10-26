@@ -1,0 +1,277 @@
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight, Hammer, MessageSquareText, ScanSearch, Sparkles } from "lucide-react";
+import { db } from "@/lib/db";
+import { getPlan } from "@/lib/plans";
+import { currentQuarter, marketKpis } from "@/lib/stats";
+import { fileUrl, formatNumber } from "@/lib/utils";
+import { SearchPanel } from "@/components/search/search-panel";
+import { MakerCard } from "@/components/makers/maker-card";
+import { ButtonLink } from "@/components/ui/button";
+import { SectionTitle } from "@/components/ui/misc";
+
+const CRAFTS = [
+  { tag: "Metalwork", param: "skills", label: "Metal & Brass", copy: "Patinated brass, bronze casting, forged steel" },
+  { tag: "Cabinetmaking", param: "skills", label: "Cabinetmaking", copy: "Burl veneers, joinery, bespoke furniture" },
+  { tag: "Leather", param: "materials", label: "Leather", copy: "Wall panels, tufting, saddlery" },
+  { tag: "Natural stone", param: "materials", label: "Stone & Marble", copy: "Onyx, travertine, sculpted marble" },
+  { tag: "Upholstery", param: "skills", label: "Upholstery", copy: "Velvet, bouclé, custom seating" },
+  { tag: "Ceramics", param: "skills", label: "Ceramics & Tiles", copy: "Zellige, glazed tiles, terracotta" },
+];
+
+async function getHomeData() {
+  const companies = await db.company.findMany({
+    where: { published: true },
+    include: { user: { select: { plan: true } }, tags: { include: { tag: true } }, portfolio: { orderBy: { position: "asc" }, take: 3 } },
+    orderBy: { updatedAt: "desc" },
+  });
+  const featured = [...companies]
+    .sort((a, b) => Number(getPlan(b.user.plan).limits.featured) - Number(getPlan(a.user.plan).limits.featured) || Number(b.verified) - Number(a.verified))
+    .slice(0, 8);
+  const crafts = CRAFTS.map((c) => {
+    const withTag = companies.filter((co) => co.tags.some((t) => t.tag.name === c.tag) && co.portfolio.length);
+    const img = withTag[0]?.portfolio[0];
+    return { ...c, count: withTag.length, image: img ? img.thumbKey ?? img.key : null };
+  });
+  const [kpis, portfolioCount, countries] = await Promise.all([
+    marketKpis(currentQuarter()),
+    db.portfolioImage.count(),
+    db.company.groupBy({ by: ["country"], where: { published: true } }).then((r) => r.length),
+  ]);
+  return { featured, crafts, kpis, portfolioCount, countries, makers: companies.length };
+}
+
+export default async function HomePage() {
+  const { featured, crafts, kpis, portfolioCount, countries, makers } = await getHomeData();
+
+  return (
+    <>
+      {/* ── Hero ───────────────────────────────────────────── */}
+      <section className="relative overflow-hidden">
+        <div className="container-x grid items-center gap-12 pb-20 pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-28 lg:pt-16">
+          <div className="min-w-0 animate-fade-up">
+            <p className="eyebrow">The sourcing platform for interior professionals</p>
+            <h1 className="display mt-5 text-[3.2rem] sm:text-7xl xl:text-[5.4rem]">
+              From inspiration
+              <br />
+              to <em className="text-brass">realization.</em>
+            </h1>
+            <p className="mt-6 max-w-lg text-[16px] leading-relaxed text-muted">
+              Find the right skills, materials and makers to bring your ideas to life — by describing a project, sharing a picture or browsing expertise.
+            </p>
+            <div className="mt-9 max-w-2xl">
+              <SearchPanel />
+            </div>
+            <p className="mt-5 text-[12px] tracking-[0.18em] text-muted uppercase">Artisans · Workshops · Manufacturers · Materials</p>
+          </div>
+
+          <div className="relative hidden h-[640px] lg:block" aria-hidden>
+            <div className="absolute right-0 top-0 h-[78%] w-[62%] overflow-hidden rounded-[2rem]">
+              <Image src="/images/hero.webp" alt="" fill priority sizes="30vw" className="object-cover" />
+            </div>
+            <div className="absolute bottom-0 left-0 h-[58%] w-[46%] overflow-hidden rounded-[2rem] border-[6px] border-ivory">
+              <Image src="/images/hero-2.webp" alt="" fill priority sizes="22vw" className="object-cover" />
+            </div>
+            <div className="absolute bottom-[6%] right-[8%] h-[30%] w-[30%] overflow-hidden rounded-[1.5rem] border-[6px] border-ivory">
+              <Image src="/images/hero-3.webp" alt="" fill sizes="15vw" className="object-cover" />
+            </div>
+            <div className="absolute left-[12%] top-[14%] rounded-2xl bg-paper/95 px-5 py-4 shadow-xl shadow-ink/10 backdrop-blur">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-muted">Image match</p>
+              <p className="display mt-1 text-3xl">94%</p>
+              <p className="text-xs text-muted">Patinated brass · Lyon</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Chiffres ───────────────────────────────────────── */}
+      <section className="border-y border-line bg-paper">
+        <div className="container-x grid grid-cols-2 divide-line py-8 md:grid-cols-4 md:divide-x">
+          {[
+            [formatNumber(makers), "Curated makers"],
+            [formatNumber(countries), "Countries"],
+            [formatNumber(portfolioCount), "Portfolio pieces"],
+            ["0%", "Commission on projects"],
+          ].map(([n, l]) => (
+            <div key={l} className="px-2 py-3 text-center md:px-6">
+              <p className="display text-4xl sm:text-5xl">{n}</p>
+              <p className="mt-1 text-[12px] uppercase tracking-[0.18em] text-muted">{l}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Savoir-faire ───────────────────────────────────── */}
+      <section className="container-x py-24">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <SectionTitle eyebrow="Explore by craft" title="Know-how, organised.">
+            Browse a curated vocabulary of skills, materials and techniques used by the best workshops.
+          </SectionTitle>
+          <Link href="/search" className="link-underline inline-flex items-center gap-1.5 text-sm font-medium">
+            All expertise <ArrowRight className="size-4" />
+          </Link>
+        </div>
+        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:gap-6">
+          {crafts.map((c) => (
+            <Link key={c.label} href={`/search?${c.param}=${encodeURIComponent(c.tag)}`} className="grain group relative aspect-[4/3] overflow-hidden rounded-2xl bg-espresso">
+              {c.image && <Image src={fileUrl(c.image)!} alt="" fill sizes="(min-width:768px) 33vw, 50vw" className="object-cover opacity-80 transition duration-700 group-hover:scale-105 group-hover:opacity-65" />}
+              <div className="absolute inset-0 bg-gradient-to-t from-espresso/85 via-espresso/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-paper sm:p-6">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <h3 className="display text-2xl sm:text-3xl">{c.label}</h3>
+                    <p className="mt-1 hidden text-[13px] text-paper/70 sm:block">{c.copy}</p>
+                  </div>
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-paper/30 transition group-hover:bg-paper group-hover:text-ink">
+                    <ArrowUpRight className="size-4" />
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Makers à la une ────────────────────────────────── */}
+      {featured.length > 0 && (
+        <section className="bg-paper py-24">
+          <div className="container-x">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <SectionTitle eyebrow="Featured makers" title="Ateliers worth knowing." />
+              <ButtonLink href="/search" variant="secondary" size="sm">
+                Explore all makers
+              </ButtonLink>
+            </div>
+            <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-6">
+              {featured.map((c, i) => (
+                <MakerCard
+                  key={c.id}
+                  priority={i < 4}
+                  maker={{
+                    ...c,
+                    featured: getPlan(c.user.plan).limits.featured,
+                    image: c.portfolio[0] ? { key: c.portfolio[0].thumbKey ?? c.portfolio[0].key, width: c.portfolio[0].width, height: c.portfolio[0].height, title: c.portfolio[0].title } : null,
+                    gallery: c.portfolio.slice(1).map((p) => p.thumbKey ?? p.key),
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Comment ça marche ──────────────────────────────── */}
+      <section className="container-x py-24">
+        <SectionTitle eyebrow="One platform, two ways to use it" title="Made for those who imagine — and those who make." className="mx-auto text-center" />
+        <div className="mt-14 grid gap-6 lg:grid-cols-2">
+          {[
+            {
+              who: "For creatives",
+              title: "Identify · Source · Save · Connect",
+              steps: [
+                [Sparkles, "Describe your project", "Write it in your own words: our engine understands materials, techniques, sectors and places."],
+                [ScanSearch, "Search with a picture", "Drop a moodboard image and discover makers whose portfolio looks alike."],
+                [MessageSquareText, "Talk directly to makers", "Share plans and references in a dedicated project inbox — no middleman, no commission."],
+              ],
+              cta: ["Start a project", "/register"],
+            },
+            {
+              who: "For makers",
+              title: "Showcase your craft. Get discovered.",
+              steps: [
+                [Hammer, "Create your business profile", "Skills, materials, production capacities, lead times and areas of operation."],
+                [ScanSearch, "Publish your portfolio", "Every picture you upload becomes searchable by image and by description."],
+                [MessageSquareText, "Receive qualified requests", "Architects and designers reach you with a clear brief, budget and timeline."],
+              ],
+              cta: ["Join as a maker", "/join"],
+            },
+          ].map((col, idx) => (
+            <div key={col.who} className={idx === 0 ? "rounded-[1.75rem] border border-line bg-paper p-8 sm:p-10" : "grain rounded-[1.75rem] bg-espresso p-8 text-paper sm:p-10"}>
+              <p className={idx === 0 ? "eyebrow" : "eyebrow !text-paper/50"}>{col.who}</p>
+              <h3 className="display mt-3 text-3xl sm:text-4xl">{col.title}</h3>
+              <ol className="mt-8 space-y-6">
+                {col.steps.map(([Icon, t, d], i) => {
+                  const I = Icon as typeof Sparkles;
+                  return (
+                    <li key={t as string} className="flex gap-4">
+                      <span className={idx === 0 ? "flex size-11 shrink-0 items-center justify-center rounded-full bg-ivory text-brass" : "flex size-11 shrink-0 items-center justify-center rounded-full bg-paper/10 text-brass-light"}>
+                        <I className="size-5" strokeWidth={1.5} />
+                      </span>
+                      <div>
+                        <p className="text-[15px] font-semibold">
+                          <span className="mr-2 font-display text-brass">0{i + 1}</span>
+                          {t as string}
+                        </p>
+                        <p className={idx === 0 ? "mt-1 text-sm leading-relaxed text-muted" : "mt-1 text-sm leading-relaxed text-paper/60"}>{d as string}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              <ButtonLink href={col.cta[1]!} variant={idx === 0 ? "primary" : "light"} className="mt-9">
+                {col.cta[0]} <ArrowRight className="size-4" />
+              </ButtonLink>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Rejoindre (pros) ───────────────────────────────── */}
+      <section className="container-x pb-24">
+        <div className="grid overflow-hidden rounded-[2rem] bg-sand lg:grid-cols-[1fr_1.1fr]">
+          <div className="grid grid-cols-2 gap-1.5 p-1.5">
+            <div className="relative min-h-72 overflow-hidden rounded-[1.6rem]">
+              <Image src="/images/join-1.webp" alt="A cabinetmaker's hands planing wood" fill sizes="25vw" className="object-cover" />
+            </div>
+            <div className="relative min-h-72 overflow-hidden rounded-[1.6rem]">
+              <Image src="/images/join-2.webp" alt="Hand carving a stone and timber sculpture" fill sizes="25vw" className="object-cover" />
+            </div>
+          </div>
+          <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
+            <p className="eyebrow">Showcase your craft. Get discovered.</p>
+            <h2 className="display mt-4 text-4xl sm:text-5xl">Create your business profile.</h2>
+            <p className="mt-5 max-w-md leading-relaxed text-ink-soft">
+              Join SEFIKH and connect with architects, designers and creative professionals looking for unique skills, materials and expertise.
+            </p>
+            <p className="mt-4 font-display text-xl italic text-muted">Tell us about your skills, materials and capabilities — it only takes a few minutes.</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <ButtonLink href="/register?role=pro" size="lg">
+                Join SEFIKH <ArrowRight className="size-4" />
+              </ButtonLink>
+              <ButtonLink href="/pricing?for=pro" variant="secondary" size="lg">
+                Business plans
+              </ButtonLink>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Données marché ─────────────────────────────────── */}
+      <section className="grain bg-espresso py-24 text-paper">
+        <div className="container-x grid items-center gap-14 lg:grid-cols-[1fr_1.2fr]">
+          <div>
+            <p className="eyebrow !text-paper/50">SEFIKH market data</p>
+            <h2 className="display mt-4 text-4xl sm:text-5xl">A live view of what the creative industries are looking for.</h2>
+            <p className="mt-5 max-w-md text-paper/60">Every search, match and connection feeds an anonymised barometer of demand for craftsmanship.</p>
+            <ButtonLink href="/insights" variant="light" className="mt-8">
+              Trends & Insights <ArrowRight className="size-4" />
+            </ButtonLink>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              [kpis.searches, "Searches this quarter"],
+              [kpis.activePros, "Active professionals"],
+              [kpis.matches, "Qualified matches"],
+              [kpis.connections, "Connection requests"],
+            ].map(([n, l]) => (
+              <div key={l as string} className="rounded-3xl border border-paper/10 bg-paper/[0.04] p-6 sm:p-8">
+                <p className="display text-5xl sm:text-6xl">{formatNumber(n as number)}</p>
+                <p className="mt-2 text-[13px] text-paper/55">{l as string}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
