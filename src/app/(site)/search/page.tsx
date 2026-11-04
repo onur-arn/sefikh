@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { fromBytes } from "@/lib/images";
 import { getPlan } from "@/lib/plans";
-import { findRecentSearch, logSearch, runSearch, searchesThisMonth, type SearchInput, type SearchMode } from "@/lib/search";
+import { findRecentSearch, logSearch, runSearch, searchesUsed, type SearchInput, type SearchMode } from "@/lib/search";
 import { fileUrl, parseList } from "@/lib/utils";
 import { visitorId } from "@/lib/visitor";
 import { SearchFilters, SortSelect } from "@/components/search/filters";
@@ -66,9 +66,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const mode: SearchMode = imageSearch ? "IMAGE" : q ? "TEXT" : "FILTER";
   const logKey = mode === "TEXT" ? q! : JSON.stringify([q, input.near, input.skills, input.materials, input.techniques, input.sectors]);
   let limited = false;
-  if (hasCriteria && !imageSearch && Number.isFinite(plan.limits.searchesPerMonth)) {
+  if (hasCriteria && !imageSearch && Number.isFinite(plan.limits.freeSearches)) {
     const already = await findRecentSearch(who, mode, logKey);
-    if (!already && (await searchesThisMonth(who)) >= plan.limits.searchesPerMonth) limited = true;
+    if (!already && (await searchesUsed(who)) >= plan.limits.freeSearches) limited = true;
   }
 
   // La recherche comprend l'anglais et le français ; les autres langues passent par la traduction automatique.
@@ -126,7 +126,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
             </p>
             <h1 className="display mt-2 text-3xl sm:text-4xl">
               {limited
-                ? tr("You've reached your free searches for this month")
+                ? tr("You've used your free searches")
                 : hasCriteria
                   ? tr(imageSearch ? (results.length === 1 ? "Here is 1 maker matching your reference." : "Here are {count} makers matching your reference.") : results.length === 1 ? "Here is 1 maker matching your project requirements." : "Here are {count} makers matching your project requirements.", { count: results.length })
                   : tr("{length} makers, workshops and manufacturers", { length: results.length })}
@@ -157,7 +157,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
               <Lock className="mx-auto size-8 text-muted" strokeWidth={1.4} />
               <h2 className="display mt-4 text-3xl">{tr("Unlock unlimited AI-powered searches")}</h2>
               <p className="mx-auto mt-3 max-w-md text-sm text-muted">
-                {tr("The Free plan includes {limit} searches per month. Upgrade to Pro for unlimited searches, the names of makers and direct messaging.", { limit: plan.limits.searchesPerMonth })}</p>
+                {tr("The Free plan includes {limit} searches in total. Upgrade to Pro for unlimited searches, the names of makers and direct messaging.", { limit: plan.limits.freeSearches })}</p>
               <div className="mt-7 flex flex-wrap justify-center gap-3">
                 <ButtonLink href="/pricing">
                   {tr("See plans")}

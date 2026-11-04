@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/mail";
 import { paymentFailedTemplate, subscriptionTemplate } from "@/lib/mail/templates";
 import { notify } from "@/lib/notifications";
 import { defaultPlanFor, getPlan, PLANS, type PlanId, type Term } from "@/lib/plans";
+import { hasListedPlan } from "@/lib/access";
 
 let stripe: Stripe | null = null;
 export function getStripe() {
@@ -185,6 +186,8 @@ export async function activateSubscription(opts: {
   if (opts.planId === "PRO_PRO" || opts.planId === "PRO_VISIBILITY" || opts.planId === "PRO_INTELLIGENCE" || opts.planId === "PRO_FOUNDING") {
     await db.company.updateMany({ where: { userId: opts.userId }, data: { verified: true } });
   }
+  // Le paiement rend la fiche visible dès qu'elle a au moins une photo.
+  if (hasListedPlan(opts.planId)) await db.company.updateMany({ where: { userId: opts.userId, portfolio: { some: {} } }, data: { published: true } });
   const tr = translatorFor(user.locale);
   await notify(opts.userId, { type: "BILLING", title: tr("Welcome to {planName}", { planName: tr(plan.name) }), body: tr("Your subscription is active."), link: "/dashboard/billing" });
   const tpl = subscriptionTemplate({ name: user.name, planName: tr(plan.name), amount: tr.money(amount), term: tr(TERM_LABEL[opts.term]) }, user.locale);

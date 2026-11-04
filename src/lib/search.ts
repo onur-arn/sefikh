@@ -7,6 +7,7 @@ import { continentOf, detectLocation, distanceKm, findCity, findCountry, type Ci
 import { cosine, fromBytes } from "@/lib/images";
 import { getPlan } from "@/lib/plans";
 import { parseList } from "@/lib/utils";
+import { LISTED_COMPANY } from "@/lib/access";
 
 // ───────────────────────── Analyse de la requête ─────────────────────────
 
@@ -79,7 +80,7 @@ export type SearchResult = {
 
 async function loadCandidates() {
   return db.company.findMany({
-    where: { published: true },
+    where: LISTED_COMPANY,
     include: {
       user: { select: { plan: true } },
       tags: { include: { tag: true } },
@@ -249,13 +250,11 @@ export async function runSearch(input: SearchInput) {
 
 export type SearchMode = "TEXT" | "IMAGE" | "FILTER" | "PROJECT";
 
-/** Recherches du mois, tous modes confondus (projet, image, catégories). */
-export async function searchesThisMonth(who: { userId?: string | null; visitorId?: string | null }) {
-  const since = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-  if (!who.userId && !who.visitorId) return 0;
-  return db.searchLog.count({
-    where: { mode: { in: ["TEXT", "IMAGE", "FILTER"] }, createdAt: { gte: since }, ...(who.userId ? { userId: who.userId } : { visitorId: who.visitorId }) },
-  });
+/** Recherches effectuées depuis toujours, tous modes confondus (compte et navigateur cumulés). */
+export async function searchesUsed(who: { userId?: string | null; visitorId?: string | null }) {
+  const owner = [...(who.userId ? [{ userId: who.userId }] : []), ...(who.visitorId ? [{ visitorId: who.visitorId }] : [])];
+  if (!owner.length) return 0;
+  return db.searchLog.count({ where: { mode: { in: ["TEXT", "IMAGE", "FILTER"] }, OR: owner } });
 }
 
 export async function logSearch(opts: {

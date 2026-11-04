@@ -1,4 +1,4 @@
-import { getPlan } from "@/lib/plans";
+import { getPlan, LISTED_PLAN_IDS, type PlanId } from "@/lib/plans";
 
 // Règle d'accès aux makers : sans offre payante, les résultats sont anonymes et le contact impossible.
 // L'anonymisation se fait côté serveur : le nom, le slug et l'identifiant ne sont jamais envoyés au navigateur.
@@ -7,6 +7,13 @@ type Viewer = { role: string; plan: string } | null | undefined;
 
 export function canSeeMakers(user: Viewer) {
   return !!user && (user.role === "ADMIN" || getPlan(user.plan).limits.seeMakers);
+}
+
+/** Filtre Prisma : un maker n'apparaît que s'il est publié et abonné. */
+export const LISTED_COMPANY = { published: true, user: { plan: { in: LISTED_PLAN_IDS as string[] } } };
+
+export function hasListedPlan(plan: string) {
+  return LISTED_PLAN_IDS.includes(plan as PlanId);
 }
 
 type Anonymizable = {

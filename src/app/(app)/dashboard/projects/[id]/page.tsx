@@ -11,7 +11,7 @@ import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/misc";
 import { ProjectActions } from "@/components/dashboard/project-actions";
-import { anonymize, canSeeMakers } from "@/lib/access";
+import { canSeeMakers } from "@/lib/access";
 import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,8 +32,10 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
     },
   });
   if (!p) notFound();
-  const { results } = await runSearch(projectQuery(p));
-  const matches = results.slice(0, 8);
+  // Sans offre payante : ni résultats (ils échapperaient au quota de recherches) ni noms de makers.
+  const access = canSeeMakers(user);
+  const matches = access ? (await runSearch(projectQuery(p))).results.slice(0, 8) : [];
+  const conversations = access ? p.conversations : [];
 
   const recap: [string, string | null][] = [
     [tr("Type"), tr(p.projectType)],
@@ -97,12 +99,12 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
         <div className="space-y-6">
           <Card className="p-6">
             <h2 className="flex items-center gap-2 text-sm font-semibold">
-              <MessageCircle className="size-4 text-brass" /> {" "}{tr("Conversations ({length})", { length: p.conversations.length })}</h2>
+              <MessageCircle className="size-4 text-brass" /> {" "}{tr("Conversations ({length})", { length: conversations.length })}</h2>
             <ul className="mt-3 divide-y divide-line">
-              {p.conversations.length === 0 ? (
+              {conversations.length === 0 ? (
                 <li className="py-4 text-[13px] text-muted">{tr("Contact a maker below — the conversation will be linked to this project.")}</li>
               ) : (
-                p.conversations.map((c) => (
+                conversations.map((c) => (
                   <li key={c.id}>
                     <Link href={`/messages?c=${c.id}`} className="block py-3 hover:opacity-75">
                       <p className="flex justify-between text-[13.5px] font-medium">
@@ -139,7 +141,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
           <Sparkles className="size-3.5" /> {" "}{tr("Matching makers")}</p>
         <h2 className="display mt-2 text-3xl sm:text-4xl">{tr("Here are {length} makers and specialists matching your project requirements.", { length: matches.length })}</h2>
         <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4">
-          {(canSeeMakers(user) ? matches : matches.map(anonymize)).map((r) => (
+          {matches.map((r) => (
             <MakerCard key={r.id} maker={r} source="SEARCH" />
           ))}
         </div>

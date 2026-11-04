@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getConversationForUser, markConversationRead, otherUserId } from "@/lib/messaging";
+import { canContactMakers, getConversationForUser, markConversationRead, otherUserId } from "@/lib/messaging";
 import { isOnline } from "@/lib/realtime";
 import { getPlan } from "@/lib/plans";
 
@@ -9,6 +9,7 @@ import { getPlan } from "@/lib/plans";
 export async function GET(request: Request, ctx: RouteContext<"/api/conversations/[id]">) {
   const me = await getCurrentUser();
   if (!me) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canContactMakers(me)) return NextResponse.json({ error: "Upgrade to Pro to contact makers.", code: "LIMIT" }, { status: 402 });
   const { id } = await ctx.params;
   const found = await getConversationForUser(me, id);
   if (!found) return NextResponse.json({ error: "Not found" }, { status: 404 });

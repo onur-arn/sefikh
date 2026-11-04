@@ -6,7 +6,7 @@ import { ai, aiEnabled, aiRequest } from "@/lib/ai";
 import { canSeeMakers } from "@/lib/access";
 import { getPlan } from "@/lib/plans";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
-import { logSearch, runSearch, searchesThisMonth, type SearchResult } from "@/lib/search";
+import { logSearch, runSearch, searchesUsed, type SearchResult } from "@/lib/search";
 import { visitorId } from "@/lib/visitor";
 import { LOCALE_LABELS } from "@/i18n/config";
 import { getT } from "@/i18n/server";
@@ -62,19 +62,19 @@ export async function POST(request: Request) {
   if (!rateLimit(`assistant:${key}`, 30, 60 * 60_000).ok) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
 
   const who = { userId: user?.id ?? null, visitorId: vid };
-  const limit = getPlan(user?.plan ?? "CLIENT_FREE").limits.searchesPerMonth;
+  const limit = getPlan(user?.plan ?? "CLIENT_FREE").limits.freeSearches;
   const access = canSeeMakers(user);
   const tr = await getT();
 
   /** Une recherche de l'assistant compte comme une recherche texte (mêmes quotas que la page de recherche). */
   async function search(query: string, near: string | null): Promise<SearchResult[] | "limit"> {
-    if (Number.isFinite(limit) && (await searchesThisMonth(who)) >= limit) return "limit";
+    if (Number.isFinite(limit) && (await searchesUsed(who)) >= limit) return "limit";
     const { results } = await runSearch({ q: query, near: near ?? undefined });
     await logSearch({ userId: user?.id, visitorId: vid, mode: "TEXT", query, terms: [], results }).catch(() => {});
     return results.slice(0, 4);
   }
 
-  const limitReply = { reply: tr("You've reached your free searches for this month"), makers: [], upgrade: true };
+  const limitReply = { reply: tr("You've used your free searches"), makers: [], upgrade: true };
 
   // Sans clé d'API : recherche directe, sans dialogue.
   if (!aiEnabled()) {

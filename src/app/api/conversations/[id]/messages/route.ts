@@ -24,6 +24,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/conversatio
   const found = await getConversationForUser(me, id);
   if (!found) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const { conv, side } = found;
+  // Un message du maker révélerait son nom à un client sans offre payante.
+  if (side === "pro" && !canContactMakers(conv.client)) return NextResponse.json({ error: "This client can no longer receive messages." }, { status: 403 });
 
   if (!canContactMakers(me)) return NextResponse.json({ error: "Upgrade to Pro to contact makers.", code: "LIMIT" }, { status: 402 });
 

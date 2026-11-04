@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { canSeeMakers } from "@/lib/access";
+import { canSeeMakers, LISTED_COMPANY } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { translateText, TranslationUnavailable } from "@/lib/ai";
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
   let fields: Record<string, string | null | undefined> | null = null;
   // Fiches : mêmes droits que la page du maker (offre payante, ou sa propre fiche).
-  const visible = canSeeMakers(me) ? { published: true } : me ? { userId: me.id } : null;
+  const visible = canSeeMakers(me) ? LISTED_COMPANY : me ? { userId: me.id } : null;
   if (kind === "company" && visible) {
     fields = await db.company.findFirst({ where: { id, ...visible }, select: { tagline: true, about: true, productionCapacity: true } });
   } else if (kind === "portfolio" && visible) {

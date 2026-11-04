@@ -23,7 +23,7 @@ export function PlanPicker({ audience, currentPlan, currentTerm, loggedInRole, f
   const [busy, setBusy] = useState<PlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const ids = (audience === "CLIENT" ? ["CLIENT_FREE", "CLIENT_PRO", "CLIENT_STUDIO"] : ["PRO_BASIC", "PRO_PRO", "PRO_VISIBILITY", "PRO_INTELLIGENCE", "PRO_FOUNDING"]) as PlanId[];
+  const ids = (audience === "CLIENT" ? ["CLIENT_FREE", "CLIENT_PRO", "CLIENT_STUDIO"] : ["PRO_PRO", "PRO_VISIBILITY", "PRO_INTELLIGENCE", "PRO_FOUNDING"]) as PlanId[];
   const wrongAudience = loggedInRole && loggedInRole !== "ADMIN" && (loggedInRole === "PRO" ? "PRO" : "CLIENT") !== audience;
 
   async function choose(id: PlanId) {
@@ -63,7 +63,7 @@ export function PlanPicker({ audience, currentPlan, currentTerm, loggedInRole, f
         </p>
       )}
 
-      <div className={cn("mt-10 grid gap-4", ids.length === 3 ? "lg:grid-cols-3" : "md:grid-cols-2 xl:grid-cols-4", compact && "xl:grid-cols-4")}>
+      <div className={cn("mt-10 grid gap-4", ids.length === 3 || audience === "PRO" ? "lg:grid-cols-3" : "md:grid-cols-2 xl:grid-cols-4", compact && "xl:grid-cols-4")}>
         {ids
           .filter((id) => !(audience === "PRO" && id === "PRO_FOUNDING"))
           .map((id) => {

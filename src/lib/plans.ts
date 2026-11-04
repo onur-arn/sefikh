@@ -23,7 +23,7 @@ export type Plan = {
   features: string[];
   highlight?: boolean;
   limits: {
-    searchesPerMonth: number; // tous modes confondus ; Infinity = illimité
+    freeSearches: number; // total à vie, tous modes confondus ; Infinity = illimité
     newConversationsPerMonth: number;
     portfolioImages: number;
     seeMakers: boolean; // noms et fiches ; sinon résultats anonymes
@@ -47,12 +47,12 @@ export const PLANS: Record<PlanId, Plan> = {
     tagline: "Explore · Search · Discover",
     prices: { ANNUAL: 0, MONTHLY: 0 },
     features: [
-      "3 free searches per month: project, image or category",
+      "3 free searches in total: project, image or category",
       "AI-powered results and matches",
       "Anonymous preview of matching makers",
     ],
     limits: {
-      searchesPerMonth: 3,
+      freeSearches: 3,
       newConversationsPerMonth: 0,
       portfolioImages: 0,
       seeMakers: false,
@@ -80,7 +80,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "Personalised suggestions",
     ],
     limits: {
-      searchesPerMonth: UNLIMITED,
+      freeSearches: UNLIMITED,
       newConversationsPerMonth: UNLIMITED,
       portfolioImages: 0,
       seeMakers: true,
@@ -106,7 +106,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "Priority support",
     ],
     limits: {
-      searchesPerMonth: UNLIMITED,
+      freeSearches: UNLIMITED,
       newConversationsPerMonth: UNLIMITED,
       portfolioImages: 0,
       seeMakers: true,
@@ -121,12 +121,12 @@ export const PLANS: Record<PlanId, Plan> = {
   PRO_BASIC: {
     id: "PRO_BASIC",
     audience: "PRO",
-    name: "Essential",
-    tagline: "Get listed for free",
+    name: "Not listed",
+    tagline: "Profile hidden until you subscribe",
     prices: { ANNUAL: 0, MONTHLY: 0 },
-    features: ["Business profile", "Up to 6 portfolio pictures", "Receive messages from creatives"],
+    features: [],
     limits: {
-      searchesPerMonth: UNLIMITED,
+      freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 6,
       seeMakers: false,
@@ -146,7 +146,7 @@ export const PLANS: Record<PlanId, Plan> = {
     prices: { ANNUAL: 149, MONTHLY: 179 },
     features: ["Professional profile with verified badge", "Unlimited projects & portfolio", "Visibility analytics"],
     limits: {
-      searchesPerMonth: UNLIMITED,
+      freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 60,
       seeMakers: true,
@@ -167,7 +167,7 @@ export const PLANS: Record<PlanId, Plan> = {
     highlight: true,
     features: ["Everything in Pro", "Boosted ranking in search results", "Featured on the home page", "Editorial features & dedicated content"],
     limits: {
-      searchesPerMonth: UNLIMITED,
+      freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 120,
       seeMakers: true,
@@ -187,7 +187,7 @@ export const PLANS: Record<PlanId, Plan> = {
     prices: { ANNUAL: 499, MONTHLY: 579 },
     features: ["Everything in Visibility", "Advanced demand analysis", "Full market insights", "Quarterly demand reporting"],
     limits: {
-      searchesPerMonth: UNLIMITED,
+      freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 200,
       seeMakers: true,
@@ -208,7 +208,7 @@ export const PLANS: Record<PlanId, Plan> = {
     features: ["Full Intelligence package", "12-month partnership for launch-phase supporters", "Founding Partner badge", "Price locked for 12 months"],
     seatsLimit: 50,
     limits: {
-      searchesPerMonth: UNLIMITED,
+      freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 200,
       seeMakers: true,
@@ -221,6 +221,9 @@ export const PLANS: Record<PlanId, Plan> = {
     },
   },
 };
+
+/** Seules ces offres rendent un maker visible sur SEFIKH. */
+export const LISTED_PLAN_IDS: PlanId[] = ["PRO_PRO", "PRO_VISIBILITY", "PRO_INTELLIGENCE", "PRO_FOUNDING"];
 
 export const CLIENT_PLAN_IDS: PlanId[] = ["CLIENT_FREE", "CLIENT_PRO", "CLIENT_STUDIO"];
 export const PRO_PLAN_IDS: PlanId[] = ["PRO_BASIC", "PRO_PRO", "PRO_VISIBILITY", "PRO_INTELLIGENCE", "PRO_FOUNDING"];

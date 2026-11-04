@@ -9,7 +9,7 @@ import { getPlan } from "@/lib/plans";
 import { isOnline, publish } from "@/lib/realtime";
 import { startOfMonth } from "@/lib/utils";
 
-type Me = { id: string; role: string; company?: { id: string } | null };
+type Me = { id: string; role: string; plan: string; company?: { id: string } | null };
 
 /** Conversations dont l'utilisateur est participant (côté client ou côté pro). */
 export function participantWhere(me: Me): Prisma.ConversationWhereInput {
@@ -26,7 +26,7 @@ export async function getConversationForUser(me: Me, id: string) {
   const conv = await db.conversation.findUnique({
     where: { id },
     include: {
-      client: { select: { id: true, name: true, avatarKey: true, email: true, lastSeenAt: true, clientProfile: { select: { studioName: true, clientType: true, city: true, country: true } } } },
+      client: { select: { id: true, name: true, plan: true, role: true, avatarKey: true, email: true, lastSeenAt: true, clientProfile: { select: { studioName: true, clientType: true, city: true, country: true } } } },
       company: { select: { id: true, slug: true, name: true, logoKey: true, userId: true, city: true, country: true, publicEmail: true, phone: true, user: { select: { lastSeenAt: true } } } },
       project: { select: { id: true, title: true, city: true, country: true, budget: true, timeline: true } },
     },
@@ -37,6 +37,7 @@ export async function getConversationForUser(me: Me, id: string) {
 }
 
 export async function unreadConversationCount(me: Me) {
+  if (!canContactMakers(me)) return 0;
   const convs = await db.conversation.findMany({
     where: participantWhere(me),
     select: {

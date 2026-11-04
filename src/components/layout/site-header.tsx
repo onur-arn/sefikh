@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { unreadConversationCount } from "@/lib/messaging";
 import { HeaderClient } from "./header-client";
 
-export async function SiteHeader({ variant = "default" }: { variant?: "default" | "overlay" }) {
+export async function SiteHeader() {
   const user = await getCurrentUser();
   let unreadMessages = 0;
   let unreadNotifications = 0;
@@ -15,7 +15,6 @@ export async function SiteHeader({ variant = "default" }: { variant?: "default" 
   }
   return (
     <HeaderClient
-      variant={variant}
       user={user ? { name: user.name, role: user.role, avatarKey: user.avatarKey ?? user.company?.logoKey ?? null, plan: user.plan, companySlug: user.company?.slug ?? null } : null}
       initialCounts={{ messages: unreadMessages, notifications: unreadNotifications }}
     />

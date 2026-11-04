@@ -4,7 +4,7 @@ import { ArrowRight, ArrowUpRight, Bookmark, Check, Eye, FolderKanban, MessageCi
 import { requireUser, type CurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getPlan, formatLimit } from "@/lib/plans";
-import { runSearch, searchesThisMonth } from "@/lib/search";
+import { runSearch, searchesUsed } from "@/lib/search";
 import { companyStats } from "@/lib/stats";
 import { parseList } from "@/lib/utils";
 import { unreadConversationCount } from "@/lib/messaging";
@@ -12,7 +12,8 @@ import { Avatar, Badge, Card } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { MakerCard } from "@/components/makers/maker-card";
 import { PublishToggle } from "@/components/dashboard/publish-toggle";
-import { anonymize, canSeeMakers } from "@/lib/access";
+import { hasListedPlan } from "@/lib/access";
+import { visitorId } from "@/lib/visitor";
 import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -53,7 +54,7 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
     db.project.findMany({ where: { ownerId: user.id }, orderBy: { updatedAt: "desc" }, include: { _count: { select: { conversations: true } } } }),
     db.savedCompany.count({ where: { userId: user.id } }),
     unreadConversationCount(user),
-    searchesThisMonth({ userId: user.id }),
+    searchesUsed({ userId: user.id, visitorId: await visitorId() }),
   ]);
   const active = projects.filter((p) => p.status === "ACTIVE");
   const archived = projects.filter((p) => p.status === "ARCHIVED");
@@ -89,9 +90,9 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
         <Stat icon={Bookmark} label={tr("Saved makers")} value={saved} href="/dashboard/library" />
         <Stat
           icon={Search}
-          label={tr("Searches this month")}
+          label={tr("Searches")}
           value={used}
-          hint={Number.isFinite(plan.limits.searchesPerMonth) ? tr("{count} of {limit} free searches used", { count: used, limit: plan.limits.searchesPerMonth }) : tr("Unlimited on your plan")}
+          hint={Number.isFinite(plan.limits.freeSearches) ? tr("{count} of {limit} free searches used", { count: used, limit: plan.limits.freeSearches }) : tr("Unlimited on your plan")}
         />
       </div>
 
@@ -144,7 +145,7 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
               {tr("All matches")}</Link>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 xl:grid-cols-4">
-            {(canSeeMakers(user) ? suggestions : suggestions.map(anonymize)).map((r) => (
+            {suggestions.map((r) => (
               <MakerCard key={r.id} maker={r} source="SEARCH" />
             ))}
           </div>
@@ -214,9 +215,13 @@ async function ProOverview({ user }: { user: CurrentUser }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <PublishToggle published={company.published} />
+          {hasListedPlan(user.plan) ? (
+            <PublishToggle published={company.published} />
+          ) : (
+            <ButtonLink href="/upgrade">{tr("Choose a plan to appear on SEFIKH")}</ButtonLink>
+          )}
           <ButtonLink href={`/makers/${company.slug}`} variant="secondary">
-            {tr("View public page")}{" "}<ArrowUpRight className="size-4" />
+            {tr(hasListedPlan(user.plan) ? "View public page" : "Preview my profile")}{" "}<ArrowUpRight className="size-4" />
           </ButtonLink>
         </div>
       </header>
@@ -280,17 +285,6 @@ async function ProOverview({ user }: { user: CurrentUser }) {
         </Card>
       </div>
 
-      {plan.id === "PRO_BASIC" && (
-        <div className="rounded-2xl grain flex flex-col items-start gap-5 overflow-hidden bg-espresso p-8 text-paper sm:flex-row sm:items-center">
-          <div className="flex-1">
-            <p className="display text-3xl">{tr("Would you like to upgrade your profile?")}</p>
-            <p className="mt-2 text-sm text-paper/60">{tr("Verified badge, unlimited portfolio, analytics, boosted ranking and market insights.")}</p>
-          </div>
-          <ButtonLink href="/upgrade" variant="light">
-            {tr("Discover business plans")}{" "}<ArrowRight className="size-4" />
-          </ButtonLink>
-        </div>
-      )}
     </div>
   );
 }

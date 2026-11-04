@@ -54,7 +54,9 @@ Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5`
 
 **Authentification** — inscription (choix créatif / maker), connexion, déconnexion, vérification d'e-mail, mot de passe oublié / réinitialisation (jeton à usage unique, 1 h), changement d'e-mail et de mot de passe, liste des sessions et déconnexion des autres appareils, suppression du compte et export RGPD (JSON).
 
-**Accès** — sans offre payante (visiteurs, offre gratuite) : 3 recherches par mois tous modes confondus (`searchesPerMonth`), makers anonymes et contact impossible. L'anonymisation se fait côté serveur (`src/lib/access.ts`) : nom, slug et identifiant ne sont jamais envoyés au navigateur. Les fiches ne sont donc plus indexables (retirées du sitemap).
+**Accès** — sans offre payante (visiteurs, offre gratuite) : 3 recherches au total, à vie, tous modes confondus (`freeSearches`, compte et navigateur cumulés), makers anonymes et contact impossible. L'anonymisation se fait côté serveur (`src/lib/access.ts`) : nom, slug et identifiant ne sont jamais envoyés au navigateur. Les fiches ne sont donc plus indexables (retirées du sitemap). La messagerie, les notifications et les conversations de projet leur sont aussi fermées.
+
+**Visibilité des makers** — seul un abonnement payant rend une fiche visible (`LISTED_COMPANY` dans `src/lib/access.ts`) : sans offre active, la fiche reste en aperçu pour son propriétaire. Un paiement publie la fiche si elle a une photo ; une résiliation la masque automatiquement.
 
 **Recherche**
 - *Describe a project* : analyse du texte (compétences, matériaux, techniques, secteurs, ville/pays avec synonymes FR/EN) + similarité sémantique texte → photos (CLIP) + proximité géographique.
@@ -70,7 +72,7 @@ Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5`
 
 **Tableaux de bord** — créatif : projets actifs/archivés, suggestions personnalisées, bibliothèque fournisseurs, documents cloud (500 Mo). Maker : statistiques, force du profil, dernières demandes, publication, éditeur de profil, gestion du portfolio (upload multiple, légendes, ordre, couverture), analytics (vues, apparitions, sources).
 
-**Abonnements** — créatifs Free / Pro / Studio, makers Essential / Pro / Visibility / Intelligence + Founding Partner (50 places), engagement 12 mois ou sans engagement, Stripe Checkout, changement d'offre au prorata, résiliation (à l'échéance de l'engagement), reprise, portail client Stripe, factures, webhooks idempotents, e-mails de confirmation / d'échec de paiement.
+**Abonnements** — clients Free / Pro / Studio, makers Pro / Visibility / Intelligence + Founding Partner (50 places), engagement 12 mois ou sans engagement, Stripe Checkout, changement d'offre au prorata, résiliation (à l'échéance de l'engagement), reprise, portail client Stripe, factures, webhooks idempotents, e-mails de confirmation / d'échec de paiement.
 
 **Trends & Insights** — pages de données de marché générées automatiquement à partir de l'activité réelle (recherches, vues, mises en relation) : KPI, tendances mensuelles, matériaux/techniques/expertises/lieux les plus recherchés, demande émergente, makers les plus découverts, taux de conversion. Sections détaillées réservées aux offres Intelligence (makers) et Studio (créatifs).
 
@@ -140,8 +142,7 @@ Mots de passe hachés (bcrypt), jetons de session/réinitialisation stockés hac
 
 ## Points à valider avec la cliente
 
-- **Prix « sans engagement » des offres créatives** : la maquette n'indique que 39 € / 79 € ; j'ai proposé **49 € / 95 €** sans engagement (cohérent avec l'écart des offres pro : 149→179, 299→349, 499→579).
-- **Founding Partner** : 149 €/mois, 12 mois, limité à **50 places** (nombre à confirmer).
+- **Prix** : validés le 04/11/2026 (clients 39/49 € et 79/95 € ; makers 149/179, 299/349, 499/579 € ; Founding Partner 149 €).
 - **Nombre de compétences par profil** (question de la maquette) : vocabulaire contrôlé illimité + **15 mots-clés libres** en bulles.
 - **Accès multi-utilisateurs** (Studio / Intelligence dans la maquette) : non développé — retiré des listes de fonctionnalités en attendant (comptes d'équipe à prévoir).
 - **Paiement à échéance choisie / moyens de paiement par pays** (notes de la maquette) : facturation mensuelle à la date de souscription ; moyens de paiement locaux gérés par Stripe selon le pays.

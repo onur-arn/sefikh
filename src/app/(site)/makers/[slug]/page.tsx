@@ -19,7 +19,7 @@ import { PortfolioGallery } from "@/components/makers/portfolio-gallery";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/misc";
 import { AutoTranslate } from "@/components/translate/auto-translate";
-import { canSeeMakers } from "@/lib/access";
+import { canSeeMakers, hasListedPlan, LISTED_COMPANY } from "@/lib/access";
 import { getT } from "@/i18n/server";
 
 async function getCompany(slug: string) {
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: PageProps<"/makers/[slug]">):
 async function similarMakers(company: NonNullable<Awaited<ReturnType<typeof getCompany>>>) {
   const mine = company.portfolio.map((p) => fromBytes(p.embedding)).filter(Boolean) as Float32Array[];
   const others = await db.company.findMany({
-    where: { published: true, NOT: { id: company.id } },
+    where: { ...LISTED_COMPANY, NOT: { id: company.id } },
     include: { portfolio: { orderBy: { position: "asc" }, select: { key: true, thumbKey: true, width: true, height: true, title: true, embedding: true } } },
   });
   return others
@@ -93,7 +93,8 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
   const company = await getCompany(slug);
   const user = await getCurrentUser();
   const isOwner = !!user && company?.userId === user.id;
-  if (!company || (!company.published && !isOwner)) notFound();
+  const listed = !!company?.published && hasListedPlan(company.user.plan);
+  if (!company || (!listed && !isOwner)) notFound();
   if (!isOwner && !canSeeMakers(user)) return <LockedMaker />;
 
   // Statistiques de vues (hors propriétaire), dédoublonnées sur 30 min.
@@ -134,7 +135,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      {isOwner && !company.published && (
+      {isOwner && !listed && (
         <div className="bg-brass-light py-3 text-center text-sm text-brass-dark">
           {tr("Preview — your profile is not published yet.")}{" "}
           <Link href="/dashboard/profile" className="font-semibold underline">

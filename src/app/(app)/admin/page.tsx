@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { daysFromNow } from "@/lib/utils";
 import { getT } from "@/i18n/server";
+import { LISTED_COMPANY } from "@/lib/access";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tr = await getT();
@@ -14,7 +15,7 @@ export default async function AdminPage() {
   const [creatives, makers, published, subscriptions, messages, searches, requests, revenue] = await Promise.all([
     db.user.count({ where: { role: "CLIENT" } }),
     db.user.count({ where: { role: "PRO" } }),
-    db.company.count({ where: { published: true } }),
+    db.company.count({ where: LISTED_COMPANY }),
     db.subscription.count({ where: { status: "ACTIVE" } }),
     db.message.count({ where: { createdAt: { gte: since } } }),
     db.searchLog.count({ where: { createdAt: { gte: since } } }),

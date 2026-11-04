@@ -2,6 +2,7 @@ import "server-only";
 import { db } from "@/lib/db";
 import { getT } from "@/i18n/server";
 import { parseList } from "@/lib/utils";
+import { LISTED_COMPANY } from "@/lib/access";
 
 export type Range = { from: Date; to: Date };
 
@@ -19,7 +20,7 @@ export async function marketKpis(range: Range) {
   const where = { createdAt: { gte: range.from, lte: range.to } };
   const [searches, activePros, matches, connections, uniqueUsers, uniqueVisitors] = await Promise.all([
     db.searchLog.count({ where }),
-    db.company.count({ where: { published: true } }),
+    db.company.count({ where: LISTED_COMPANY }),
     db.profileView.count({ where: { ...where, source: { in: ["SEARCH", "IMAGE"] } } }),
     db.conversation.count({ where }),
     db.searchLog.groupBy({ by: ["userId"], where: { ...where, userId: { not: null } } }).then((r) => r.length),
@@ -78,7 +79,7 @@ export async function monthlySeries(months = 12) {
 /** Makers les plus découverts (vues de profil) sur la période. */
 export async function mostDiscovered(range: Range, limit = 5) {
   const rows = await db.profileView.groupBy({ by: ["companyId"], where: { createdAt: { gte: range.from, lte: range.to } }, _count: { _all: true }, orderBy: { _count: { companyId: "desc" } }, take: limit });
-  const companies = await db.company.findMany({ where: { id: { in: rows.map((r) => r.companyId) } }, select: { id: true, name: true, slug: true, city: true } });
+  const companies = await db.company.findMany({ where: { ...LISTED_COMPANY, id: { in: rows.map((r) => r.companyId) } }, select: { id: true, name: true, slug: true, city: true } });
   return rows.map((r) => ({ ...companies.find((c) => c.id === r.companyId)!, views: r._count._all })).filter((r) => r.name);
 }
 

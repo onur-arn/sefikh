@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
 import { isRealtimeConnected, useRealtime } from "@/lib/realtime-client";
 import { useT } from "@/i18n/client";
+import { SearchPanel } from "@/components/search/search-panel";
 import { LocaleSwitcher } from "./locale-switcher";
 
 type HeaderUser = { name: string; role: string; avatarKey: string | null; plan: string; companySlug: string | null };
@@ -18,17 +19,19 @@ type Notif = { id: string; title: string; body: string | null; link: string | nu
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About us" },
-  { href: "/journal", label: "Content" },
+  { href: "#search", label: "Content" },
   { href: "/insights", label: "Trends & Insights" },
   { href: "/pricing", label: "Pricing" },
 ];
 
-export function HeaderClient({ user, initialCounts, variant }: { user: HeaderUser | null; initialCounts: { messages: number; notifications: number }; variant: "default" | "overlay" }) {
+export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null; initialCounts: { messages: number; notifications: number } }) {
   const tr = useT();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [pastIntro, setPastIntro] = useState(false);
   const [counts, setCounts] = useState(initialCounts);
-  const [scrolled, setScrolled] = useState(false);
 
   // Réinitialisations dérivées des props (pattern « ajuster l'état pendant le rendu »).
   const [lastPath, setLastPath] = useState(pathname);
@@ -43,7 +46,9 @@ export function HeaderClient({ user, initialCounts, variant }: { user: HeaderUse
   }
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => {
+      setPastIntro(window.scrollY > window.innerHeight - 80);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -65,25 +70,54 @@ export function HeaderClient({ user, initialCounts, variant }: { user: HeaderUse
     return () => clearInterval(id);
   }, [user]);
 
-  const overlay = variant === "overlay" && !scrolled && !mobileOpen;
+  // Le panneau de recherche se referme en changeant de page ou avec Échap.
+  const [searchPath, setSearchPath] = useState(pathname);
+  if (searchPath !== pathname) {
+    setSearchPath(pathname);
+    setSearchOpen(false);
+  }
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSearchOpen(false);
+    const onOpen = () => setSearchOpen(true);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("sefikh:open-search", onOpen);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("sefikh:open-search", onOpen);
+    };
+  }, []);
+
+  // Accueil : barre transparente sur l'image d'ouverture, blanche au survol et après le défilement.
+  const overlay = pathname === "/" && !pastIntro && !hovered && !mobileOpen && !searchOpen;
+  const navClass = "link-underline text-[13px] text-ink-soft hover:text-ink";
 
   return (
-    <header className={cn("sticky top-0 z-40 transition-colors duration-300", overlay ? "bg-transparent" : "border-b border-line/80 bg-ivory/90 backdrop-blur-md")}>
-      <div className="container-x flex h-[68px] items-center gap-6">
-        <Link href="/" aria-label={tr("SEFIKH — home")} className="shrink-0">
-          <Logo />
-        </Link>
-
-        <nav className="ml-auto hidden items-center gap-7 lg:flex" aria-label={tr("Main")}>
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className={cn("link-underline text-[13.5px] text-ink-soft hover:text-ink", pathname.startsWith(n.href) && "text-ink [background-size:100%_1px]")}>
-              {tr(n.label)}
-            </Link>
-          ))}
+    <header
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={cn("sticky top-0 z-40 transition-colors duration-300", overlay ? "bg-transparent text-paper [&_.text-ink-soft]:!text-paper" : "border-b border-line/80 bg-paper")}
+    >
+      <div className="container-x grid h-[68px] grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <nav className="hidden items-center gap-5 xl:flex" aria-label={tr("Main")}>
+          {NAV.map((n) =>
+            n.href === "#search" ? (
+              <button key={n.href} type="button" aria-expanded={searchOpen} onClick={() => setSearchOpen((v) => !v)} className={cn(navClass, searchOpen && "text-ink [background-size:100%_1px]")}>
+                {tr(n.label)}
+              </button>
+            ) : (
+              <Link key={n.href} href={n.href} className={cn(navClass, (n.href === "/" ? pathname === "/" : pathname.startsWith(n.href)) && "text-ink [background-size:100%_1px]")}>
+                {tr(n.label)}
+              </Link>
+            ),
+          )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5 lg:ml-4">
-          <LocaleSwitcher className="mr-1 hidden sm:inline-flex" />
+        <Link href="/" aria-label={tr("SEFIKH — home")} className="col-start-2 shrink-0">
+          <Logo light={overlay} />
+        </Link>
+
+        <div className="col-start-3 flex items-center justify-end gap-1.5">
+          <LocaleSwitcher tone={overlay ? "dark" : "light"} className="mr-1 hidden sm:inline-flex" />
           {user ? (
             <>
               <IconLink href="/messages" label={tr("Messages")} count={counts.messages}>
@@ -96,20 +130,34 @@ export function HeaderClient({ user, initialCounts, variant }: { user: HeaderUse
             <div className="hidden items-center gap-2 sm:flex">
               <Link href="/login" className="px-3 text-[13.5px] text-ink-soft hover:text-ink">
                 {tr("Log in")}</Link>
-              <ButtonLink href="/register" size="sm">
+              <ButtonLink href="/register" size="sm" variant={overlay ? "light" : "primary"}>
                 {tr("Join SEFIKH")}</ButtonLink>
             </div>
           )}
-          <button className="ml-1 inline-flex size-10 items-center justify-center rounded-full hover:bg-sand lg:hidden" onClick={() => setMobileOpen((o) => !o)} aria-label={tr("Menu")} aria-expanded={mobileOpen}>
+          <button className="ml-1 inline-flex size-10 items-center justify-center rounded-full hover:bg-sand hover:text-ink xl:hidden" onClick={() => setMobileOpen((o) => !o)} aria-label={tr("Menu")} aria-expanded={mobileOpen}>
             {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
       </div>
 
+      {searchOpen && (
+        <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-68px)] overflow-y-auto border-y border-line bg-paper py-6 shadow-lg">
+          <div className="container-x">
+            <div className="mx-auto max-w-3xl">
+              <SearchPanel compact />
+            </div>
+          </div>
+        </div>
+      )}
+
       {mobileOpen && (
-        <div className="border-t border-line bg-ivory lg:hidden">
+        <div className="border-t border-line bg-paper text-ink xl:hidden">
           <nav className="container-x flex flex-col py-4" aria-label={tr("Mobile")}>
-            {NAV.map((n) => (
+            {NAV.map((n) => n.href === "#search" ? (
+              <button key={n.href} type="button" onClick={() => { setMobileOpen(false); setSearchOpen(true); }} className="display border-b border-line/70 py-3 text-left text-2xl">
+                {tr(n.label)}
+              </button>
+            ) : (
               <Link key={n.href} href={n.href} className="display border-b border-line/70 py-3 text-2xl">
                 {tr(n.label)}
               </Link>

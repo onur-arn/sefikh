@@ -6,7 +6,7 @@ import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tr = await getT();
-  return { title: tr("Join as a maker"), description: tr("Showcase your craft and get discovered by architects, interior designers and hoteliers. Free business profile, no commission.") };
+  return { title: tr("Join as a maker"), description: tr("Showcase your craft and get discovered by architects, interior designers and hoteliers. A subscription, no commission.") };
 }
 
 export default async function JoinPage() {
@@ -26,7 +26,7 @@ export default async function JoinPage() {
             <ButtonLink href="/pricing?for=pro" size="lg" variant="secondary">
               {tr("Business plans")}</ButtonLink>
           </div>
-          <p className="mt-4 text-[13px] text-muted">{tr("Free profile · No commission on projects · Cancel at any time")}</p>
+          <p className="mt-4 text-[13px] text-muted">{tr("Subscription required to appear · No commission on projects")}</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="relative aspect-[3/4] overflow-hidden rounded-[1.75rem]">

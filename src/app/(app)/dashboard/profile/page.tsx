@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { AvatarUpload } from "@/components/dashboard/avatar-upload";
 import { ClientProfileForm } from "@/components/dashboard/client-profile-form";
+import { hasListedPlan } from "@/lib/access";
 import { CompanyForm } from "@/components/dashboard/company-form";
 import { getT } from "@/i18n/server";
 
@@ -22,7 +23,7 @@ export default async function ProfilePage() {
         <div className="mb-10">
           <AvatarUpload kind="logo" name={company?.name ?? user.name} imageKey={company?.logoKey ?? null} label={tr("Company logo")} />
         </div>
-        <CompanyForm accountEmail={user.email} company={company ? { ...company, tags: company.tags.map((t) => ({ kind: t.tag.kind, name: t.tag.name })) } : {}} />
+        <CompanyForm listed={hasListedPlan(user.plan)} accountEmail={user.email} company={company ? { ...company, tags: company.tags.map((t) => ({ kind: t.tag.kind, name: t.tag.name })) } : {}} />
       </>
     );
   }

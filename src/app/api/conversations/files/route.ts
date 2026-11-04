@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
-import { participantWhere, sideOf } from "@/lib/messaging";
+import { canContactMakers, participantWhere, sideOf } from "@/lib/messaging";
 
 /** Tous les fichiers échangés dans les conversations de l'utilisateur (« Cloud »). */
 export async function GET() {
   const me = await getCurrentUser();
   if (!me) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canContactMakers(me)) return NextResponse.json({ items: [] });
   const rows = await db.attachment.findMany({
     where: { message: { conversation: participantWhere(me) } },
     orderBy: { message: { createdAt: "desc" } },

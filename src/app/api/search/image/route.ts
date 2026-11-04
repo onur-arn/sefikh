@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { colorVector, processImage, toBytes, UploadError } from "@/lib/images";
 import { getPlan } from "@/lib/plans";
 import { rateLimit } from "@/lib/rate-limit";
-import { searchesThisMonth } from "@/lib/search";
+import { searchesUsed } from "@/lib/search";
 import { visitorId } from "@/lib/visitor";
 
 /**
@@ -20,9 +20,9 @@ export async function POST(request: Request) {
   if (!rl.ok) return NextResponse.json({ error: "Too many searches, please wait a moment." }, { status: 429 });
 
   // Quota mensuel partagé avec les autres modes (visiteurs anonymes : quota de l'offre gratuite).
-  const limit = getPlan(user?.plan ?? "CLIENT_FREE").limits.searchesPerMonth;
-  if (Number.isFinite(limit) && (await searchesThisMonth({ userId: user?.id, visitorId: vid })) >= limit) {
-    return NextResponse.json({ error: "You've reached your free searches for this month", code: "LIMIT" }, { status: 402 });
+  const limit = getPlan(user?.plan ?? "CLIENT_FREE").limits.freeSearches;
+  if (Number.isFinite(limit) && (await searchesUsed({ userId: user?.id, visitorId: vid })) >= limit) {
+    return NextResponse.json({ error: "You've used your free searches", code: "LIMIT" }, { status: 402 });
   }
 
   const form = await request.formData().catch(() => null);

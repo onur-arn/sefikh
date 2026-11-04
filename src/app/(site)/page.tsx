@@ -1,15 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Hammer, MessageSquareText, ScanSearch, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Hammer, MessageSquareText, ScanSearch, Sparkles, ChevronDown } from "lucide-react";
 import { db } from "@/lib/db";
 import { getPlan } from "@/lib/plans";
 import { currentQuarter, marketKpis } from "@/lib/stats";
 import { fileUrl } from "@/lib/utils";
-import { SearchPanel } from "@/components/search/search-panel";
+import { OpenSearchButton } from "@/components/layout/open-search-button";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionTitle } from "@/components/ui/misc";
-import { anonymize, canSeeMakers } from "@/lib/access";
+import { anonymize, canSeeMakers, LISTED_COMPANY } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getT } from "@/i18n/server";
 
@@ -24,7 +24,7 @@ const CRAFTS = [
 
 async function getHomeData() {
   const companies = await db.company.findMany({
-    where: { published: true },
+    where: LISTED_COMPANY,
     include: { user: { select: { plan: true } }, tags: { include: { tag: true } }, portfolio: { orderBy: { position: "asc" }, take: 3 } },
     orderBy: { updatedAt: "desc" },
   });
@@ -39,7 +39,7 @@ async function getHomeData() {
   const [kpis, portfolioCount, countries] = await Promise.all([
     marketKpis(currentQuarter()),
     db.portfolioImage.count(),
-    db.company.groupBy({ by: ["country"], where: { published: true } }).then((r) => r.length),
+    db.company.groupBy({ by: ["country"], where: LISTED_COMPANY }).then((r) => r.length),
   ]);
   return { featured, crafts, kpis, portfolioCount, countries, makers: companies.length };
 }
@@ -51,19 +51,27 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ── Hero ───────────────────────────────────────────── */}
-      <section className="container-x pt-2">
+      {/* ── Ouverture : image plein écran, le site commence au défilement ── */}
+      <section className="relative -mt-[68px] h-dvh overflow-hidden bg-espresso">
+        <Image src="/images/join-1.webp" alt={tr("A cabinetmaker's hands planing wood")} fill priority sizes="100vw" className="object-cover object-[50%_58%]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-espresso/45 via-transparent to-espresso/55" />
+        <a href="#site" className="absolute inset-x-0 bottom-8 z-10 flex flex-col items-center gap-2 text-paper">
+          <span className="text-[12px] uppercase tracking-[0.22em]">{tr("Search Engine For Know-How")}</span>
+          <ChevronDown className="size-5 animate-bounce" strokeWidth={1.5} aria-hidden />
+        </a>
+      </section>
+
+      {/* ── Le site ────────────────────────────────────────── */}
+      <section id="site" className="container-x scroll-mt-[68px] pt-8">
         <div className="relative h-[38vh] min-h-64 overflow-hidden rounded-[2rem] sm:h-[46vh]">
-          <Image src="/images/hero-drape.webp" alt="" fill priority sizes="100vw" className="object-cover object-[50%_62%]" />
+          <Image src="/images/hero-drape.webp" alt="" fill sizes="100vw" className="object-cover object-[50%_62%]" />
         </div>
-        <div className="mx-auto max-w-3xl pb-16 pt-9">
+        <div className="mx-auto max-w-3xl pb-16 pt-9 text-center">
           <p className="eyebrow">{tr("The sourcing platform for interior professionals")}</p>
           <h1 className="mt-3 text-[1.7rem] font-semibold leading-tight tracking-tight sm:text-4xl">{tr("From inspiration to realization.")}</h1>
           <p className="mt-3 text-[15px] leading-relaxed text-muted">{tr("Find the right skills, materials and makers to bring your ideas to life.")}</p>
-          <div className="mt-6">
-            <SearchPanel />
-          </div>
-          <p className="mt-4 text-[12px] tracking-[0.14em] text-muted uppercase">{tr("Artisans · Workshops · Manufacturers · Materials")}</p>
+          <OpenSearchButton />
+          <p className="mt-5 text-[12px] tracking-[0.14em] text-muted uppercase">{tr("Artisans · Workshops · Manufacturers · Materials")}</p>
         </div>
       </section>
 

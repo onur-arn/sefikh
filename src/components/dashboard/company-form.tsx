@@ -40,7 +40,7 @@ export type CompanyFormData = {
 
 const TEAM = ["1–5", "6–10", "11–25", "26–50", "51–200", "200+"];
 
-export function CompanyForm({ company, onboarding, accountEmail }: { company: CompanyFormData; onboarding?: boolean; accountEmail: string }) {
+export function CompanyForm({ company, onboarding, accountEmail, listed }: { company: CompanyFormData; onboarding?: boolean; accountEmail: string; listed?: boolean }) {
   const tr = useT();
   const [state, onSubmit, pending] = useFormAction(saveCompanyProfile);
   const e = state?.fieldErrors ?? {};
@@ -178,7 +178,7 @@ export function CompanyForm({ company, onboarding, accountEmail }: { company: Co
         </div>
       </Section>
 
-      {!onboarding && (
+      {!onboarding && listed && (
         <Section title={tr("Visibility")}>
           <label className="flex items-start gap-3 rounded-xl border border-line bg-paper p-4">
             <input type="checkbox" name="published" defaultChecked={company.published} className="mt-0.5 size-4 accent-ink" />

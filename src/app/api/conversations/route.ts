@@ -5,11 +5,13 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { assertCanStartConversation, canContactMakers, MessagingError, notifyNewMessage, participantWhere, sideOf } from "@/lib/messaging";
 import { publish } from "@/lib/realtime";
 import { rateLimit } from "@/lib/rate-limit";
+import { hasListedPlan } from "@/lib/access";
 
 /** Liste des conversations de l'utilisateur (boîte de réception). */
 export async function GET(request: Request) {
   const me = await getCurrentUser();
   if (!me) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canContactMakers(me)) return NextResponse.json({ error: "Upgrade to Pro to contact makers.", code: "LIMIT" }, { status: 402 });
   const url = new URL(request.url);
   const filter = url.searchParams.get("filter") ?? "all";
   const q = url.searchParams.get("q")?.trim().toLowerCase();
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
   const { companyId, projectId, body } = parsed.data;
 
   const company = await db.company.findUnique({ where: { id: companyId }, include: { user: true } });
-  if (!company || !company.published) return NextResponse.json({ error: "Maker not found." }, { status: 404 });
+  if (!company || !company.published || !hasListedPlan(company.user.plan)) return NextResponse.json({ error: "Maker not found." }, { status: 404 });
   if (company.userId === me.id) return NextResponse.json({ error: "You cannot message your own company." }, { status: 400 });
   const project = projectId ? await db.project.findFirst({ where: { id: projectId, ownerId: me.id } }) : null;
 

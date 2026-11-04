@@ -9,6 +9,7 @@ import { MATERIALS, SECTORS, SKILLS, TECHNIQUES } from "@/lib/constants";
 import { continentOf, findCountry, geocode } from "@/lib/geo";
 import { slugify, toList } from "@/lib/utils";
 import { fieldErrors, formToObject, type FormState } from "@/lib/validation";
+import { hasListedPlan } from "@/lib/access";
 
 const opt = (max = 200) => z.string().trim().max(max).optional().transform((v) => v || null);
 const vocab = (list: { name: string }[]) => z.array(z.string()).transform((arr) => arr.filter((v) => list.some((x) => x.name === v)));
@@ -135,7 +136,7 @@ export async function saveCompanyProfile(_: FormState, formData: FormData): Prom
   const existing = await db.company.findUnique({ where: { userId: user.id } });
   const portfolioCount = existing ? await db.portfolioImage.count({ where: { companyId: existing.id } }) : 0;
   // Publication possible dès qu'il y a au moins une photo (sinon le profil reste en brouillon).
-  const published = d.published && portfolioCount > 0;
+  const published = d.published && portfolioCount > 0 && hasListedPlan(user.plan);
 
   if (existing) {
     await db.$transaction([
@@ -152,6 +153,7 @@ export async function saveCompanyProfile(_: FormState, formData: FormData): Prom
   revalidatePath("/search");
 
   if (formData.get("onboarding")) redirect("/dashboard/portfolio?onboarding=1");
+  if (d.published && !hasListedPlan(user.plan)) return { success: "Profile saved. Choose a plan to appear on SEFIKH." };
   if (d.published && !published) return { success: "Profile saved. Add at least one portfolio picture to publish it." };
   return { success: published ? "Profile saved and published." : "Profile saved (not published)." };
 }
@@ -160,6 +162,7 @@ export async function setPublished(published: boolean) {
   const user = await getCurrentUser();
   if (!user?.company) return { error: "No business profile." };
   const count = await db.portfolioImage.count({ where: { companyId: user.company.id } });
+  if (published && !hasListedPlan(user.plan)) return { error: "Choose a plan to appear on SEFIKH" };
   if (published && count === 0) return { error: "Add at least one portfolio picture before publishing." };
   await db.company.update({ where: { id: user.company.id }, data: { published } });
   revalidatePath("/dashboard", "layout");
