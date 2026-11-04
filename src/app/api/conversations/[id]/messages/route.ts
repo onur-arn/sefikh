@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { UPLOAD_LIMITS } from "@/lib/constants";
 import { processImage, UploadError } from "@/lib/images";
-import { getConversationForUser, notifyNewMessage } from "@/lib/messaging";
+import { getConversationForUser, notifyNewMessage, otherUserId } from "@/lib/messaging";
+import { publish, type WireMessage } from "@/lib/realtime";
 import { rateLimit } from "@/lib/rate-limit";
 import { newKey, putFile } from "@/lib/storage";
 
@@ -27,6 +28,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/conversatio
   const form = await request.formData().catch(() => null);
   if (!form) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   const body = String(form.get("body") ?? "").trim().slice(0, 5000);
+  // Identifiant temporaire choisi par l'onglet émetteur : lui permet de remplacer son message « en cours d'envoi ».
+  const nonce = String(form.get("nonce") ?? "").slice(0, 64) || undefined;
   const files = form.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
   if (!body && files.length === 0) return NextResponse.json({ error: "Message is empty." }, { status: 400 });
   if (files.length > UPLOAD_LIMITS.attachmentsPerMessage) return NextResponse.json({ error: `Up to ${UPLOAD_LIMITS.attachmentsPerMessage} files per message.` }, { status: 400 });
@@ -63,7 +66,22 @@ export async function POST(request: Request, ctx: RouteContext<"/api/conversatio
     data: { lastMessageAt: now, clientArchived: false, proArchived: false, ...(side === "client" ? { clientLastReadAt: now } : { proLastReadAt: now }) },
   });
 
-  const recipientId = side === "client" ? conv.company.userId : conv.client.id;
+  const wire: WireMessage = {
+    id: message.id,
+    body: message.body,
+    createdAt: message.createdAt,
+    mine: true,
+    senderName: me.name,
+    attachments: message.attachments.map((a) => ({ id: a.id, name: a.name, mime: a.mime, size: a.size, url: `/files/${a.key}`, width: a.width, height: a.height })),
+    nonce,
+  };
+
+  // Diffusion immédiate : au destinataire, et aux autres onglets / appareils de l'expéditeur.
+  const recipientId = otherUserId(conv, side);
+  publish(recipientId, { type: "message", conversationId: id, message: { ...wire, mine: false, nonce: undefined } });
+  publish(me.id, { type: "message", conversationId: id, message: wire });
+  publish([recipientId, me.id], { type: "conversations" });
+
   const recipient = await db.user.findUnique({ where: { id: recipientId } });
   if (recipient) {
     await notifyNewMessage({
@@ -76,17 +94,5 @@ export async function POST(request: Request, ctx: RouteContext<"/api/conversatio
     });
   }
 
-  return NextResponse.json(
-    {
-      message: {
-        id: message.id,
-        body: message.body,
-        createdAt: message.createdAt,
-        mine: true,
-        senderName: me.name,
-        attachments: message.attachments.map((a) => ({ id: a.id, name: a.name, mime: a.mime, size: a.size, url: `/files/${a.key}`, width: a.width, height: a.height })),
-      },
-    },
-    { status: 201 },
-  );
+  return NextResponse.json({ message: wire }, { status: 201 });
 }

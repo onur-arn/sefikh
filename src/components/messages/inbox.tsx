@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Archive, ArchiveRestore, ArrowLeft, Camera, Check, CheckCheck, ExternalLink, FileText, FolderOpen, Inbox as InboxIcon, Info, Mail, MapPin, Paperclip, Phone, Search, Send, X } from "lucide-react";
 import { Avatar } from "@/components/ui/misc";
+import { useRealtime, useRealtimeConnected } from "@/lib/realtime-client";
 import { cn, formatBytes, formatRelative } from "@/lib/utils";
 
 type ListItem = {
@@ -19,14 +20,14 @@ type ListItem = {
   lastMessageAt: string;
 };
 type AttachmentT = { id: string; name: string; mime: string; size: number; url: string; width: number | null; height: number | null };
-type Msg = { id: string; body: string; createdAt: string; mine: boolean; senderName: string; attachments: AttachmentT[]; pending?: boolean; failed?: boolean };
+type Msg = { id: string; body: string; createdAt: string; mine: boolean; senderName: string; attachments: AttachmentT[]; nonce?: string; pending?: boolean; failed?: boolean };
 type Detail = {
   id: string;
   side: "client" | "pro";
   subject: string | null;
   archived: boolean;
   project: { id: string; title: string; city: string | null; country: string | null; budget: string | null; timeline: string | null } | null;
-  other: { name: string; contactName?: string; avatarKey: string | null; href: string | null; location: string; email: string | null; phone: string | null; role: string };
+  other: { userId: string; name: string; contactName?: string; avatarKey: string | null; href: string | null; location: string; email: string | null; phone: string | null; role: string };
 };
 type FileRow = AttachmentT & { conversationId: string; with: string; createdAt: string };
 
@@ -54,14 +55,18 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
     setActiveId((current) => current ?? (list.length && window.matchMedia("(min-width: 1024px)").matches ? list[0]!.id : null));
   }, [filter, query]);
 
+  const live = useRealtimeConnected();
   useEffect(() => {
     const t = setTimeout(loadList, query ? 250 : 0);
-    const id = setInterval(() => !document.hidden && loadList(), 15_000);
+    const id = live ? null : setInterval(() => !document.hidden && loadList(), 15_000);
     return () => {
       clearTimeout(t);
-      clearInterval(id);
+      if (id) clearInterval(id);
     };
-  }, [loadList, query]);
+  }, [loadList, query, live]);
+  useRealtime((event) => {
+    if (event.type === "conversations" || event.type === "reconnected") void loadList();
+  });
 
   function open(id: string) {
     setActiveId(id);
@@ -177,10 +182,45 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
   const [messages, setMessages] = useState<Msg[]>([]);
   const [otherReadAt, setOtherReadAt] = useState<string | null>(null);
   const [online, setOnline] = useState(false);
+  const [typing, setTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lastAt = useRef<string | null>(null);
   const stickToBottom = useRef(true);
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingSent = useRef(0);
+  const unreadWhileHidden = useRef(false);
+  const live = useRealtimeConnected();
+
+  /** Ajoute les nouveaux messages reçus (temps réel ou rattrapage), sans doublon. */
+  const appendIncoming = useCallback((incoming: Msg[]) => {
+    setMessages((prev) => {
+      let next = prev;
+      for (const m of incoming) {
+        if (next.some((p) => p.id === m.id)) continue;
+        // Notre propre message renvoyé par le serveur : remplace la bulle « en cours d'envoi ».
+        const pendingIndex = m.nonce ? next.findIndex((p) => p.id === m.nonce) : -1;
+        next = pendingIndex >= 0 ? next.map((p, i) => (i === pendingIndex ? m : p)) : [...next, m];
+      }
+      return next;
+    });
+    const last = incoming.at(-1);
+    if (last && (!lastAt.current || last.createdAt > lastAt.current)) lastAt.current = last.createdAt;
+  }, []);
+
+  /** Récupère ce qui a pu être manqué (chargement, reconnexion, mode dégradé sans temps réel). */
+  const catchUp = useCallback(async () => {
+    const res = await fetch(`/api/conversations/${id}${lastAt.current ? `?after=${encodeURIComponent(lastAt.current)}` : ""}`, { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    setOtherReadAt(data.otherReadAt);
+    setOnline(data.otherOnline);
+    if (data.messages.length) {
+      appendIncoming(data.messages);
+      onChanged();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, appendIncoming]);
 
   useEffect(() => {
     let alive = true;
@@ -196,38 +236,82 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
       lastAt.current = data.messages.at(-1)?.createdAt ?? null;
       onChanged();
     })();
-    const poll = setInterval(async () => {
-      if (document.hidden) return;
-      const res = await fetch(`/api/conversations/${id}${lastAt.current ? `?after=${encodeURIComponent(lastAt.current)}` : ""}`, { cache: "no-store" });
-      if (!res.ok) return;
-      const data = await res.json();
-      setOtherReadAt(data.otherReadAt);
-      setOnline(data.otherOnline);
-      const fresh: Msg[] = data.messages.filter((m: Msg) => !m.mine);
-      if (fresh.length) {
-        setMessages((prev) => [...prev, ...fresh.filter((f) => !prev.some((p) => p.id === f.id))]);
-        onChanged();
-      }
-      if (data.messages.length) lastAt.current = data.messages.at(-1).createdAt;
-    }, 4000);
     return () => {
       alive = false;
-      clearInterval(poll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Mode dégradé : sans connexion temps réel (réseau filtrant, reconnexion en cours), interrogation toutes les 4 s.
+  useEffect(() => {
+    if (live) return;
+    const poll = setInterval(() => !document.hidden && catchUp(), 4000);
+    return () => clearInterval(poll);
+  }, [live, catchUp]);
+
+  const markRead = useCallback(() => {
+    unreadWhileHidden.current = false;
+    void fetch(`/api/conversations/${id}/read`, { method: "POST" }).then(() => onChanged());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // Messages arrivés pendant que l'onglet était en arrière-plan : lus au retour sur l'onglet.
+  useEffect(() => {
+    const onVisible = () => !document.hidden && unreadWhileHidden.current && markRead();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [markRead]);
+
+  useEffect(() => () => {
+    if (typingTimer.current) clearTimeout(typingTimer.current);
+  }, []);
+
+  useRealtime((event) => {
+    if (event.type === "reconnected") return void catchUp();
+    if (event.type === "presence") {
+      if (event.userId === detail?.other.userId) setOnline(event.online);
+      return;
+    }
+    if (!("conversationId" in event) || event.conversationId !== id) return;
+    if (event.type === "message") {
+      appendIncoming([event.message]);
+      if (!event.message.mine) {
+        setTyping(false);
+        setOnline(true);
+        if (document.hidden) unreadWhileHidden.current = true;
+        else markRead();
+      }
+    } else if (event.type === "read") {
+      setOtherReadAt(event.at);
+    } else if (event.type === "typing") {
+      setTyping(true);
+      setOnline(true);
+      if (typingTimer.current) clearTimeout(typingTimer.current);
+      typingTimer.current = setTimeout(() => setTyping(false), 4000);
+    }
+  });
+
+  /** Signale la saisie à l'interlocuteur (au plus une fois toutes les 2,5 s). */
+  function notifyTyping() {
+    const now = Date.now();
+    if (now - lastTypingSent.current < 2500) return;
+    lastTypingSent.current = now;
+    void fetch(`/api/conversations/${id}/typing`, { method: "POST" }).catch(() => {});
+  }
+
   useLayoutEffect(() => {
     const el = scroller.current;
     if (el && stickToBottom.current) el.scrollTop = el.scrollHeight;
-  }, [messages]);
+  }, [messages, typing]);
 
   async function send(body: string, files: File[]) {
     const tempId = `tmp-${Date.now()}`;
     stickToBottom.current = true;
     setMessages((m) => [...m, { id: tempId, body, createdAt: new Date().toISOString(), mine: true, senderName: "", attachments: [], pending: true }]);
+    lastTypingSent.current = 0;
     const fd = new FormData();
     fd.set("body", body);
+    fd.set("nonce", tempId);
     files.forEach((f) => fd.append("files", f));
     const res = await fetch(`/api/conversations/${id}/messages`, { method: "POST", body: fd });
     const data = await res.json().catch(() => ({}));
@@ -236,8 +320,8 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
       setError(data.error ?? "Message not sent.");
       return false;
     }
-    setMessages((m) => m.map((x) => (x.id === tempId ? data.message : x)));
-    lastAt.current = data.message.createdAt;
+    // Le message a pu arriver d'abord par le flux temps réel : dans ce cas, la bulle temporaire a déjà été remplacée.
+    appendIncoming([data.message]);
     setError(null);
     onChanged();
     return true;
@@ -264,11 +348,11 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
             <>
               <div className="relative">
                 <Avatar name={detail.other.name} imageKey={detail.other.avatarKey} size={40} />
-                {online && <span className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-ivory bg-success" title="Online" />}
+                {online && <span className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-ivory bg-success" title="Online" aria-label="Online" />}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14.5px] font-semibold">{detail.other.name}</p>
-                <p className="truncate text-[12px] text-muted">{detail.project?.title ?? detail.subject}</p>
+                <p className="truncate text-[12px] text-muted">{typing ? <span className="text-brass-dark">typing…</span> : online ? <>Online · {detail.project?.title ?? detail.subject}</> : detail.project?.title ?? detail.subject}</p>
               </div>
               <button onClick={toggleArchive} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" title={detail.archived ? "Unarchive" : "Archive"} aria-label={detail.archived ? "Unarchive" : "Archive"}>
                 {detail.archived ? <ArchiveRestore className="size-[18px]" /> : <Archive className="size-[18px]" />}
@@ -320,11 +404,20 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
               </div>
             );
           })}
+          {typing && detail && (
+            <div className="mt-3 flex justify-start" aria-live="polite">
+              <div className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-line bg-paper px-4 py-3" aria-label={`${detail.other.name} is typing`}>
+                {[0, 150, 300].map((delay) => (
+                  <span key={delay} className="size-1.5 animate-bounce rounded-full bg-muted" style={{ animationDelay: `${delay}ms` }} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {error && <p className="px-6 pb-2 text-sm text-danger">{error}</p>}
         {me.verified ? (
-          <Composer onSend={send} />
+          <Composer onSend={send} onTyping={notifyTyping} />
         ) : (
           <p className="border-t border-line p-4 text-center text-sm text-muted">
             Confirm your e-mail address to reply.{" "}
@@ -442,7 +535,7 @@ function AttachmentView({ a }: { a: AttachmentT }) {
   );
 }
 
-function Composer({ onSend }: { onSend: (body: string, files: File[]) => Promise<boolean> }) {
+function Composer({ onSend, onTyping }: { onSend: (body: string, files: File[]) => Promise<boolean>; onTyping: () => void }) {
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
@@ -488,7 +581,10 @@ function Composer({ onSend }: { onSend: (body: string, files: File[]) => Promise
         <textarea
           ref={textRef}
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={(e) => {
+            setBody(e.target.value);
+            if (e.target.value.trim()) onTyping();
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();

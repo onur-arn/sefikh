@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/mail";
 import { newMessageTemplate } from "@/lib/mail/templates";
 import { notify } from "@/lib/notifications";
 import { getPlan } from "@/lib/plans";
+import { isOnline, publish } from "@/lib/realtime";
 import { startOfMonth } from "@/lib/utils";
 
 type Me = { id: string; role: string; company?: { id: string } | null };
@@ -82,11 +83,27 @@ export async function notifyNewMessage(opts: { conversationId: string; senderNam
     body: opts.body.slice(0, 140),
     link,
   });
-  const online = opts.recipient.lastSeenAt && Date.now() - opts.recipient.lastSeenAt.getTime() < 2 * 60_000;
+  // Pas d'e-mail si le destinataire a le site ouvert (flux temps réel actif).
+  const online = isOnline(opts.recipient.id);
   if (opts.recipient.notifyByEmail && !online) {
     await sendEmail({
       to: opts.recipient.email,
       ...newMessageTemplate({ recipientName: opts.recipient.name, senderName: opts.senderName, preview: opts.body, conversationId: opts.conversationId, subject: opts.subject }),
     });
   }
+}
+
+/** Identifiant utilisateur de l'interlocuteur. */
+export function otherUserId(conv: { client: { id: string }; company: { userId: string } }, side: "client" | "pro") {
+  return side === "client" ? conv.company.userId : conv.client.id;
+}
+
+/** Marque la conversation comme lue et prévient l'interlocuteur (accusé de lecture en direct). */
+export async function markConversationRead(me: { id: string }, conv: { id: string; client: { id: string }; company: { userId: string } }, side: "client" | "pro") {
+  const at = new Date();
+  await db.conversation.update({ where: { id: conv.id }, data: side === "client" ? { clientLastReadAt: at } : { proLastReadAt: at } });
+  await db.notification.updateMany({ where: { userId: me.id, link: `/messages?c=${conv.id}`, readAt: null }, data: { readAt: at } });
+  publish(otherUserId(conv, side), { type: "read", conversationId: conv.id, at: at.toISOString() });
+  publish(me.id, { type: "counts" });
+  return at;
 }

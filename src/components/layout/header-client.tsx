@@ -8,6 +8,7 @@ import { Avatar, Logo } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { cn, formatRelative } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
+import { isRealtimeConnected, useRealtime } from "@/lib/realtime-client";
 
 type HeaderUser = { name: string; role: string; avatarKey: string | null; plan: string; companySlug: string | null };
 type Notif = { id: string; title: string; body: string | null; link: string | null; readAt: string | null; createdAt: string };
@@ -45,15 +46,19 @@ export function HeaderClient({ user, initialCounts, variant }: { user: HeaderUse
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Rafraîchissement léger des compteurs (messagerie / notifications).
+  // Compteurs (messagerie / notifications) : mis à jour en direct, interrogation périodique seulement hors connexion temps réel.
+  const refreshCounts = async () => {
+    const res = await fetch("/api/me/counts", { cache: "no-store" }).catch(() => null);
+    if (res?.ok) setCounts(await res.json());
+  };
+  useRealtime((event) => {
+    if (event.type === "counts" || event.type === "reconnected" || (event.type === "message" && !event.message.mine)) void refreshCounts();
+  }, !!user);
   useEffect(() => {
     if (!user) return;
-    const tick = async () => {
-      if (document.hidden) return;
-      const res = await fetch("/api/me/counts", { cache: "no-store" }).catch(() => null);
-      if (res?.ok) setCounts(await res.json());
-    };
-    const id = setInterval(tick, 20_000);
+    const id = setInterval(() => {
+      if (!document.hidden && !isRealtimeConnected()) void refreshCounts();
+    }, 20_000);
     return () => clearInterval(id);
   }, [user]);
 

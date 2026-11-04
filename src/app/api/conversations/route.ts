@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { assertCanStartConversation, MessagingError, notifyNewMessage, participantWhere, sideOf } from "@/lib/messaging";
+import { publish } from "@/lib/realtime";
 import { rateLimit } from "@/lib/rate-limit";
 
 /** Liste des conversations de l'utilisateur (boîte de réception). */
@@ -87,8 +88,12 @@ export async function POST(request: Request) {
   }
 
   const now = new Date();
-  await db.message.create({ data: { conversationId: conv.id, senderId: me.id, body } });
+  const message = await db.message.create({ data: { conversationId: conv.id, senderId: me.id, body } });
   await db.conversation.update({ where: { id: conv.id }, data: { lastMessageAt: now, clientLastReadAt: now, clientArchived: false, proArchived: false } });
+  const wire = { id: message.id, body, createdAt: message.createdAt, senderName: me.name, attachments: [] };
+  publish(company.userId, { type: "message", conversationId: conv.id, message: { ...wire, mine: false } });
+  publish(me.id, { type: "message", conversationId: conv.id, message: { ...wire, mine: true } });
+  publish([company.userId, me.id], { type: "conversations" });
   await notifyNewMessage({ conversationId: conv.id, senderName: me.clientProfile?.studioName || me.name, recipient: company.user, body, subject: conv.subject, isNew });
 
   return NextResponse.json({ id: conv.id }, { status: isNew ? 201 : 200 });

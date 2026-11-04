@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getConversationForUser } from "@/lib/messaging";
+import { getConversationForUser, markConversationRead, otherUserId } from "@/lib/messaging";
+import { isOnline } from "@/lib/realtime";
 import { getPlan } from "@/lib/plans";
 
 /** Détail d'une conversation + messages. `?after=<ISO>` pour ne récupérer que les nouveaux (polling). */
@@ -23,13 +24,10 @@ export async function GET(request: Request, ctx: RouteContext<"/api/conversation
 
   // Accusé de lecture
   const last = messages.at(-1);
-  if (last && last.senderId !== me.id) {
-    await db.conversation.update({ where: { id }, data: side === "client" ? { clientLastReadAt: new Date() } : { proLastReadAt: new Date() } });
-    await db.notification.updateMany({ where: { userId: me.id, link: `/messages?c=${id}`, readAt: null }, data: { readAt: new Date() } });
-  }
+  if (last && last.senderId !== me.id) await markConversationRead(me, conv, side);
 
   const otherReadAt = side === "client" ? conv.proLastReadAt : conv.clientLastReadAt;
-  const otherSeen = side === "client" ? conv.company.user.lastSeenAt : conv.client.lastSeenAt;
+  const otherId = otherUserId(conv, side);
   const showContact = side === "pro" || getPlan(me.plan).limits.seeContactDetails;
 
   return NextResponse.json({
@@ -43,11 +41,11 @@ export async function GET(request: Request, ctx: RouteContext<"/api/conversation
           project: conv.project,
           other:
             side === "client"
-              ? { name: conv.company.name, avatarKey: conv.company.logoKey, href: `/makers/${conv.company.slug}`, location: [conv.company.city, conv.company.country].filter(Boolean).join(", "), email: showContact ? conv.company.publicEmail : null, phone: showContact ? conv.company.phone : null, role: "Maker" }
-              : { name: conv.client.clientProfile?.studioName || conv.client.name, contactName: conv.client.name, avatarKey: conv.client.avatarKey, href: null, location: [conv.client.clientProfile?.city, conv.client.clientProfile?.country].filter(Boolean).join(", "), email: conv.client.email, phone: null, role: conv.client.clientProfile?.clientType ?? "Creative" },
+              ? { userId: otherId, name: conv.company.name, avatarKey: conv.company.logoKey, href: `/makers/${conv.company.slug}`, location: [conv.company.city, conv.company.country].filter(Boolean).join(", "), email: showContact ? conv.company.publicEmail : null, phone: showContact ? conv.company.phone : null, role: "Maker" }
+              : { userId: otherId, name: conv.client.clientProfile?.studioName || conv.client.name, contactName: conv.client.name, avatarKey: conv.client.avatarKey, href: null, location: [conv.client.clientProfile?.city, conv.client.clientProfile?.country].filter(Boolean).join(", "), email: conv.client.email, phone: null, role: conv.client.clientProfile?.clientType ?? "Creative" },
         },
     otherReadAt,
-    otherOnline: !!otherSeen && Date.now() - new Date(otherSeen).getTime() < 2 * 60_000,
+    otherOnline: isOnline(otherId),
     messages: messages.map((m) => ({
       id: m.id,
       body: m.body,
