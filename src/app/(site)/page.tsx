@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getPlan } from "@/lib/plans";
 import { currentQuarter, marketKpis } from "@/lib/stats";
 import { fileUrl } from "@/lib/utils";
+import { IntroSlideshow } from "@/components/layout/intro-slideshow";
 import { OpenSearchButton } from "@/components/layout/open-search-button";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
@@ -53,9 +54,8 @@ export default async function HomePage() {
     <>
       {/* ── Ouverture : image plein écran, le site commence au défilement ── */}
       <section className="relative -mt-[68px] h-dvh overflow-hidden bg-espresso">
-        <Image src="/images/join-1.webp" alt={tr("A cabinetmaker's hands planing wood")} fill priority sizes="100vw" className="object-cover object-[50%_58%]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-espresso/45 via-transparent to-espresso/55" />
-        <a href="#site" className="absolute inset-x-0 bottom-8 z-10 flex flex-col items-center gap-2 text-paper">
+        <IntroSlideshow />
+        <a href="#site" className="absolute inset-x-0 bottom-14 z-10 flex flex-col items-center gap-2 text-paper">
           <span className="text-[12px] uppercase tracking-[0.22em]">{tr("Search Engine For Know-How")}</span>
           <ChevronDown className="size-5 animate-bounce" strokeWidth={1.5} aria-hidden />
         </a>
