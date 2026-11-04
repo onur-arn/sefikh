@@ -10,8 +10,7 @@ import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/(auth)/actions";
 import { isRealtimeConnected, useRealtime } from "@/lib/realtime-client";
 import { useT } from "@/i18n/client";
-import { SearchPanel } from "@/components/search/search-panel";
-import { LocaleSwitcher } from "./locale-switcher";
+import { LocaleMenu, LocaleRow } from "./locale-switcher";
 
 type HeaderUser = { name: string; role: string; avatarKey: string | null; plan: string; companySlug: string | null };
 type Notif = { id: string; title: string; body: string | null; link: string | null; readAt: string | null; createdAt: string };
@@ -19,7 +18,7 @@ type Notif = { id: string; title: string; body: string | null; link: string | nu
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About us" },
-  { href: "#search", label: "Content" },
+  { href: "/content", label: "Content" },
   { href: "/insights", label: "Trends & Insights" },
   { href: "/pricing", label: "Pricing" },
 ];
@@ -28,7 +27,6 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
   const tr = useT();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [pastIntro, setPastIntro] = useState(false);
   const [counts, setCounts] = useState(initialCounts);
@@ -71,24 +69,8 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
   }, [user]);
 
   // Le panneau de recherche se referme en changeant de page ou avec Échap.
-  const [searchPath, setSearchPath] = useState(pathname);
-  if (searchPath !== pathname) {
-    setSearchPath(pathname);
-    setSearchOpen(false);
-  }
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSearchOpen(false);
-    const onOpen = () => setSearchOpen(true);
-    document.addEventListener("keydown", onKey);
-    window.addEventListener("sefikh:open-search", onOpen);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      window.removeEventListener("sefikh:open-search", onOpen);
-    };
-  }, []);
-
   // Accueil : barre transparente sur l'image d'ouverture, blanche au survol et après le défilement.
-  const overlay = pathname === "/" && !pastIntro && !hovered && !mobileOpen && !searchOpen;
+  const overlay = pathname === "/" && !pastIntro && !hovered && !mobileOpen;
   const navClass = "link-underline font-mono text-[11.5px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink";
 
   return (
@@ -99,17 +81,11 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
     >
       <div className="container-x grid h-[68px] grid-cols-[1fr_auto_1fr] items-center gap-4">
         <nav className="hidden items-center gap-4 lg:flex xl:gap-5" aria-label={tr("Main")}>
-          {NAV.map((n) =>
-            n.href === "#search" ? (
-              <button key={n.href} type="button" aria-expanded={searchOpen} onClick={() => setSearchOpen((v) => !v)} className={cn(navClass, searchOpen && "text-ink [background-size:100%_1px]")}>
-                {tr(n.label)}
-              </button>
-            ) : (
+          {NAV.map((n) => (
               <Link key={n.href} href={n.href} className={cn(navClass, (n.href === "/" ? pathname === "/" : pathname.startsWith(n.href)) && "text-ink [background-size:100%_1px]")}>
                 {tr(n.label)}
               </Link>
-            ),
-          )}
+          ))}
         </nav>
 
         <Link href="/" aria-label={tr("SEFIKH — home")} className="col-start-2 shrink-0">
@@ -117,7 +93,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
         </Link>
 
         <div className="col-start-3 flex items-center justify-end gap-1.5">
-          <LocaleSwitcher compact tone={overlay ? "dark" : "light"} className="mr-1 hidden sm:inline-flex" />
+          <LocaleMenu tone={overlay ? "dark" : "light"} className="mr-2 hidden sm:block" />
           {user ? (
             <>
               <IconLink href="/messages" label={tr("Messages")} count={counts.messages}>
@@ -137,29 +113,15 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
         </div>
       </div>
 
-      {searchOpen && (
-        <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-68px)] overflow-y-auto border-y border-line bg-ivory py-8 shadow-sm">
-          <div className="container-x">
-            <div className="mx-auto max-w-3xl">
-              <SearchPanel compact />
-            </div>
-          </div>
-        </div>
-      )}
-
       {mobileOpen && (
         <div className="border-t border-line bg-paper text-ink lg:hidden">
           <nav className="container-x flex flex-col py-4" aria-label={tr("Mobile")}>
-            {NAV.map((n) => n.href === "#search" ? (
-              <button key={n.href} type="button" onClick={() => { setMobileOpen(false); setSearchOpen(true); }} className="display border-b border-line/70 py-3 text-left text-2xl">
-                {tr(n.label)}
-              </button>
-            ) : (
+            {NAV.map((n) => (
               <Link key={n.href} href={n.href} className="display border-b border-line/70 py-3 text-2xl">
                 {tr(n.label)}
               </Link>
             ))}
-            <LocaleSwitcher className="mt-4 sm:hidden" />
+            <LocaleRow className="mt-5 sm:hidden" />
             {!user && (
               <div className="mt-5 flex gap-3">
                 <ButtonLink href="/login" variant="secondary" className="flex-1">

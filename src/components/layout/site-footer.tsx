@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LocaleSwitcher } from "./locale-switcher";
+import { LocaleRow } from "./locale-switcher";
 import { NewsletterForm } from "./newsletter-form";
 import { getT } from "@/i18n/server";
 
@@ -44,7 +44,7 @@ export async function SiteFooter() {
       <div className="container-x folio flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-5">
         <p>{tr("© {v} SEFIKH. All rights reserved.", { v: new Date().getFullYear() })}</p>
         <p>{tr("SEFIKH takes no commission on projects conducted through the platform.")}</p>
-        <LocaleSwitcher />
+        <LocaleRow />
       </div>
     </footer>
   );

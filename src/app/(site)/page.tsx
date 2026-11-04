@@ -6,7 +6,6 @@ import { getPlan } from "@/lib/plans";
 import { currentQuarter, marketKpis } from "@/lib/stats";
 import { fileUrl, parseList } from "@/lib/utils";
 import { IntroSlideshow } from "@/components/layout/intro-slideshow";
-import { OpenSearchButton } from "@/components/layout/open-search-button";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { anonymize, canSeeMakers, LISTED_COMPANY } from "@/lib/access";
@@ -82,7 +81,9 @@ export default async function HomePage() {
           <div className="lg:col-span-9">
             <p className="display text-[2.3rem] sm:text-6xl lg:text-[4.6rem]">{tr("An interior cannot be bought. It is built, by hand, by people you have not met yet.")}</p>
             <p className="mt-8 max-w-xl text-[16px] leading-relaxed text-ink-soft">{tr("SEFIKH brings together the cabinetmakers, metalworkers, stone carvers and weavers that architects keep to themselves. Describe an idea, show an image: we look for who can make it.")}</p>
-            <OpenSearchButton />
+            <ButtonLink href="/content" size="lg" className="mt-8">
+              {tr("Explore expertise")} <ArrowRight className="size-3.5" />
+            </ButtonLink>
           </div>
         </div>
         <dl className="mt-20 grid grid-cols-2 border-t border-line lg:grid-cols-4">
