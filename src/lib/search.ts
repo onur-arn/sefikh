@@ -250,11 +250,9 @@ export async function runSearch(input: SearchInput) {
 
 export type SearchMode = "TEXT" | "IMAGE" | "FILTER" | "PROJECT";
 
-/** Recherches effectuées depuis toujours, tous modes confondus (compte et navigateur cumulés). */
-export async function searchesUsed(who: { userId?: string | null; visitorId?: string | null }) {
-  const owner = [...(who.userId ? [{ userId: who.userId }] : []), ...(who.visitorId ? [{ visitorId: who.visitorId }] : [])];
-  if (!owner.length) return 0;
-  return db.searchLog.count({ where: { mode: { in: ["TEXT", "IMAGE", "FILTER"] }, OR: owner } });
+/** Recherches effectuées par un compte depuis sa création, tous modes confondus. */
+export async function searchesUsed(userId: string) {
+  return db.searchLog.count({ where: { userId, mode: { in: ["TEXT", "IMAGE", "FILTER"] } } });
 }
 
 export async function logSearch(opts: {

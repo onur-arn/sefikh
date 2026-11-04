@@ -54,7 +54,7 @@ Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5`
 
 **Authentification** — inscription (choix créatif / maker), connexion, déconnexion, vérification d'e-mail, mot de passe oublié / réinitialisation (jeton à usage unique, 1 h), changement d'e-mail et de mot de passe, liste des sessions et déconnexion des autres appareils, suppression du compte et export RGPD (JSON).
 
-**Accès** — sans offre payante (visiteurs, offre gratuite) : 3 recherches au total, à vie, tous modes confondus (`freeSearches`, compte et navigateur cumulés), makers anonymes et contact impossible. L'anonymisation se fait côté serveur (`src/lib/access.ts`) : nom, slug et identifiant ne sont jamais envoyés au navigateur. Les fiches ne sont donc plus indexables (retirées du sitemap). La messagerie, les notifications et les conversations de projet leur sont aussi fermées.
+**Accès** — la recherche exige un compte. Sans offre payante : 3 recherches par compte, à vie, tous modes confondus (`freeSearches`), makers anonymes et contact impossible. L'anonymisation se fait côté serveur (`src/lib/access.ts`) : nom, slug et identifiant ne sont jamais envoyés au navigateur. Les fiches ne sont donc plus indexables (retirées du sitemap). La messagerie, les notifications et les conversations de projet leur sont aussi fermées.
 
 **Visibilité des makers** — seul un abonnement payant rend une fiche visible (`LISTED_COMPANY` dans `src/lib/access.ts`) : sans offre active, la fiche reste en aperçu pour son propriétaire. Un paiement publie la fiche si elle a une photo ; une résiliation la masque automatiquement.
 

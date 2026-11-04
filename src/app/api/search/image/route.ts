@@ -15,13 +15,14 @@ import { visitorId } from "@/lib/visitor";
  */
 export async function POST(request: Request) {
   const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Please log in." }, { status: 401 });
   const vid = await visitorId();
-  const rl = rateLimit(`imgsearch:${user?.id ?? vid}`, 20, 10 * 60_000);
+  const rl = rateLimit(`imgsearch:${user.id}`, 20, 10 * 60_000);
   if (!rl.ok) return NextResponse.json({ error: "Too many searches, please wait a moment." }, { status: 429 });
 
-  // Quota mensuel partagé avec les autres modes (visiteurs anonymes : quota de l'offre gratuite).
-  const limit = getPlan(user?.plan ?? "CLIENT_FREE").limits.freeSearches;
-  if (Number.isFinite(limit) && (await searchesUsed({ userId: user?.id, visitorId: vid })) >= limit) {
+  // Quota du compte, partagé avec les autres modes.
+  const limit = getPlan(user.plan).limits.freeSearches;
+  if (Number.isFinite(limit) && (await searchesUsed(user.id)) >= limit) {
     return NextResponse.json({ error: "You've used your free searches", code: "LIMIT" }, { status: 402 });
   }
 
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     const [embedding, colors] = await Promise.all([embedImage(img.buffer), colorVector(img.buffer)]);
     const log = await db.searchLog.create({
       data: {
-        userId: user?.id ?? null,
+        userId: user.id,
         visitorId: vid,
         mode: "IMAGE",
         imageKey: img.key,

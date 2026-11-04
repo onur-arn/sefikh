@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Lock, ScanSearch, Sparkles } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -32,8 +33,10 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const tr = await getT();
   const sp = await searchParams;
   const [user, vid] = await Promise.all([getCurrentUser(), visitorId()]);
-  const who = { userId: user?.id ?? null, visitorId: vid };
-  const plan = getPlan(user?.plan ?? "CLIENT_FREE");
+  // La recherche est réservée aux comptes : 3 recherches gratuites par compte.
+  if (!user) redirect("/register?reason=search");
+  const who = { userId: user.id, visitorId: vid };
+  const plan = getPlan(user.plan);
 
   const q = one(sp.q)?.slice(0, 500);
   const imageId = one(sp.image);
@@ -54,7 +57,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   let imageSearch: { id: string; imageKey: string | null } | null = null;
   if (imageId) {
     const log = await db.searchLog.findUnique({ where: { id: imageId } });
-    if (log && log.mode === "IMAGE" && ((user && log.userId === user.id) || (vid && log.visitorId === vid))) {
+    if (log && log.mode === "IMAGE" && log.userId === user.id) {
       imageSearch = { id: log.id, imageKey: log.imageKey };
       input.imageEmbedding = fromBytes(log.embedding);
       if (!input.imageEmbedding && log.query) input.imageColors = parseList<number>(log.query);
@@ -68,7 +71,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   let limited = false;
   if (hasCriteria && !imageSearch && Number.isFinite(plan.limits.freeSearches)) {
     const already = await findRecentSearch(who, mode, logKey);
-    if (!already && (await searchesUsed(who)) >= plan.limits.freeSearches) limited = true;
+    if (!already && (await searchesUsed(user.id)) >= plan.limits.freeSearches) limited = true;
   }
 
   // La recherche comprend l'anglais et le français ; les autres langues passent par la traduction automatique.

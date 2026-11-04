@@ -67,6 +67,7 @@ export function SearchPanel({ compact = false, initial }: { compact?: boolean; i
       const res = await fetch("/api/search/image", { method: "POST", body }).catch(() => null);
       const data = await res?.json().catch(() => null);
       setUploading(false);
+      if (res?.status === 401) return startTransition(() => router.push("/register?reason=search"));
       if (res?.status === 402) return startTransition(() => router.push("/pricing?reason=limit"));
       if (!res?.ok || !data?.id) return setError(data?.error ?? "Image search failed. Please try again.");
       params.set("image", data.id);

@@ -13,7 +13,6 @@ import { ButtonLink } from "@/components/ui/button";
 import { MakerCard } from "@/components/makers/maker-card";
 import { PublishToggle } from "@/components/dashboard/publish-toggle";
 import { hasListedPlan } from "@/lib/access";
-import { visitorId } from "@/lib/visitor";
 import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -54,7 +53,7 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
     db.project.findMany({ where: { ownerId: user.id }, orderBy: { updatedAt: "desc" }, include: { _count: { select: { conversations: true } } } }),
     db.savedCompany.count({ where: { userId: user.id } }),
     unreadConversationCount(user),
-    searchesUsed({ userId: user.id, visitorId: await visitorId() }),
+    searchesUsed(user.id),
   ]);
   const active = projects.filter((p) => p.status === "ACTIVE");
   const archived = projects.filter((p) => p.status === "ARCHIVED");

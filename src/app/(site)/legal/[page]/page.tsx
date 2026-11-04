@@ -34,7 +34,7 @@ const PAGES: Record<string, { title: string; updated: string; sections: [string,
     title: "Cookie policy",
     updated: "26 October 2026",
     sections: [
-      ["Strictly necessary cookies", "sefikh_session keeps you logged in (30 days). sefikh_vid is an anonymous identifier used to apply free search quotas and count unique visits. sefikh_locale remembers your language (1 year). These cookies are essential and do not require consent."],
+      ["Strictly necessary cookies", "sefikh_session keeps you logged in (30 days). sefikh_vid is an anonymous identifier used to count unique visits. sefikh_locale remembers your language (1 year). These cookies are essential and do not require consent."],
       ["No advertising cookies", "SEFIKH does not use advertising or third-party tracking cookies. If audience measurement is added later, it will be configured to be exempt from consent or a consent banner will be displayed."],
       ["Payment", "When you pay, Stripe may set its own cookies to prevent fraud, on its own pages."],
     ],
