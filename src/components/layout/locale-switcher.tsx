@@ -14,7 +14,7 @@ export function LocaleSwitcher({ tone = "light", compact = false, className }: {
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
-    <label className={cn("relative inline-flex items-center gap-1.5", compact ? "text-[11.5px]" : "text-[13px]", tone === "dark" ? "text-paper/70 hover:text-paper" : "text-ink-soft hover:text-ink", pending && "opacity-60", className)}>
+    <label className={cn("relative inline-flex items-center gap-1.5", "font-mono", compact ? "text-[11px]" : "text-[12px]", tone === "dark" ? "text-paper/70 hover:text-paper" : "text-ink-soft hover:text-ink", pending && "opacity-60", className)}>
       {!compact && <Globe className="size-4" aria-hidden />}
       <span className="sr-only">{tr("Language")}</span>
       <select

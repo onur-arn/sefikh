@@ -15,7 +15,7 @@ export function ChipGroup({ name, options, defaultValue = [], max }: { name: str
         const on = values.includes(o);
         const disabled = !on && max != null && values.length >= max;
         return (
-          <label key={o} className={cn("cursor-pointer select-none rounded-full border px-3 py-1.5 text-[12.5px] transition", on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40", disabled && "cursor-not-allowed opacity-40")}>
+          <label key={o} className={cn("cursor-pointer select-none rounded-sm border px-3 py-1.5 text-[12.5px] transition", on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40", disabled && "cursor-not-allowed opacity-40")}>
             <input type="checkbox" name={name} value={o} checked={on} disabled={disabled} onChange={() => setValues((v) => (on ? v.filter((x) => x !== o) : [...v, o]))} className="sr-only" />
             {tr(o)}
           </label>
@@ -39,9 +39,9 @@ export function TagInput({ name, defaultValue = [], max = 15, placeholder }: { n
     <div>
       <div className="field flex min-h-12 flex-wrap items-center gap-1.5 py-2">
         {tags.map((t) => (
-          <span key={t} className="flex items-center gap-1 rounded-full bg-brass-light px-2.5 py-1 text-[12.5px] text-brass-dark">
+          <span key={t} className="flex items-center gap-1 rounded-sm bg-brass-light px-2.5 py-1 text-[12.5px] text-brass-dark">
             {t}
-            <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={tr("Remove {t}", { t })} className="rounded-full p-0.5 hover:bg-brass/20">
+            <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={tr("Remove {t}", { t })} className="rounded-sm p-0.5 hover:bg-brass/20">
               <X className="size-3" />
             </button>
             <input type="hidden" name={name} value={t} />

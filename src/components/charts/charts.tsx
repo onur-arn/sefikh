@@ -77,8 +77,8 @@ export function BarList({ items, unit = "searches", dark }: { items: { name: str
             <span>{tr(i.name)}</span>
             <span className={dark ? "tabular-nums text-paper/60" : "tabular-nums text-muted"}>{tr.number(i.count)}</span>
           </div>
-          <div className={cn("mt-1 h-2 overflow-hidden rounded-full", dark ? "bg-paper/10" : "bg-sand")}>
-            <div className={cn("h-full rounded-full", dark ? "bg-brass-light" : "bg-brass")} style={{ width: `${(i.count / max) * 100}%` }} />
+          <div className={cn("mt-1 h-2 overflow-hidden rounded-sm", dark ? "bg-paper/10" : "bg-sand")}>
+            <div className={cn("h-full rounded-sm", dark ? "bg-brass-light" : "bg-brass")} style={{ width: `${(i.count / max) * 100}%` }} />
           </div>
         </li>
       ))}

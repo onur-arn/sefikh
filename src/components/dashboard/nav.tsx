@@ -44,10 +44,10 @@ export function DashboardNav({ role, planName, insights, analytics }: { role: st
       <ul className="scrollbar-thin -mx-4 flex gap-1 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:px-0">
         {items.map(({ href, label, icon: Icon, locked }) => (
           <li key={href} className="shrink-0">
-            <Link href={href} className={cn("flex items-center gap-3 whitespace-nowrap rounded-full px-4 py-2.5 text-[13.5px] transition lg:rounded-xl", isActive(href) ? "bg-ink text-paper" : "text-ink-soft hover:bg-sand")}>
+            <Link href={href} className={cn("flex items-center gap-3 whitespace-nowrap rounded-sm px-4 py-2.5 text-[13.5px] transition lg:rounded-xl", isActive(href) ? "bg-ink text-paper" : "text-ink-soft hover:bg-sand")}>
               <Icon className="size-4" strokeWidth={1.7} />
               {tr(label)}
-              {locked && <span className="ml-auto rounded-full bg-brass-light px-1.5 text-[9px] font-bold uppercase tracking-wider text-brass-dark">{tr("Pro")}</span>}
+              {locked && <span className="ml-auto rounded-sm bg-brass-light px-1.5 text-[9px] font-bold uppercase tracking-wider text-brass-dark">{tr("Pro")}</span>}
             </Link>
           </li>
         ))}

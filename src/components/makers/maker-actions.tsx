@@ -31,7 +31,7 @@ export function SaveButton({ companyId, initialSaved, viewer }: { companyId: str
         }}
         disabled={pending}
         aria-pressed={saved}
-        className={cn("inline-flex h-11 items-center gap-2 rounded-full border px-5 text-sm transition", saved ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/50")}
+        className={cn("inline-flex h-11 items-center gap-2 rounded-sm border px-5 text-sm transition", saved ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/50")}
       >
         {saved ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
         {saved ? tr("Saved") : tr("Save")}

@@ -21,14 +21,14 @@ export default async function UpgradePage() {
         <h1 className="display mt-3 text-5xl sm:text-6xl">{tr("Choose a plan to appear on SEFIKH")}</h1>
         <p className="mt-4 text-muted">{tr("Your profile stays hidden until you subscribe. Once your plan is active, it appears in search results.")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm">
-          <Link href="/dashboard" className="rounded-full border border-line bg-paper px-5 py-2.5 hover:border-ink/40">
+          <Link href="/dashboard" className="rounded-sm border border-line bg-paper px-5 py-2.5 hover:border-ink/40">
             {tr("Not now, keep my profile hidden")}</Link>
-          <a href="#plans" className="rounded-full bg-ink px-5 py-2.5 text-paper">
+          <a href="#plans" className="rounded-sm bg-ink px-5 py-2.5 text-paper">
             {tr("See plans")}</a>
         </div>
       </header>
       <div id="plans" className="mt-16 scroll-mt-24">
-        <PlanPicker audience="PRO" currentPlan={user.plan} currentTerm={sub?.term ?? null} loggedInRole={user.role} foundingSeatsLeft={seats} compact />
+        <PlanPicker audience="PRO" currentPlan={user.plan} currentTerm={sub?.term ?? null} loggedInRole={user.role} foundingSeatsLeft={seats} />
       </div>
     </div>
   );

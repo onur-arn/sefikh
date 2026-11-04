@@ -91,7 +91,8 @@ Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5`
 | Couche | Choix |
 |---|---|
 | Framework | Next.js 16 (App Router, Server Components, Server Actions, Turbopack), React 19, TypeScript strict |
-| UI | Tailwind CSS v4, polices Cormorant Garamond + Manrope, icônes Lucide, graphiques Recharts |
+| UI | Tailwind CSS v4, polices Instrument Serif + Instrument Sans + DM Mono, icônes Lucide, graphiques Recharts |
+| Design | Cahier d'architecte : chaux, encre, terre cuite ; angles droits, filets, légendes numérotées (tokens dans `src/app/globals.css`) |
 | Base de données | Prisma 6 — SQLite en dev, PostgreSQL en prod (changer `provider` + `DATABASE_URL`) |
 | Auth | Sessions en base (cookie httpOnly, jeton haché SHA-256, 30 jours glissants), bcrypt (12 tours) |
 | E-mails | Nodemailer (SMTP) + journal `EmailLog` |

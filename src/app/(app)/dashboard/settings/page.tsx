@@ -53,7 +53,7 @@ export default async function SettingsPage() {
               <li key={s.id} className="flex items-center justify-between gap-4 py-3 text-sm">
                 <span>
                   {describeAgent(s.userAgent)}
-                  {s.id === user.sessionId && <span className="ml-2 rounded-full bg-success/12 px-2 py-0.5 text-[11px] font-semibold text-success">{tr("This device")}</span>}
+                  {s.id === user.sessionId && <span className="ml-2 rounded-sm bg-success/12 px-2 py-0.5 text-[11px] font-semibold text-success">{tr("This device")}</span>}
                 </span>
                 <span className="text-[12px] text-muted">
                   {s.ip ? `${s.ip} · ` : ""}
@@ -66,7 +66,7 @@ export default async function SettingsPage() {
         <Card className="p-6 sm:p-8">
           <h2 className="display text-2xl">{tr("Your data")}</h2>
           <p className="mt-1 text-sm text-muted">{tr("Download a copy of your personal data (GDPR), in JSON format.")}</p>
-          <a href="/api/me/export" className="mt-4 inline-flex h-10 items-center rounded-full border border-ink/70 px-5 text-sm hover:bg-ink hover:text-paper">
+          <a href="/api/me/export" className="mt-4 inline-flex h-10 items-center rounded-sm border border-ink/70 px-5 text-sm hover:bg-ink hover:text-paper">
             {tr("Download my data")}</a>
         </Card>
         <Card className="border-danger/30 p-6 sm:p-8">

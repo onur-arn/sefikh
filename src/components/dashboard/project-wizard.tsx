@@ -217,14 +217,14 @@ export function ProjectWizard({ initial }: { initial: ProjectDraft }) {
             <Q title={tr("Do you have any reference images or moodboards?")} hint={tr("Upload images, plans or documents (PDF, JPG, PNG — 15 MB max each).")}>
               <div className="flex flex-wrap items-center gap-2">
                 {files.map((f, i) => (
-                  <span key={i} className="flex items-center gap-2 rounded-full bg-sand py-1.5 pl-3 pr-1.5 text-[12.5px]">
+                  <span key={i} className="flex items-center gap-2 rounded-sm bg-sand py-1.5 pl-3 pr-1.5 text-[12.5px]">
                     <FileText className="size-3.5" /> <span className="max-w-44 truncate">{f.name}</span> <span className="text-muted">{tr.bytes(f.size)}</span>
-                    <button type="button" onClick={() => setFiles(files.filter((_, j) => j !== i))} className="rounded-full p-0.5 hover:bg-line" aria-label={tr("Remove {name}", { name: f.name })}>
+                    <button type="button" onClick={() => setFiles(files.filter((_, j) => j !== i))} className="rounded-sm p-0.5 hover:bg-line" aria-label={tr("Remove {name}", { name: f.name })}>
                       <X className="size-3" />
                     </button>
                   </span>
                 ))}
-                <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-2 rounded-full border border-dashed border-ink/40 px-4 py-2 text-[13px] hover:bg-sand">
+                <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-2 rounded-sm border border-dashed border-ink/40 px-4 py-2 text-[13px] hover:bg-sand">
                   <Paperclip className="size-4" /> {" "}{tr("Add files")}</button>
                 <input ref={fileRef} type="file" multiple accept="image/*,application/pdf" className="hidden" onChange={(e) => { setFiles([...files, ...Array.from(e.target.files ?? [])].slice(0, 10)); e.target.value = ""; }} />
               </div>
@@ -324,7 +324,7 @@ export function ProjectWizard({ initial }: { initial: ProjectDraft }) {
 
         {step === 6 && (
           <div className="rounded-3xl border border-line bg-paper p-6 sm:p-10">
-            <p className="inline-block rounded-full bg-ink px-5 py-2 text-sm font-semibold text-paper">{tr("Project recap")}</p>
+            <p className="inline-block rounded-sm bg-ink px-5 py-2 text-sm font-semibold text-paper">{tr("Project recap")}</p>
             <dl className="mt-8 grid gap-x-10 gap-y-4 sm:grid-cols-2">
               {recap.map(([k, v]) => (
                 <div key={k} className="border-b border-line pb-3">
@@ -365,7 +365,7 @@ export function ProjectWizard({ initial }: { initial: ProjectDraft }) {
 
 function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button type="button" onClick={onClick} aria-pressed={on} className={cn("rounded-full border px-3.5 py-2 text-[13px] transition", on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40")}>
+    <button type="button" onClick={onClick} aria-pressed={on} className={cn("rounded-sm border px-3.5 py-2 text-[13px] transition", on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40")}>
       {children}
     </button>
   );

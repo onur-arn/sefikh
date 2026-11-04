@@ -7,13 +7,13 @@ import { useT } from "@/i18n/client";
 
 export function Badge({ children, tone = "neutral", className }: { children: ReactNode; tone?: "neutral" | "brass" | "dark" | "success" | "danger"; className?: string }) {
   const tones = {
-    neutral: "bg-sand text-ink-soft",
-    brass: "bg-brass-light text-brass-dark",
+    neutral: "border border-line text-ink-soft",
+    brass: "border border-brass/40 text-brass",
     dark: "bg-ink text-paper",
     success: "bg-success/12 text-success",
     danger: "bg-danger/12 text-danger",
   };
-  return <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide", tones[tone], className)}>{children}</span>;
+  return <span className={cn("inline-flex items-center gap-1 rounded-sm px-2 py-0.5 font-mono text-[10.5px] uppercase tracking-[0.05em]", tones[tone], className)}>{children}</span>;
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
@@ -23,7 +23,7 @@ export function Card({ children, className }: { children: ReactNode; className?:
 export function Avatar({ name, imageKey, size = 40, className }: { name: string; imageKey?: string | null; size?: number; className?: string }) {
   const url = fileUrl(imageKey);
   return (
-    <span className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-sand font-semibold text-ink-soft", className)} style={{ width: size, height: size, fontSize: size * 0.36 }}>
+    <span className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-sm bg-sand font-semibold text-ink-soft", className)} style={{ width: size, height: size, fontSize: size * 0.36 }}>
       {url ? <Image src={url} alt="" fill sizes={`${size}px`} className="object-cover" /> : initials(name) || "·"}
     </span>
   );
@@ -44,7 +44,7 @@ export function SectionTitle({ eyebrow, title, children, className }: { eyebrow?
   return (
     <div className={cn("max-w-2xl", className)}>
       {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
-      <h2 className="display text-4xl sm:text-5xl">{title}</h2>
+      <h2 className="display text-4xl sm:text-[3.4rem]">{title}</h2>
       {children && <p className="mt-4 text-[15px] leading-relaxed text-muted">{children}</p>}
     </div>
   );
@@ -53,7 +53,7 @@ export function SectionTitle({ eyebrow, title, children, className }: { eyebrow?
 export function Logo({ className, light }: { className?: string; light?: boolean }) {
   const tr = useT();
   return (
-    <span className={cn("text-[1.35rem] font-semibold leading-none tracking-[0.04em]", light ? "text-paper" : "text-ink", className)}>
+    <span className={cn("font-display text-[1.75rem] leading-none tracking-[0.1em]", light ? "text-paper" : "text-ink", className)}>
       {tr("SEFIKH")}</span>
   );
 }

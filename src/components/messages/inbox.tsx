@@ -95,13 +95,13 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
           {/* Liste */}
           <section className={cn("flex min-h-0 flex-col border-r border-line", activeId && "hidden lg:flex")} aria-label={tr("Conversations")}>
             <div className="space-y-3 border-b border-line p-4">
-              <label className="flex items-center gap-2 rounded-full bg-paper px-3.5 py-2 ring-1 ring-line focus-within:ring-ink">
+              <label className="flex items-center gap-2 rounded-sm bg-paper px-3.5 py-2 ring-1 ring-line focus-within:ring-ink">
                 <Search className="size-4 text-muted" />
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={tr("Search conversations")} className="w-full bg-transparent text-sm focus:outline-none" aria-label={tr("Search conversations")} />
               </label>
               <div className="flex gap-1">
                 {FILTERS.map((f) => (
-                  <button key={f.id} onClick={() => setFilter(f.id)} className={cn("rounded-full px-3 py-1 text-[12.5px]", filter === f.id ? "bg-ink text-paper" : "text-muted hover:bg-sand hover:text-ink")}>
+                  <button key={f.id} onClick={() => setFilter(f.id)} className={cn("rounded-sm px-3 py-1 text-[12.5px]", filter === f.id ? "bg-ink text-paper" : "text-muted hover:bg-sand hover:text-ink")}>
                     {tr(f.label)}
                   </button>
                 ))}
@@ -569,9 +569,9 @@ function Composer({ onSend, onTyping }: { onSend: (body: string, files: File[]) 
         {files.length > 0 && (
           <div className="flex flex-wrap gap-1.5 border-b border-line p-2.5">
             {files.map((f, i) => (
-              <span key={i} className="flex items-center gap-1.5 rounded-full bg-sand py-1 pl-3 pr-1.5 text-[12px]">
+              <span key={i} className="flex items-center gap-1.5 rounded-sm bg-sand py-1 pl-3 pr-1.5 text-[12px]">
                 <span className="max-w-40 truncate">{f.name}</span>
-                <button onClick={() => setFiles((x) => x.filter((_, j) => j !== i))} className="rounded-full p-0.5 hover:bg-line" aria-label={tr("Remove {name}", { name: f.name })}>
+                <button onClick={() => setFiles((x) => x.filter((_, j) => j !== i))} className="rounded-sm p-0.5 hover:bg-line" aria-label={tr("Remove {name}", { name: f.name })}>
                   <X className="size-3" />
                 </button>
               </span>
@@ -606,7 +606,7 @@ function Composer({ onSend, onTyping }: { onSend: (body: string, files: File[]) 
           <input ref={fileRef} type="file" multiple accept="application/pdf,image/*" className="hidden" onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
           <input ref={imageRef} type="file" multiple accept="image/*" capture="environment" className="hidden" onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
           <span className="ml-2 hidden text-[11px] text-muted sm:inline">{tr("Enter to send · Shift + Enter for a new line")}</span>
-          <button onClick={submit} disabled={sending || (!body.trim() && !files.length)} className="ml-auto flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-[13px] font-medium text-paper transition hover:bg-ink-soft disabled:opacity-40" aria-label={tr("Send")}>
+          <button onClick={submit} disabled={sending || (!body.trim() && !files.length)} className="ml-auto flex h-9 items-center gap-2 rounded-sm bg-ink px-4 text-[13px] font-medium text-paper transition hover:bg-ink-soft disabled:opacity-40" aria-label={tr("Send")}>
             {sending ? <span className="size-3.5 animate-spin rounded-full border-2 border-paper border-r-transparent" /> : <Send className="size-3.5" />}
             {tr("Send")}</button>
         </div>

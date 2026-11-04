@@ -72,7 +72,7 @@ export function PortfolioManager({ initialItems, limit }: { initialItems: Item[]
         <ImagePlus className="size-9 text-brass" strokeWidth={1.3} />
         <p className="mt-3 font-medium">{tr("Drop your pictures here")}</p>
         <p className="mt-1 text-sm text-muted">{tr("JPG, PNG, WebP or HEIC — up to 10 MB each. Your best picture should come first.")}</p>
-        <button onClick={() => inputRef.current?.click()} disabled={items.length >= limit} className="mt-5 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper hover:bg-ink-soft disabled:opacity-40">
+        <button onClick={() => inputRef.current?.click()} disabled={items.length >= limit} className="mt-5 rounded-sm bg-ink px-5 py-2.5 text-sm font-medium text-paper hover:bg-ink-soft disabled:opacity-40">
           {tr("Choose pictures")}</button>
         <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { uploadFiles(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
         {limitHit && (
@@ -128,7 +128,7 @@ function PortfolioItem({ item, index, total, onMove, onRemove }: { item: Item; i
       <div className="relative aspect-[4/3] bg-sand">
         <Image src={fileUrl(item.thumbKey ?? item.key)!} alt={item.title ?? ""} fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />
         {index === 0 && (
-          <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-ink/80 px-2.5 py-1 text-[11px] font-medium text-paper">
+          <span className="absolute left-3 top-3 flex items-center gap-1 rounded-sm bg-ink/80 px-2.5 py-1 text-[11px] font-medium text-paper">
             <Star className="size-3" /> {" "}{tr("Cover")}</span>
         )}
         <div className="absolute right-3 top-3 flex gap-1">
@@ -157,7 +157,7 @@ function PortfolioItem({ item, index, total, onMove, onRemove }: { item: Item; i
           <input value={form.year} onChange={set("year")} placeholder={tr("Year")} inputMode="numeric" className="field py-2 text-[13px]" aria-label={tr("Year")} />
         </div>
         <div className="flex justify-end">
-          <button onClick={save} disabled={!dirty || state === "saving"} className="flex items-center gap-1.5 rounded-full bg-ink px-4 py-1.5 text-[12.5px] font-medium text-paper disabled:opacity-30">
+          <button onClick={save} disabled={!dirty || state === "saving"} className="flex items-center gap-1.5 rounded-sm bg-ink px-4 py-1.5 text-[12.5px] font-medium text-paper disabled:opacity-30">
             {state === "saved" ? <><Check className="size-3.5" /> {" "}{tr("Saved")}</> : state === "saving" ? tr("Saving…") : tr("Save details")}
           </button>
         </div>

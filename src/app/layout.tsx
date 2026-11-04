@@ -1,20 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { DM_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google";
 import { I18nProvider } from "@/i18n/client";
 import { clientCatalog, getLocale, getT } from "@/i18n/server";
 import "./globals.css";
 
-const display = Cormorant_Garamond({
-  variable: "--font-cormorant",
+const serif = Instrument_Serif({
+  variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: "400",
   style: ["normal", "italic"],
   display: "swap",
 });
 
-const sans = Manrope({
-  variable: "--font-manrope",
+const sans = Instrument_Sans({
+  variable: "--font-text",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const mono = DM_Mono({
+  variable: "--font-caption",
+  subsets: ["latin"],
+  weight: ["300", "400"],
   display: "swap",
 });
 
@@ -41,13 +48,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  themeColor: "#f6f3ec",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   return (
-    <html lang={locale} data-scroll-behavior="smooth" className={`${display.variable} ${sans.variable} h-full antialiased`}>
+    <html lang={locale} data-scroll-behavior="smooth" className={`${serif.variable} ${sans.variable} ${mono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <I18nProvider locale={locale} catalog={clientCatalog(locale)}>
           {children}

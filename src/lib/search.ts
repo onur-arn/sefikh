@@ -53,6 +53,7 @@ export type SearchInput = {
   near?: string; // ville ou pays
   radiusKm?: number;
   maxLeadTime?: number;
+  months?: number[]; // disponible au moins un de ces mois
   imageEmbedding?: Float32Array | null;
   imageColors?: number[] | null;
   sort?: "relevance" | "distance" | "recent";
@@ -141,6 +142,10 @@ export async function runSearch(input: SearchInput) {
     if (hardFilters.some(([kind, values]) => values.length > 0 && !values.some((v) => has(kind, v)))) continue;
     if (input.kind && c.kind !== input.kind) continue;
     if (input.maxLeadTime && c.leadTimeMin && c.leadTimeMin > input.maxLeadTime) continue;
+    if (input.months?.length) {
+      const open = parseList<number>(c.availability);
+      if (!input.months.some((m) => open.includes(m))) continue;
+    }
 
     const distance = city && c.lat != null && c.lng != null ? distanceKm(city, { lat: c.lat, lng: c.lng }) : null;
     if (input.radiusKm && city && (distance == null || distance > input.radiusKm)) continue;

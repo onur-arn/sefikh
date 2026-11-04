@@ -57,7 +57,7 @@ export function DocumentsManager({ initialDocs, projects, initialProject, used }
             </option>
           ))}
         </select>
-        <button onClick={() => ref.current?.click()} className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-paper hover:bg-ink-soft">
+        <button onClick={() => ref.current?.click()} className="inline-flex h-11 items-center justify-center gap-2 rounded-sm bg-ink px-5 text-sm font-medium text-paper hover:bg-ink-soft">
           {busy ? <span className="size-4 animate-spin rounded-full border-2 border-paper border-r-transparent" /> : <Upload className="size-4" />} {" "}{tr("Upload files")}</button>
         <input ref={ref} type="file" multiple accept="image/*,application/pdf" className="hidden" onChange={(e) => { upload(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
         <div className="sm:ml-auto sm:w-56">
@@ -74,7 +74,7 @@ export function DocumentsManager({ initialDocs, projects, initialProject, used }
 
       <div className="flex flex-wrap gap-1.5">
         {[{ id: "all", title: tr("All") }, ...projects, { id: "none", title: tr("Unassigned") }].map((p) => (
-          <button key={p.id} onClick={() => setFilter(p.id)} className={cn("rounded-full px-3 py-1 text-[12.5px]", filter === p.id ? "bg-ink text-paper" : "bg-paper text-muted ring-1 ring-line hover:text-ink")}>
+          <button key={p.id} onClick={() => setFilter(p.id)} className={cn("rounded-sm px-3 py-1 text-[12.5px]", filter === p.id ? "bg-ink text-paper" : "bg-paper text-muted ring-1 ring-line hover:text-ink")}>
             {tr(p.title)}
           </button>
         ))}
@@ -106,7 +106,7 @@ export function DocumentsManager({ initialDocs, projects, initialProject, used }
                     {d.project && ` · ${d.project.title}`}
                   </p>
                 </div>
-                <button onClick={() => remove(d)} className="rounded-full p-1.5 text-muted hover:bg-sand hover:text-danger" aria-label={tr("Delete {name}", { name: d.name })}>
+                <button onClick={() => remove(d)} className="rounded-sm p-1.5 text-muted hover:bg-sand hover:text-danger" aria-label={tr("Delete {name}", { name: d.name })}>
                   <Trash2 className="size-4" />
                 </button>
               </div>

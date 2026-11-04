@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Hammer, MessageSquareText, ScanSearch, Sparkles, ChevronDown } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { db } from "@/lib/db";
 import { getPlan } from "@/lib/plans";
 import { currentQuarter, marketKpis } from "@/lib/stats";
@@ -9,7 +9,6 @@ import { IntroSlideshow } from "@/components/layout/intro-slideshow";
 import { OpenSearchButton } from "@/components/layout/open-search-button";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
-import { SectionTitle } from "@/components/ui/misc";
 import { anonymize, canSeeMakers, LISTED_COMPANY } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getT } from "@/i18n/server";
@@ -49,211 +48,200 @@ export default async function HomePage() {
   const tr = await getT();
   const [{ featured, crafts, kpis, portfolioCount, countries, makers }, user] = await Promise.all([getHomeData(), getCurrentUser()]);
   const access = canSeeMakers(user);
+  const plates = featured.slice(0, 6).map((c, i) => {
+    const maker = {
+      ...c,
+      featured: getPlan(c.user.plan).limits.featured,
+      availability: parseList<number>(c.availability),
+      image: c.portfolio[0] ? { key: c.portfolio[0].thumbKey ?? c.portfolio[0].key, width: c.portfolio[0].width, height: c.portfolio[0].height, title: c.portfolio[0].title } : null,
+      gallery: [],
+    };
+    return access ? maker : anonymize(maker, i);
+  });
+  // Grille de planches décalées, comme une page de monographie.
+  const placement = ["md:col-span-5", "md:col-span-3 md:mt-28", "md:col-span-4", "md:col-span-4 md:col-start-2", "md:col-span-3 md:mt-20", "md:col-span-4"];
 
   return (
     <>
-      {/* ── Ouverture : image plein écran, le site commence au défilement ── */}
+      {/* ── Ouverture ──────────────────────────────────────── */}
       <section className="relative -mt-[68px] h-dvh overflow-hidden bg-espresso">
         <IntroSlideshow />
-        <a href="#site" className="absolute inset-x-0 bottom-14 z-10 flex flex-col items-center gap-2 text-paper">
-          <span className="text-[12px] uppercase tracking-[0.22em]">{tr("Search Engine For Know-How")}</span>
-          <ChevronDown className="size-5 animate-bounce" strokeWidth={1.5} aria-hidden />
+        <div className="container-x absolute inset-x-0 bottom-16 z-10 text-paper sm:bottom-10">
+          <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-paper/80">{tr("Search Engine For Know-How")}</p>
+          <h1 className="display mt-3 max-w-3xl text-[3.2rem] sm:text-7xl lg:text-[6.2rem]">{tr("Find the right hands.")}</h1>
+        </div>
+        <a href="#site" aria-label={tr("Explore")} className="absolute bottom-14 right-4 z-10 text-paper sm:right-7 lg:right-10">
+          <ChevronDown className="size-5 animate-bounce" strokeWidth={1.2} aria-hidden />
         </a>
       </section>
 
-      {/* ── Le site ────────────────────────────────────────── */}
-      <section id="site" className="container-x scroll-mt-[68px] pt-8">
-        <div className="relative h-[38vh] min-h-64 overflow-hidden rounded-[2rem] sm:h-[46vh]">
-          <Image src="/images/hero-drape.webp" alt="" fill sizes="100vw" className="object-cover object-[50%_62%]" />
+      {/* ── Manifeste ──────────────────────────────────────── */}
+      <section id="site" className="container-x scroll-mt-[68px] py-20 sm:py-28">
+        <div className="grid gap-8 lg:grid-cols-12">
+          <p className="folio lg:col-span-3">{tr("N° 01 — Manifesto")}</p>
+          <div className="lg:col-span-9">
+            <p className="display text-[2.3rem] sm:text-6xl lg:text-[4.6rem]">{tr("An interior cannot be bought. It is built, by hand, by people you have not met yet.")}</p>
+            <p className="mt-8 max-w-xl text-[16px] leading-relaxed text-ink-soft">{tr("SEFIKH brings together the cabinetmakers, metalworkers, stone carvers and weavers that architects keep to themselves. Describe an idea, show an image: we look for who can make it.")}</p>
+            <OpenSearchButton />
+          </div>
         </div>
-        <div className="mx-auto max-w-3xl pb-16 pt-9 text-center">
-          <p className="eyebrow">{tr("The sourcing platform for interior professionals")}</p>
-          <h1 className="mt-3 text-[1.7rem] font-semibold leading-tight tracking-tight sm:text-4xl">{tr("From inspiration to realization.")}</h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-muted">{tr("Find the right skills, materials and makers to bring your ideas to life.")}</p>
-          <OpenSearchButton />
-          <p className="mt-5 text-[12px] tracking-[0.14em] text-muted uppercase">{tr("Artisans · Workshops · Manufacturers · Materials")}</p>
-        </div>
-      </section>
-
-      {/* ── Chiffres ───────────────────────────────────────── */}
-      <section className="border-y border-line bg-paper">
-        <div className="container-x grid grid-cols-2 divide-line py-8 md:grid-cols-4 md:divide-x">
+        <dl className="mt-20 grid grid-cols-2 border-t border-line lg:grid-cols-4">
           {[
             [tr.number(makers), tr("Curated makers")],
             [tr.number(countries), tr("Countries")],
             [tr.number(portfolioCount), tr("Portfolio pieces")],
-            ["0%", tr("Commission on projects")],
-          ].map(([n, l]) => (
-            <div key={l} className="px-2 py-3 text-center md:px-6">
-              <p className="display text-4xl sm:text-5xl">{n}</p>
-              <p className="mt-1 text-[12px] uppercase tracking-[0.18em] text-muted">{l}</p>
+            ["0 %", tr("Commission on projects")],
+          ].map(([n, l], i) => (
+            <div key={l} className={i % 2 ? "border-l border-line py-5 pl-5" : "py-5 lg:border-l lg:border-line lg:pl-5 lg:first:border-l-0 lg:first:pl-0"}>
+              <dd className="display text-5xl">{n}</dd>
+              <dt className="folio mt-2">{l}</dt>
             </div>
           ))}
-        </div>
+        </dl>
       </section>
 
-      {/* ── Savoir-faire ───────────────────────────────────── */}
-      <section className="container-x py-24">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionTitle eyebrow={tr("Explore by craft")} title={tr("Know-how, organised.")}>
-            {tr("Browse a curated vocabulary of skills, materials and techniques used by the best workshops.")}</SectionTitle>
-          <Link href="/search" className="link-underline inline-flex items-center gap-1.5 text-sm font-medium">
-            {tr("All expertise")}{" "}<ArrowRight className="size-4" />
-          </Link>
-        </div>
-        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:gap-6">
-          {crafts.map((c) => (
-            <Link key={c.label} href={`/search?${c.param}=${encodeURIComponent(c.tag)}`} className="grain group relative aspect-[4/3] overflow-hidden rounded-2xl bg-espresso">
-              {c.image && <Image src={fileUrl(c.image)!} alt="" fill sizes="(min-width:768px) 33vw, 50vw" className="object-cover opacity-80 transition duration-700 group-hover:scale-105 group-hover:opacity-65" />}
-              <div className="absolute inset-0 bg-gradient-to-t from-espresso/85 via-espresso/10 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-paper sm:p-6">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <h3 className="display text-2xl sm:text-3xl">{tr(c.label)}</h3>
-                    <p className="mt-1 hidden text-[13px] text-paper/70 sm:block">{tr(c.copy)}</p>
-                  </div>
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-paper/30 transition group-hover:bg-paper group-hover:text-ink">
-                    <ArrowUpRight className="size-4" />
+      {/* ── Index des métiers ──────────────────────────────── */}
+      <section className="border-t border-line">
+        <div className="container-x py-16 sm:py-20">
+          <div className="grid gap-4 lg:grid-cols-12">
+            <p className="folio lg:col-span-3">{tr("N° 02 — Index of crafts")}</p>
+            <h2 className="display text-4xl sm:text-5xl lg:col-span-9">{tr("Know-how, organised.")}</h2>
+          </div>
+          <ul className="mt-12 border-t border-ink/70">
+            {crafts.map((c, i) => (
+              <li key={c.label} className="border-b border-line">
+                <Link href={`/search?${c.param}=${encodeURIComponent(c.tag)}`} className="group grid items-center gap-x-6 gap-y-1 py-5 lg:grid-cols-12">
+                  <span className="folio lg:col-span-1">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="display text-3xl transition-colors group-hover:text-brass sm:text-[2.7rem] lg:col-span-5">{tr(c.label)}</span>
+                  <span className="text-[14px] text-muted lg:col-span-4">{tr(c.copy)}</span>
+                  <span className="relative hidden h-16 overflow-hidden lg:col-span-2 lg:block">
+                    {c.image && <Image src={fileUrl(c.image)!} alt="" fill sizes="16vw" className="object-cover opacity-0 transition duration-500 group-hover:opacity-100" />}
+                    <ArrowUpRight className="absolute right-0 top-1/2 size-5 -translate-y-1/2 text-muted transition group-hover:opacity-0" strokeWidth={1.2} />
                   </span>
-                </div>
-              </div>
-            </Link>
-          ))}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      {/* ── Makers à la une ────────────────────────────────── */}
-      {featured.length > 0 && (
-        <section className="bg-paper py-24">
-          <div className="container-x">
-            <div className="flex flex-wrap items-end justify-between gap-6">
-              <SectionTitle eyebrow={tr("Featured makers")} title={tr("Ateliers worth knowing.")} />
-              <ButtonLink href="/search" variant="secondary" size="sm">
-                {tr("Explore all makers")}</ButtonLink>
+      {/* ── Planches ───────────────────────────────────────── */}
+      {plates.length > 0 && (
+        <section className="border-t border-line bg-paper">
+          <div className="container-x py-16 sm:py-24">
+            <div className="grid gap-4 lg:grid-cols-12">
+              <p className="folio lg:col-span-3">{tr("N° 03 — Plates")}</p>
+              <h2 className="display text-4xl sm:text-5xl lg:col-span-9">{tr("Ateliers worth knowing.")}</h2>
             </div>
-            <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-6">
-              {featured.map((c, i) => {
-                const maker = {
-                    ...c,
-                    featured: getPlan(c.user.plan).limits.featured,
-                    availability: parseList<number>(c.availability),
-                    image: c.portfolio[0] ? { key: c.portfolio[0].thumbKey ?? c.portfolio[0].key, width: c.portfolio[0].width, height: c.portfolio[0].height, title: c.portfolio[0].title } : null,
-                    gallery: c.portfolio.slice(1).map((p) => p.thumbKey ?? p.key),
-                };
-                return <MakerCard key={i} priority={i < 4} maker={access ? maker : anonymize(maker, i)} />;
-              })}
+            <div className="mt-12 grid grid-cols-2 gap-x-5 gap-y-12 md:grid-cols-12">
+              {plates.map((m, i) => (
+                <MakerCard key={i} priority={i < 3} maker={m} className={placement[i]} />
+              ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* ── Comment ça marche ──────────────────────────────── */}
-      <section className="container-x py-24">
-        <SectionTitle eyebrow={tr("One platform, two ways to use it")} title={tr("Made for those who imagine — and those who make.")} className="mx-auto text-center" />
-        <div className="mt-14 grid gap-6 lg:grid-cols-2">
+      {/* ── Citation ───────────────────────────────────────── */}
+      <section className="relative h-[70vh] min-h-96 overflow-hidden bg-espresso">
+        <Image src="/images/intro/2.webp" alt="" fill sizes="100vw" className="object-cover opacity-80" />
+        <div className="container-x relative flex h-full items-end pb-10 text-paper">
+          <blockquote>
+            <p className="display max-w-3xl text-4xl italic sm:text-6xl">{tr("“The details are not the details. They make the design.”")}</p>
+            <footer className="mt-4 font-mono text-[11px] uppercase tracking-[0.06em] text-paper/80">{tr("Charles Eames")}</footer>
+          </blockquote>
+        </div>
+      </section>
+
+      {/* ── Deux chemins ───────────────────────────────────── */}
+      <section className="container-x py-16 sm:py-24">
+        <p className="folio">{tr("N° 04 — Two paths")}</p>
+        <div className="mt-8 grid border-t border-ink/70 lg:grid-cols-2">
           {[
             {
-              who: tr("For creatives"),
-              title: tr("Identify · Source · Save · Connect"),
+              who: tr("I have an idea, I'm looking for the right hands"),
               steps: [
-                [Sparkles, tr("Describe your project"), tr("Write it in your own words: our engine understands materials, techniques, sectors and places.")],
-                [ScanSearch, tr("Search with a picture"), tr("Drop a moodboard image and discover makers whose portfolio looks alike.")],
-                [MessageSquareText, tr("Talk directly to makers"), tr("Share plans and references in a dedicated project inbox — no middleman, no commission.")],
+                [tr("Describe your project"), tr("Write it in your own words: our engine understands materials, techniques, sectors and places.")],
+                [tr("Search with a picture"), tr("Drop a moodboard image and discover makers whose portfolio looks alike.")],
+                [tr("Talk directly to makers"), tr("Share plans and references in a dedicated project inbox — no middleman, no commission.")],
               ],
-              cta: [tr("Start a project"), "/register"],
+              cta: [tr("Start a project"), "/dashboard/projects/new"],
             },
             {
-              who: tr("For makers"),
-              title: tr("Showcase your craft. Get discovered."),
+              who: tr("I have the know-how, I'm looking for great projects"),
               steps: [
-                [Hammer, tr("Create your business profile"), tr("Skills, materials, production capacities, lead times and areas of operation.")],
-                [ScanSearch, tr("Publish your portfolio"), tr("Every picture you upload becomes searchable by image and by description.")],
-                [MessageSquareText, tr("Receive qualified requests"), tr("Architects and designers reach you with a clear brief, budget and timeline.")],
+                [tr("Create your business profile"), tr("Skills, materials, production capacities, lead times and areas of operation.")],
+                [tr("Publish your portfolio"), tr("Every picture you upload becomes searchable by image and by description.")],
+                [tr("Receive qualified requests"), tr("Architects and designers reach you with a clear brief, budget and timeline.")],
               ],
               cta: [tr("Join as a maker"), "/join"],
             },
           ].map((col, idx) => (
-            <div key={col.who} className={idx === 0 ? "rounded-[1.75rem] border border-line bg-paper p-8 sm:p-10" : "rounded-[1.75rem] border border-line bg-sand p-8 text-paper sm:p-10"}>
-              <p className={idx === 0 ? "eyebrow" : "eyebrow"}>{tr(col.who)}</p>
-              <h3 className="display mt-3 text-3xl sm:text-4xl">{tr(col.title)}</h3>
-              <ol className="mt-8 space-y-6">
-                {col.steps.map(([Icon, t, d], i) => {
-                  const I = Icon as typeof Sparkles;
-                  return (
-                    <li key={t as string} className="flex gap-4">
-                      <span className={idx === 0 ? "flex size-11 shrink-0 items-center justify-center rounded-full bg-ivory text-brass" : "flex size-11 shrink-0 items-center justify-center rounded-full bg-paper/10 text-brass-light"}>
-                        <I className="size-5" strokeWidth={1.5} />
-                      </span>
-                      <div>
-                        <p className="text-[15px] font-semibold">
-                          <span className="mr-2 font-display text-brass">0{i + 1}</span>
-                          {t as string}
-                        </p>
-                        <p className={idx === 0 ? "mt-1 text-sm leading-relaxed text-muted" : "mt-1 text-sm leading-relaxed text-muted"}>{d as string}</p>
-                      </div>
-                    </li>
-                  );
-                })}
+            <div key={col.who} className={idx ? "border-t border-line py-10 lg:border-l lg:border-t-0 lg:pl-12" : "py-10 lg:pr-12"}>
+              <h3 className="display text-4xl sm:text-[2.8rem]">{col.who}</h3>
+              <ol className="mt-8">
+                {col.steps.map(([t, d], i) => (
+                  <li key={t} className="grid grid-cols-[2.5rem_1fr] border-t border-line py-4">
+                    <span className="folio pt-1">{["i", "ii", "iii"][i]}</span>
+                    <div>
+                      <p className="text-[15.5px] font-medium">{t}</p>
+                      <p className="mt-1 text-[14px] leading-relaxed text-muted">{d}</p>
+                    </div>
+                  </li>
+                ))}
               </ol>
-              <ButtonLink href={col.cta[1]!} variant="primary" className="mt-9">
-                {col.cta[0]} <ArrowRight className="size-4" />
+              <ButtonLink href={col.cta[1]!} variant="secondary" className="mt-6">
+                {col.cta[0]} <ArrowRight className="size-3.5" />
               </ButtonLink>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Rejoindre (pros) ───────────────────────────────── */}
-      <section className="container-x pb-24">
-        <div className="grid overflow-hidden rounded-[2rem] bg-sand lg:grid-cols-[1fr_1.1fr]">
-          <div className="grid grid-cols-2 gap-1.5 p-1.5">
-            <div className="relative min-h-72 overflow-hidden rounded-[1.6rem]">
-              <Image src="/images/join-1.webp" alt={tr("A cabinetmaker's hands planing wood")} fill sizes="25vw" className="object-cover" />
-            </div>
-            <div className="relative min-h-72 overflow-hidden rounded-[1.6rem]">
-              <Image src="/images/join-2.webp" alt={tr("Hand carving a stone and timber sculpture")} fill sizes="25vw" className="object-cover" />
-            </div>
+      {/* ── Registre du marché ─────────────────────────────── */}
+      <section className="border-t border-line bg-sand">
+        <div className="container-x grid gap-10 py-16 sm:py-20 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <p className="folio">{tr("N° 05 — Register")}</p>
+            <h2 className="display mt-4 text-4xl sm:text-5xl">{tr("A live view of what the creative industries are looking for.")}</h2>
+            <Link href="/insights" className="link-underline mt-6 inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.05em]">
+              {tr("Trends & Insights")} <ArrowRight className="size-3.5" />
+            </Link>
           </div>
-          <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
-            <p className="eyebrow">{tr("Showcase your craft. Get discovered.")}</p>
-            <h2 className="display mt-4 text-4xl sm:text-5xl">{tr("Create your business profile.")}</h2>
-            <p className="mt-5 max-w-md leading-relaxed text-ink-soft">
-              {tr("Join SEFIKH and connect with architects, designers and creative professionals looking for unique skills, materials and expertise.")}</p>
-            <p className="mt-4 font-display text-xl italic text-muted">{tr("Tell us about your skills, materials and capabilities — it only takes a few minutes.")}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/register?role=pro" size="lg">
-                {tr("Join SEFIKH")}{" "}<ArrowRight className="size-4" />
-              </ButtonLink>
-              <ButtonLink href="/pricing?for=pro" variant="secondary" size="lg">
-                {tr("Business plans")}</ButtonLink>
-            </div>
-          </div>
+          <table className="w-full self-end lg:col-span-6 lg:col-start-7">
+            <tbody>
+              {[
+                [kpis.searches, tr("Searches this quarter")],
+                [kpis.activePros, tr("Active professionals")],
+                [kpis.matches, tr("Qualified matches")],
+                [kpis.connections, tr("Connection requests")],
+              ].map(([n, l]) => (
+                <tr key={l as string} className="border-t border-ink/25">
+                  <td className="folio py-3.5 !text-ink-soft">{l as string}</td>
+                  <td className="display py-2 text-right text-4xl">{tr.number(n as number)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
-      {/* ── Données marché ─────────────────────────────────── */}
-      <section className="bg-sand py-24">
-        <div className="container-x grid items-center gap-14 lg:grid-cols-[1fr_1.2fr]">
-          <div>
-            <p className="eyebrow">{tr("SEFIKH market data")}</p>
-            <h2 className="display mt-4 text-4xl sm:text-5xl">{tr("A live view of what the creative industries are looking for.")}</h2>
-            <p className="mt-5 max-w-md text-muted">{tr("Every search, match and connection feeds an anonymised barometer of demand for craftsmanship.")}</p>
-            <ButtonLink href="/insights" variant="light" className="mt-8">
-              {tr("Trends & Insights")}{" "}<ArrowRight className="size-4" />
+      {/* ── Rejoindre ──────────────────────────────────────── */}
+      <section className="grid lg:grid-cols-2">
+        <div className="relative min-h-[60vh]">
+          <Image src="/images/join-1.webp" alt={tr("A cabinetmaker's hands planing wood")} fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
+        </div>
+        <div className="flex flex-col justify-center bg-paper px-4 py-14 sm:px-10 lg:px-16">
+          <p className="folio">{tr("N° 06 — Workshops")}</p>
+          <h2 className="display mt-4 text-4xl sm:text-[3.4rem]">{tr("Showcase your craft. Get discovered.")}</h2>
+          <p className="mt-5 max-w-md leading-relaxed text-ink-soft">{tr("Join SEFIKH and connect with architects, designers and creative professionals looking for unique skills, materials and expertise.")}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <ButtonLink href="/register?role=pro">
+              {tr("Join SEFIKH")} <ArrowRight className="size-3.5" />
             </ButtonLink>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              [kpis.searches, tr("Searches this quarter")],
-              [kpis.activePros, tr("Active professionals")],
-              [kpis.matches, tr("Qualified matches")],
-              [kpis.connections, tr("Connection requests")],
-            ].map(([n, l]) => (
-              <div key={l as string} className="rounded-3xl border border-line bg-paper p-6 sm:p-8">
-                <p className="display text-5xl sm:text-6xl">{tr.number(n as number)}</p>
-                <p className="mt-2 text-[13px] text-muted">{l as string}</p>
-              </div>
-            ))}
+            <ButtonLink href="/pricing?for=pro" variant="secondary">
+              {tr("Business plans")}
+            </ButtonLink>
           </div>
         </div>
       </section>

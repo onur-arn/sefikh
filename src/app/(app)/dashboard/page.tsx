@@ -267,7 +267,7 @@ async function ProOverview({ user }: { user: CurrentUser }) {
             <span className="display text-3xl">{completion}%</span>
           </div>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-sand">
-            <div className="h-full rounded-full bg-brass transition-all" style={{ width: `${completion}%` }} />
+            <div className="h-full rounded-sm bg-brass transition-all" style={{ width: `${completion}%` }} />
           </div>
           <ul className="mt-5 space-y-2.5">
             {checklist.map((c) => (

@@ -27,7 +27,7 @@ export default async function ArticlePage({ params }: PageProps<"/journal/[slug]
       <p className="eyebrow mt-8">{tr(a.category)} · {tr.date(a.date)} · {tr("{readingTime} min read", { readingTime: a.readingTime })}</p>
       <h1 className="display mt-3 text-5xl sm:text-6xl">{tr(a.title)}</h1>
       <p className="mt-5 font-display text-2xl italic text-muted">{tr(a.excerpt)}</p>
-      <div className="relative mt-10 aspect-[16/10] overflow-hidden rounded-[1.75rem]">
+      <div className="relative mt-10 aspect-[16/10] overflow-hidden">
         <Image src={a.image} alt="" fill priority sizes="(min-width:768px) 768px, 100vw" className="object-cover" />
       </div>
       <div className="mt-10 space-y-5 text-[17px] leading-[1.8] text-ink-soft">

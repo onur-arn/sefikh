@@ -17,7 +17,7 @@ export default async function MessagesPage({ searchParams }: PageProps<"/message
     const tr = await getT();
     return (
       <div className="container-x flex min-h-[60vh] items-center justify-center py-20">
-        <div className="max-w-md rounded-[1.5rem] border border-line bg-paper p-10 text-center">
+        <div className="max-w-md border border-line bg-paper p-10 text-center">
           <h1 className="display text-3xl">{tr("Upgrade to Pro to contact makers.")}</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted">{tr("Names and contact details are reserved for Pro and Studio plans. Choose a plan to discover these makers and write to them.")}</p>
           <ButtonLink href="/pricing" className="mt-6">

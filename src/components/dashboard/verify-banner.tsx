@@ -15,7 +15,7 @@ export function VerifyBanner({ email }: { email: string }) {
         <span className="font-medium">{tr("Confirm your e-mail address.")}</span> {" "}{tr("We sent a link to {email}. Messaging is unlocked once your address is confirmed.", { email })}{" "}{state && <span className={state.error ? " text-danger" : " text-success"}> {state.error ?? tr(state.success)}</span>}
       </p>
       <form action={action}>
-        <button disabled={pending} className="whitespace-nowrap rounded-full border border-ink/30 px-4 py-1.5 text-[13px] font-medium hover:bg-paper disabled:opacity-50">
+        <button disabled={pending} className="whitespace-nowrap rounded-sm border border-ink/30 px-4 py-1.5 text-[13px] font-medium hover:bg-paper disabled:opacity-50">
           {pending ? tr("Sending…") : tr("Resend the link")}
         </button>
       </form>

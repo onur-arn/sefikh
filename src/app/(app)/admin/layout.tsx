@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <p className="eyebrow">{tr("Administration")}</p>
       <nav aria-label={tr("Administration")} className="mt-3 flex flex-wrap gap-2 border-b border-line pb-4">
         {nav.map(([href, label]) => (
-          <Link key={href} href={href} className="rounded-full border border-line px-4 py-1.5 text-[13px] hover:border-ink/40">
+          <Link key={href} href={href} className="rounded-sm border border-line px-4 py-1.5 text-[13px] hover:border-ink/40">
             {label}
           </Link>
         ))}

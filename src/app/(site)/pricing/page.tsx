@@ -32,10 +32,12 @@ export default async function PricingPage({ searchParams }: PageProps<"/pricing"
 
   return (
     <div className="container-x pb-24 pt-14">
-      <header className="mx-auto max-w-2xl text-center">
-        <p className="eyebrow">{tr("Monthly subscription principle")}</p>
-        <h1 className="display mt-4 text-5xl sm:text-6xl">{tr("One platform, two ways to use it.")}</h1>
-        <p className="mt-4 text-muted">{tr("Free to explore, search and discover. Pro and Studio to identify, source, save, collaborate and connect.")}</p>
+      <header className="grid gap-4 lg:grid-cols-12">
+        <p className="folio lg:col-span-3">{tr("Monthly subscription principle")}</p>
+        <div className="lg:col-span-9">
+          <h1 className="display text-5xl sm:text-7xl">{tr("One platform, two ways to use it.")}</h1>
+          <p className="mt-4 max-w-xl text-[16px] text-ink-soft">{tr("Free to explore, search and discover. Pro and Studio to identify, source, save, collaborate and connect.")}</p>
+        </div>
       </header>
 
       {sp.canceled && <p className="mx-auto mt-8 max-w-md rounded-xl bg-sand px-4 py-3 text-center text-sm">{tr("Payment cancelled — you have not been charged.")}</p>}
@@ -43,12 +45,12 @@ export default async function PricingPage({ searchParams }: PageProps<"/pricing"
         <p className="mx-auto mt-8 max-w-md rounded-xl bg-sand px-4 py-3 text-center text-sm">{tr(sp.reason === "limit" ? "You've used your free searches" : "Names and contact details are reserved for Pro and Studio plans. Choose a plan to discover these makers and write to them.")}</p>
       )}
 
-      <div className="mx-auto mt-10 flex w-fit gap-1 rounded-full bg-sand p-1">
+      <div className="mt-12 flex gap-6 border-b border-line">
         {[
           ["CLIENT", tr("For creatives"), "/pricing?for=creative"],
           ["PRO", tr("For makers"), "/pricing?for=pro"],
         ].map(([a, label, href]) => (
-          <Link key={a} href={href!} scroll={false} className={cn("rounded-full px-6 py-2.5 text-sm font-medium", audience === a ? "bg-paper shadow-sm" : "text-muted hover:text-ink")}>
+          <Link key={a} href={href!} scroll={false} className={cn("-mb-px border-b py-3 font-mono text-[12px] uppercase tracking-[0.05em]", audience === a ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink")}>
             {tr(label)}
           </Link>
         ))}
@@ -65,20 +67,20 @@ export default async function PricingPage({ searchParams }: PageProps<"/pricing"
         />
       </div>
 
-      <p className="mt-8 text-center text-[13px] text-muted">
+      <p className="folio mt-8">
         {tr("Prices include VAT. *SEFIKH does not take any commission or percentage on projects conducted through the platform.")}{" "}{simulatedPayments && <span className="mt-1 block text-brass-dark">{tr("Development mode: Stripe is not configured, payments are simulated.")}</span>}
       </p>
 
-      <section className="mx-auto mt-24 max-w-3xl">
-        <h2 className="display text-center text-4xl">{tr("Questions")}</h2>
-        <div className="mt-8 divide-y divide-line border-y border-line">
+      <section className="mt-24 grid gap-8 lg:grid-cols-12">
+        <h2 className="display text-4xl lg:col-span-3">{tr("Questions")}</h2>
+        <div className="divide-y divide-line border-y border-line lg:col-span-9">
           {FAQ.map(([q, a]) => (
             <details key={q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-medium">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-2xl">
                 {tr(q)}
                 <span className="text-xl text-muted transition group-open:rotate-45">+</span>
               </summary>
-              <p className="mt-3 text-sm leading-relaxed text-muted">{tr(a)}</p>
+              <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">{tr(a)}</p>
             </details>
           ))}
         </div>

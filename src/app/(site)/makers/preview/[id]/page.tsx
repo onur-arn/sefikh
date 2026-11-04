@@ -65,16 +65,16 @@ export default async function MakerPreviewPage({ params, searchParams }: PagePro
       <header className="flex flex-col gap-6 border-b border-line pb-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="eyebrow">{tr("Anonymous preview")}</p>
-          <h1 className="display mt-3 flex items-center gap-3 text-5xl">
+          <h1 className="display mt-3 flex items-center gap-3 text-6xl sm:text-7xl">
             {tr(kind)}
             {company.verified && <BadgeCheck className="size-6 text-brass" strokeWidth={1.6} aria-label={tr("Verified maker")} />}
           </h1>
-          <p className="mt-3 flex items-center gap-1.5 text-sm text-muted">
+          <p className="folio mt-3 flex items-center gap-1.5">
             <MapPin className="size-4" strokeWidth={1.6} />
             {[company.city, company.country].filter(Boolean).join(", ")}
           </p>
         </div>
-        <div className="max-w-sm rounded-2xl border border-line bg-sand p-5">
+        <div className="max-w-sm border-l border-brass pl-5">
           <p className="flex items-center gap-2 text-sm font-medium">
             <Lock className="size-4" strokeWidth={1.6} />
             {tr("Name reserved for Pro and Studio plans")}
@@ -104,7 +104,7 @@ export default async function MakerPreviewPage({ params, searchParams }: PagePro
                 <h2 className="display text-2xl">{tr(TAG_KIND_LABEL[k])}</h2>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {byKind(k).map((n) => (
-                    <span key={n} className="rounded-full border border-line px-3 py-1 text-[12.5px]">
+                    <span key={n} className="border border-line px-2.5 py-1 text-[13px]">
                       {tr(n)}
                     </span>
                   ))}
@@ -132,7 +132,7 @@ export default async function MakerPreviewPage({ params, searchParams }: PagePro
               <h2 className="display text-2xl">{tr("Areas of operation")}</h2>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {areas.map((a) => (
-                  <span key={a} className="flex items-center gap-1.5 rounded-full bg-sand px-3 py-1 text-[12.5px]">
+                  <span key={a} className="flex items-center gap-1.5 bg-sand px-2.5 py-1 text-[13px]">
                     <Globe className="size-3.5 text-muted" /> {tr(a)}
                   </span>
                 ))}

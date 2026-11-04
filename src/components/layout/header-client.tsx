@@ -47,7 +47,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
 
   useEffect(() => {
     const onScroll = () => {
-      setPastIntro(window.scrollY > window.innerHeight - 80);
+      setPastIntro(window.scrollY > window.innerHeight - 160);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -89,13 +89,13 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
 
   // Accueil : barre transparente sur l'image d'ouverture, blanche au survol et après le défilement.
   const overlay = pathname === "/" && !pastIntro && !hovered && !mobileOpen && !searchOpen;
-  const navClass = "link-underline text-[13px] text-ink-soft hover:text-ink";
+  const navClass = "link-underline font-mono text-[11.5px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink";
 
   return (
     <header
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={cn("sticky top-0 z-40 transition-colors duration-300", overlay ? "bg-transparent text-paper [&_.text-ink-soft]:!text-paper" : "border-b border-line/80 bg-paper")}
+      className={cn("sticky top-0 z-40 transition-colors duration-300", overlay ? "bg-transparent text-paper [&_.text-ink-soft]:!text-paper" : "border-b border-line bg-ivory")}
     >
       <div className="container-x grid h-[68px] grid-cols-[1fr_auto_1fr] items-center gap-4">
         <nav className="hidden items-center gap-4 lg:flex xl:gap-5" aria-label={tr("Main")}>
@@ -127,7 +127,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
               <AccountMenu user={user} />
             </>
           ) : (
-            <Link href="/login" className="hidden px-1 text-[11.5px] text-ink-soft hover:text-ink sm:inline">
+            <Link href="/login" className="hidden px-1 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink sm:inline">
               {tr("Log in")}
             </Link>
           )}
@@ -138,7 +138,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
       </div>
 
       {searchOpen && (
-        <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-68px)] overflow-y-auto border-y border-line bg-paper py-6 shadow-lg">
+        <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-68px)] overflow-y-auto border-y border-line bg-ivory py-8 shadow-sm">
           <div className="container-x">
             <div className="mx-auto max-w-3xl">
               <SearchPanel compact />
@@ -274,7 +274,7 @@ function AccountMenu({ user }: { user: HeaderUser }) {
   ];
   return (
     <div className="relative" ref={ref}>
-      <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={tr("Account menu")} className="ml-1 flex items-center gap-1.5 rounded-full p-1 pr-2 hover:bg-sand">
+      <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={tr("Account menu")} className="ml-1 flex items-center gap-1.5 rounded-sm p-1 pr-2 hover:bg-sand">
         <Avatar name={user.name} imageKey={user.avatarKey} size={32} />
         <ChevronDown className="hidden size-3.5 text-muted sm:block" />
       </button>

@@ -74,7 +74,7 @@ async function LockedMaker() {
   const tr = await getT();
   return (
     <div className="container-x flex min-h-[60vh] items-center justify-center py-20">
-      <div className="max-w-md rounded-[1.5rem] border border-line bg-paper p-10 text-center">
+      <div className="max-w-md border border-line bg-paper p-10 text-center">
         <Lock className="mx-auto size-7 text-muted" strokeWidth={1.4} />
         <h1 className="display mt-4 text-3xl">{tr("Create an account to continue")}</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted">{tr("Names and contact details are reserved for Pro and Studio plans. Choose a plan to discover these makers and write to them.")}</p>
@@ -148,7 +148,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
 
       {/* ── En-tête ─────────────────────────────── */}
       <section className="container-x pt-10">
-        <nav className="text-[12px] text-muted" aria-label={tr("Breadcrumb")}>
+        <nav className="folio" aria-label={tr("Breadcrumb")}>
           <Link href="/search" className="hover:text-ink">
             {tr("Explore")}</Link>
           / <span className="text-ink-soft">{company.name}</span>
@@ -163,9 +163,9 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
               )}
               {plan.id === "PRO_FOUNDING" && <Badge tone="dark">{tr("Founding Partner")}</Badge>}
             </div>
-            <h1 className="display mt-4 text-5xl sm:text-6xl lg:text-7xl">{company.name}</h1>
+            <h1 className="display mt-4 text-5xl sm:text-7xl lg:text-[6rem]">{company.name}</h1>
             {company.tagline && <AutoTranslate kind="company" id={company.id} field="tagline" text={company.tagline} className="mt-3 font-display text-2xl italic text-muted" />}
-            <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink-soft">
+            <div className="folio mt-5 flex flex-wrap gap-x-6 gap-y-2">
               <span className="flex items-center gap-1.5">
                 <MapPin className="size-4 text-muted" /> {[company.city, company.country].filter(Boolean).join(", ")}
               </span>
@@ -203,12 +203,12 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
       {cover && (
         <section className="container-x mt-10">
           <div className="grid h-[320px] gap-3 sm:h-[440px] sm:grid-cols-[2fr_1fr]">
-            <div className="relative overflow-hidden rounded-[1.75rem] bg-sand">
+            <div className="relative overflow-hidden bg-sand">
               <Image src={fileUrl(cover.key)!} alt={cover.title ?? company.name} fill priority sizes="(min-width:640px) 66vw, 100vw" className="object-cover" />
             </div>
             <div className="hidden grid-rows-2 gap-3 sm:grid">
               {company.portfolio.slice(1, 3).map((p) => (
-                <div key={p.id} className="relative overflow-hidden rounded-[1.75rem] bg-sand">
+                <div key={p.id} className="relative overflow-hidden bg-sand">
                   <Image src={fileUrl(p.thumbKey ?? p.key)!} alt={p.title ?? ""} fill sizes="33vw" className="object-cover" />
                 </div>
               ))}
@@ -229,7 +229,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
                       <p className="mb-2 font-display text-xl">{tr(TAG_KIND_LABEL[k])}</p>
                       <div className="flex flex-wrap gap-1.5">
                         {byKind(k).map((n) => (
-                          <Link key={n} href={`/search?${k === "SKILL" ? "skills" : k === "MATERIAL" ? "materials" : "techniques"}=${encodeURIComponent(n)}`} className="rounded-full border border-line bg-paper px-3 py-1 text-[12.5px] hover:border-ink/40">
+                          <Link key={n} href={`/search?${k === "SKILL" ? "skills" : k === "MATERIAL" ? "materials" : "techniques"}=${encodeURIComponent(n)}`} className="rounded-sm border border-line bg-paper px-3 py-1 text-[12.5px] hover:border-ink/40">
                             {tr(n)}
                           </Link>
                         ))}
@@ -250,7 +250,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
               <p className="text-sm text-muted">{tr("Based in")}{" "}{company.city ?? company.country}{tr(". Delivers and installs in:")}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {areas.map((a) => (
-                  <span key={a} className="flex items-center gap-1.5 rounded-full bg-sand px-3 py-1 text-[12.5px]">
+                  <span key={a} className="flex items-center gap-1.5 rounded-sm bg-sand px-3 py-1 text-[12.5px]">
                     <Globe className="size-3.5 text-muted" /> {tr(a)}
                   </span>
                 ))}
@@ -324,7 +324,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
           {keywords.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-1.5">
               {keywords.map((k) => (
-                <span key={k} className="rounded-full bg-brass-light/60 px-3 py-1 text-[12.5px] text-brass-dark">
+                <span key={k} className="rounded-sm bg-brass-light/60 px-3 py-1 text-[12.5px] text-brass-dark">
                   {tr(k)}
                 </span>
               ))}

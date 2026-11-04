@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, Lock, MapPin } from "lucide-react";
+import { BadgeCheck, Lock } from "lucide-react";
 import { COMPANY_KINDS } from "@/lib/constants";
 import { cn, fileUrl } from "@/lib/utils";
 import { useT } from "@/i18n/client";
@@ -41,71 +41,53 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
     .map(({ m }) => tr.date(new Date(2026, m - 1, 1), { month: "short" }));
   return (
     <Link href={href} className={cn("group block", className)}>
-      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-sand">
+      <div className="relative aspect-[4/5] overflow-hidden bg-sand">
         {maker.image ? (
           <Image
             src={fileUrl(maker.image.key)!}
             alt={maker.anonymous ? "" : (maker.image.title ?? tr("Work by {name}", { name: maker.name }))}
             fill
             priority={priority}
-            sizes="(min-width: 1280px) 22vw, (min-width: 768px) 33vw, 50vw"
-            className="object-cover transition duration-700 ease-out group-hover:scale-[1.04]"
+            sizes="(min-width: 1024px) 33vw, 50vw"
+            className="object-cover transition duration-[900ms] ease-out group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="flex size-full items-center justify-center font-display text-4xl text-muted">{maker.name[0]}</div>
+          <div className="flex size-full items-center justify-center font-display text-5xl text-muted">{maker.name[0]}</div>
         )}
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
-          {maker.match != null && maker.match > 0 ? (
-            <span className="rounded-full bg-paper/90 px-2.5 py-1 text-[11px] font-semibold text-ink backdrop-blur">{tr("{match}% match", { match: maker.match })}</span>
-          ) : (
-            <span />
-          )}
-          {maker.featured && <span className="rounded-full bg-ink/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-paper backdrop-blur">{tr("Featured")}</span>}
-        </div>
-        {maker.gallery && maker.gallery.length > 0 && (
-          <div className="absolute bottom-3 right-3 flex gap-1.5 opacity-0 transition duration-300 group-hover:opacity-100">
-            {maker.gallery.slice(0, 2).map((k) => (
-              <span key={k} className="relative size-11 overflow-hidden rounded-lg border-2 border-paper">
-                <Image src={fileUrl(k)!} alt="" fill sizes="44px" className="object-cover" />
-              </span>
-            ))}
-          </div>
-        )}
+        {maker.match != null && maker.match > 0 && <span className="absolute left-0 top-0 bg-ivory px-2 py-1 font-mono text-[11px]">{tr("{match}% match", { match: maker.match })}</span>}
       </div>
-      <div className="mt-3.5">
-        <div className="flex items-center gap-1.5">
-          <h3 className="truncate text-[15px] font-semibold tracking-tight">{maker.anonymous ? tr(kind) : maker.name}</h3>
-          {maker.anonymous && <Lock className="size-3.5 shrink-0 text-muted" strokeWidth={1.8} aria-label={tr("Name reserved for Pro and Studio plans")} />}
-          {maker.verified && <BadgeCheck className="size-4 shrink-0 text-brass" strokeWidth={1.8} aria-label={tr("Verified maker")} />}
+      <div className="mt-3 border-t border-ink/70 pt-2.5">
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 className="display truncate text-[1.65rem] transition-colors group-hover:text-brass">{maker.anonymous ? tr(kind) : maker.name}</h3>
+          <span className="flex shrink-0 items-center gap-1.5 text-muted">
+            {maker.verified && <BadgeCheck className="size-3.5" strokeWidth={1.4} aria-label={tr("Verified maker")} />}
+            {maker.anonymous && <Lock className="size-3.5" strokeWidth={1.4} aria-label={tr("Name reserved for Pro and Studio plans")} />}
+          </span>
         </div>
-        <p className="mt-0.5 line-clamp-1 text-[13.5px] text-muted">{maker.anonymous ? tr("Name reserved for Pro and Studio plans") : (maker.tagline ?? tr(kind))}</p>
-        <p className="mt-1.5 flex items-center gap-1 text-[12px] text-muted">
-          <MapPin className="size-3.5" strokeWidth={1.6} />
-          {[maker.city, maker.country].filter(Boolean).join(", ") || "—"}
-          {maker.distance != null && maker.distance > 0 && <span className="text-ink-soft"> {" "}{tr("· {distance} km", { distance: maker.distance })}</span>}
-        </p>
-        {(nextMonths.length > 0 || maker.leadTimeMin != null) && (
-          <p className="mt-1 flex items-start gap-1 text-[12px] text-muted">
-            <CalendarClock className="mt-px size-3.5 shrink-0" strokeWidth={1.6} />
-            <span>
-              {[
-                nextMonths.length > 0 ? tr("Available: {months}", { months: nextMonths.join(", ") }) : null,
-                maker.leadTimeMin != null ? tr("{min}–{max} months lead time", { min: maker.leadTimeMin, max: maker.leadTimeMax ?? maker.leadTimeMin }) : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </span>
-          </p>
-        )}
-        {maker.reasons && maker.reasons.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {maker.reasons.map((r) => (
-              <span key={r} className="rounded-full bg-brass-light/70 px-2 py-0.5 text-[11px] font-medium text-brass-dark">
-                {r}
-              </span>
-            ))}
+        {!maker.anonymous && <p className="mt-0.5 line-clamp-1 text-[14px] text-muted">{maker.tagline ?? tr(kind)}</p>}
+        <dl className="folio mt-2 space-y-0.5">
+          <div className="flex gap-2">
+            <dt className="sr-only">{tr("Location")}</dt>
+            <dd>
+              {[maker.city, maker.country].filter(Boolean).join(", ") || "—"}
+              {maker.distance != null && maker.distance > 0 && tr("· {distance} km", { distance: maker.distance })}
+            </dd>
           </div>
-        )}
+          {(nextMonths.length > 0 || maker.leadTimeMin != null) && (
+            <div>
+              <dt className="sr-only">{tr("Availability")}</dt>
+              <dd>
+                {[
+                  nextMonths.length > 0 ? tr("Available: {months}", { months: nextMonths.join(", ") }) : null,
+                  maker.leadTimeMin != null ? tr("{min}–{max} months lead time", { min: maker.leadTimeMin, max: maker.leadTimeMax ?? maker.leadTimeMin }) : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </dd>
+            </div>
+          )}
+          {maker.reasons && maker.reasons.length > 0 && <dd className="text-brass">{maker.reasons.join(" · ")}</dd>}
+        </dl>
       </div>
     </Link>
   );

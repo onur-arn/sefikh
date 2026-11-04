@@ -62,9 +62,9 @@ export default async function InsightsPage({ searchParams }: PageProps<"/insight
               {tr("Traffic from {from} to {to}", { from: tr.date(range.from), to: tr.date(range.to) })}
             </p>
           </div>
-          <div className="flex gap-1 rounded-full bg-sand p-1">
+          <div className="flex gap-1 rounded-sm bg-sand p-1">
             {Object.entries(PERIODS).map(([k, v]) => (
-              <Link key={k} href={`/insights?period=${k}`} scroll={false} className={cn("rounded-full px-4 py-1.5 text-[13px]", period === k ? "bg-paper font-medium shadow-sm" : "text-muted hover:text-ink")}>
+              <Link key={k} href={`/insights?period=${k}`} scroll={false} className={cn("rounded-sm px-4 py-1.5 text-[13px]", period === k ? "bg-paper font-medium shadow-sm" : "text-muted hover:text-ink")}>
                 {tr(v.label)}
               </Link>
             ))}

@@ -8,9 +8,9 @@ import { useT } from "@/i18n/client";
 export function OpenSearchButton() {
   const tr = useT();
   return (
-    <button type="button" onClick={() => window.dispatchEvent(new Event("sefikh:open-search"))} className={buttonClass("primary", "lg", "mt-6")}>
+    <button type="button" onClick={() => window.dispatchEvent(new Event("sefikh:open-search"))} className={buttonClass("primary", "lg", "mt-8")}>
       {tr("Explore expertise")}
-      <ArrowRight className="size-4" />
+      <ArrowRight className="size-3.5" />
     </button>
   );
 }

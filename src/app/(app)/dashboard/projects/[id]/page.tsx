@@ -81,7 +81,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Card className="p-6 sm:p-8">
-          <p className="inline-block rounded-full bg-ink px-4 py-1.5 text-[13px] font-semibold text-paper">{tr("Project recap")}</p>
+          <p className="inline-block rounded-sm bg-ink px-4 py-1.5 text-[13px] font-semibold text-paper">{tr("Project recap")}</p>
           {p.description && <p className="mt-6 leading-relaxed text-ink-soft">{tr(p.description)}</p>}
           <dl className="mt-6 grid gap-x-8 gap-y-3 sm:grid-cols-2">
             {recap
