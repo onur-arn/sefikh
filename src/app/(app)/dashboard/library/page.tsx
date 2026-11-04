@@ -6,6 +6,7 @@ import { getPlan } from "@/lib/plans";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/misc";
+import { parseList } from "@/lib/utils";
 import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,7 +29,7 @@ export default async function LibraryPage() {
         <h1 className="display text-4xl sm:text-5xl">{tr("Supplier library")}</h1>
         <p className="mt-2 text-sm text-muted">{tr("The makers you've saved, ready for your next project.")}</p>
       </header>
-      {!allowed && saved.length === 0 ? (
+      {!allowed ? (
         <EmptyState icon={<Lock className="size-8" strokeWidth={1.3} />} title={tr("Build your supplier library")} action={<ButtonLink href="/pricing">{tr("Upgrade to Pro")}</ButtonLink>}>
           {tr("Save makers you love and find them in one place. The supplier library is included in Pro and Studio.")}</EmptyState>
       ) : saved.length === 0 ? (
@@ -39,7 +40,7 @@ export default async function LibraryPage() {
           {saved.map(({ company: c }) => (
             <MakerCard
               key={c.id}
-              maker={{ ...c, image: c.portfolio[0] ? { key: c.portfolio[0].thumbKey ?? c.portfolio[0].key, width: c.portfolio[0].width, height: c.portfolio[0].height, title: c.portfolio[0].title } : null, gallery: c.portfolio.slice(1).map((p) => p.thumbKey ?? p.key) }}
+              maker={{ ...c, availability: parseList<number>(c.availability), image: c.portfolio[0] ? { key: c.portfolio[0].thumbKey ?? c.portfolio[0].key, width: c.portfolio[0].width, height: c.portfolio[0].height, title: c.portfolio[0].title } : null, gallery: c.portfolio.slice(1).map((p) => p.thumbKey ?? p.key) }}
             />
           ))}
         </div>

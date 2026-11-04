@@ -181,7 +181,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           )}
           {!access && !limited && results.length > 0 && (
             <div className="mt-16 flex flex-col items-center justify-between gap-4 rounded-2xl border border-line bg-paper p-6 sm:flex-row">
-              <p className="text-sm text-ink-soft">{tr("Names and profiles are reserved for Pro and Studio plans. Choose a plan to discover these makers and contact them.")}</p>
+              <p className="text-sm text-ink-soft">{tr("Names and contact details are reserved for Pro and Studio plans. Choose a plan to discover these makers and write to them.")}</p>
               <ButtonLink href="/pricing" size="sm">
                 {tr("See plans")}
               </ButtonLink>

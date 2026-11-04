@@ -4,7 +4,7 @@ import { ArrowRight, ArrowUpRight, Hammer, MessageSquareText, ScanSearch, Sparkl
 import { db } from "@/lib/db";
 import { getPlan } from "@/lib/plans";
 import { currentQuarter, marketKpis } from "@/lib/stats";
-import { fileUrl } from "@/lib/utils";
+import { fileUrl, parseList } from "@/lib/utils";
 import { IntroSlideshow } from "@/components/layout/intro-slideshow";
 import { OpenSearchButton } from "@/components/layout/open-search-button";
 import { MakerCard } from "@/components/makers/maker-card";
@@ -136,6 +136,7 @@ export default async function HomePage() {
                 const maker = {
                     ...c,
                     featured: getPlan(c.user.plan).limits.featured,
+                    availability: parseList<number>(c.availability),
                     image: c.portfolio[0] ? { key: c.portfolio[0].thumbKey ?? c.portfolio[0].key, width: c.portfolio[0].width, height: c.portfolio[0].height, title: c.portfolio[0].title } : null,
                     gallery: c.portfolio.slice(1).map((p) => p.thumbKey ?? p.key),
                 };

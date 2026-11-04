@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, Lock, MapPin } from "lucide-react";
+import { BadgeCheck, CalendarClock, Lock, MapPin } from "lucide-react";
 import { COMPANY_KINDS } from "@/lib/constants";
 import { cn, fileUrl } from "@/lib/utils";
 import { useT } from "@/i18n/client";
@@ -11,6 +11,10 @@ export type MakerCardData = {
   slug: string;
   name: string;
   anonymous?: boolean;
+  previewId?: string;
+  availability?: number[];
+  leadTimeMin?: number | null;
+  leadTimeMax?: number | null;
   tagline: string | null;
   kind: string;
   city: string | null;
@@ -27,7 +31,14 @@ export type MakerCardData = {
 export function MakerCard({ maker, priority, source, className }: { maker: MakerCardData; priority?: boolean; source?: string; className?: string }) {
   const tr = useT();
   const kind = COMPANY_KINDS.find((k) => k.value === maker.kind)?.label ?? maker.kind;
-  const href = maker.anonymous ? "/pricing?reason=locked" : `/makers/${maker.slug}${source ? `?src=${source}` : ""}`;
+  const href = `/makers/${maker.anonymous ? `preview/${maker.previewId}` : maker.slug}${source ? `?src=${source}` : ""}`;
+  // Prochains mois disponibles, à partir du mois en cours.
+  const month = new Date().getMonth() + 1;
+  const nextMonths = (maker.availability ?? [])
+    .map((m) => ({ m, wait: (m - month + 12) % 12 }))
+    .sort((a, b) => a.wait - b.wait)
+    .slice(0, 3)
+    .map(({ m }) => tr.date(new Date(2026, m - 1, 1), { month: "short" }));
   return (
     <Link href={href} className={cn("group block", className)}>
       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-sand">
@@ -73,6 +84,19 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
           {[maker.city, maker.country].filter(Boolean).join(", ") || "—"}
           {maker.distance != null && maker.distance > 0 && <span className="text-ink-soft"> {" "}{tr("· {distance} km", { distance: maker.distance })}</span>}
         </p>
+        {(nextMonths.length > 0 || maker.leadTimeMin != null) && (
+          <p className="mt-1 flex items-start gap-1 text-[12px] text-muted">
+            <CalendarClock className="mt-px size-3.5 shrink-0" strokeWidth={1.6} />
+            <span>
+              {[
+                nextMonths.length > 0 ? tr("Available: {months}", { months: nextMonths.join(", ") }) : null,
+                maker.leadTimeMin != null ? tr("{min}–{max} months lead time", { min: maker.leadTimeMin, max: maker.leadTimeMax ?? maker.leadTimeMin }) : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+          </p>
+        )}
         {maker.reasons && maker.reasons.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {maker.reasons.map((r) => (

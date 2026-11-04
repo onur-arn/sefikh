@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { BadgeCheck, Building2, CalendarClock, Globe, Lock, Mail, MapPin, Phone, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -77,7 +77,7 @@ async function LockedMaker() {
       <div className="max-w-md rounded-[1.5rem] border border-line bg-paper p-10 text-center">
         <Lock className="mx-auto size-7 text-muted" strokeWidth={1.4} />
         <h1 className="display mt-4 text-3xl">{tr("Create an account to continue")}</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted">{tr("Names and profiles are reserved for Pro and Studio plans. Choose a plan to discover these makers and contact them.")}</p>
+        <p className="mt-3 text-sm leading-relaxed text-muted">{tr("Names and contact details are reserved for Pro and Studio plans. Choose a plan to discover these makers and write to them.")}</p>
         <ButtonLink href="/pricing" className="mt-6">
           {tr("Choose your monthly subscription")}
         </ButtonLink>
@@ -95,7 +95,10 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
   const isOwner = !!user && company?.userId === user.id;
   const listed = !!company?.published && hasListedPlan(company.user.plan);
   if (!company || (!listed && !isOwner)) notFound();
-  if (!isOwner && !canSeeMakers(user)) return <LockedMaker />;
+  if (!isOwner && !canSeeMakers(user)) {
+    if (user) redirect(`/makers/preview/${company.id}`);
+    return <LockedMaker />;
+  }
 
   // Statistiques de vues (hors propriétaire), dédoublonnées sur 30 min.
   const vid = await visitorId();
@@ -175,7 +178,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
                 <span className="flex items-center gap-1.5">
                   <Users className="size-4 text-muted" /> {tr("{teamSize} people", { teamSize: company.teamSize })}</span>
               )}
-              {company.leadTimeMin && (
+              {company.leadTimeMin != null && (
                 <span className="flex items-center gap-1.5">
                   <CalendarClock className="size-4 text-muted" /> {" "}{tr("Lead time {leadTimeMin}–", { leadTimeMin: company.leadTimeMin })}{company.leadTimeMax ?? company.leadTimeMin} {" "}{tr("months")}</span>
               )}
@@ -239,7 +242,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
             <AccordionItem title={tr("Project sectors")}>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-1 font-display text-xl">
                 {byKind("SECTOR").map((s) => (
-                  <li key={s}>{s}</li>
+                  <li key={s}>{tr(s)}</li>
                 ))}
               </ul>
             </AccordionItem>
@@ -248,14 +251,14 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {areas.map((a) => (
                   <span key={a} className="flex items-center gap-1.5 rounded-full bg-sand px-3 py-1 text-[12.5px]">
-                    <Globe className="size-3.5 text-muted" /> {a}
+                    <Globe className="size-3.5 text-muted" /> {tr(a)}
                   </span>
                 ))}
               </div>
             </AccordionItem>
             <AccordionItem title={tr("Production capabilities")}>
               {company.productionCapacity && <AutoTranslate kind="company" id={company.id} field="productionCapacity" text={company.productionCapacity} className="text-sm leading-relaxed text-ink-soft" />}
-              {company.leadTimeMin && (
+              {company.leadTimeMin != null && (
                 <p className="mt-3 text-sm">
                   <span className="text-muted">{tr("Lead time:")}</span> {company.leadTimeMin}–{company.leadTimeMax ?? company.leadTimeMin} {" "}{tr("months")}</p>
               )}
@@ -347,7 +350,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
               {similar.map((o) => (
                 <MakerCard
                   key={o.id}
-                  maker={{ ...o, image: o.portfolio[0] ? { key: o.portfolio[0].thumbKey ?? o.portfolio[0].key, width: o.portfolio[0].width, height: o.portfolio[0].height, title: o.portfolio[0].title } : null }}
+                  maker={{ ...o, availability: parseList<number>(o.availability), image: o.portfolio[0] ? { key: o.portfolio[0].thumbKey ?? o.portfolio[0].key, width: o.portfolio[0].width, height: o.portfolio[0].height, title: o.portfolio[0].title } : null }}
                 />
               ))}
             </div>

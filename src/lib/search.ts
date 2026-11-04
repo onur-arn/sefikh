@@ -74,6 +74,9 @@ export type SearchResult = {
   distance: number | null;
   reasons: string[];
   tags: { kind: string; name: string }[];
+  availability: number[];
+  leadTimeMin: number | null;
+  leadTimeMax: number | null;
   image: { key: string; width: number; height: number; title: string | null } | null;
   gallery: string[];
 };
@@ -223,6 +226,9 @@ export async function runSearch(input: SearchInput) {
       distance: distance != null ? Math.round(distance) : null,
       reasons: [...new Set(reasons)].slice(0, 3),
       tags: companyTags,
+      availability: parseList<number>(c.availability),
+      leadTimeMin: c.leadTimeMin,
+      leadTimeMax: c.leadTimeMax,
       image: cover ? { key: cover.thumbKey ?? cover.key, width: cover.width, height: cover.height, title: cover.title } : null,
       gallery: c.portfolio.filter((p) => p.id !== cover?.id).slice(0, 3).map((p) => p.thumbKey ?? p.key),
     });

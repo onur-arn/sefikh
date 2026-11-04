@@ -1,7 +1,7 @@
 import { getPlan, LISTED_PLAN_IDS, type PlanId } from "@/lib/plans";
 
 // Règle d'accès aux makers : sans offre payante, les résultats sont anonymes et le contact impossible.
-// L'anonymisation se fait côté serveur : le nom, le slug et l'identifiant ne sont jamais envoyés au navigateur.
+// L'anonymisation se fait côté serveur : le nom et le slug ne sont jamais envoyés au navigateur.
 
 type Viewer = { role: string; plan: string } | null | undefined;
 
@@ -17,6 +17,10 @@ export function hasListedPlan(plan: string) {
 }
 
 type Anonymizable = {
+  id: string;
+  availability?: number[];
+  leadTimeMin?: number | null;
+  leadTimeMax?: number | null;
   kind: string;
   city: string | null;
   country: string | null;
@@ -33,6 +37,10 @@ export function anonymize(m: Anonymizable, index: number) {
   return {
     id: `anonymous-${index}`,
     anonymous: true as const,
+    previewId: m.id,
+    availability: m.availability,
+    leadTimeMin: m.leadTimeMin,
+    leadTimeMax: m.leadTimeMax,
     slug: "",
     name: "",
     tagline: null,
