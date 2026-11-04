@@ -20,6 +20,8 @@ export const env = {
   stripeWebhookSecret: read("STRIPE_WEBHOOK_SECRET"),
   storageDir: read("STORAGE_DIR", "./storage"),
   clipEnabled: read("CLIP_MODE", "on") !== "off",
+  anthropicApiKey: read("ANTHROPIC_API_KEY"),
+  aiModel: read("AI_MODEL", "claude-opus-5-5"),
 };
 
 if (env.isProd && env.authSecret === "dev-insecure-secret") {

@@ -42,7 +42,7 @@ export const getCurrentUser = cache(async () => {
     where: { tokenHash: sha256(token) },
     include: { user: { include: { company: { select: { id: true, slug: true, name: true, published: true, logoKey: true } }, clientProfile: { select: { studioName: true } } } } },
   });
-  if (!session || session.expiresAt < new Date()) return null;
+  if (!session || session.expiresAt < new Date() || session.user.suspendedAt) return null;
 
   // Prolongation glissante + présence (au plus une écriture par jour / par minute).
   const now = Date.now();
@@ -69,6 +69,12 @@ export async function requireUser(next?: string) {
 export async function requireRole(role: "CLIENT" | "PRO", next?: string) {
   const user = await requireUser(next);
   if (user.role !== role && user.role !== "ADMIN") redirect("/dashboard");
+  return user;
+}
+
+export async function requireAdmin() {
+  const user = await requireUser("/admin");
+  if (user.role !== "ADMIN") redirect("/dashboard");
   return user;
 }
 

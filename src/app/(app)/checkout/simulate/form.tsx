@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { simulateCheckoutAction } from "@/app/(app)/dashboard/billing/actions";
 import type { PlanId, Term } from "@/lib/plans";
+import { useT } from "@/i18n/client";
 
 export function SimulatedCheckoutForm({ plan, term, email }: { plan: PlanId; term: Term; email: string }) {
+  const tr = useT();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
@@ -22,24 +24,23 @@ export function SimulatedCheckoutForm({ plan, term, email }: { plan: PlanId; ter
         });
       }}
     >
-      <Field label="E-mail">
+      <Field label={tr("E-mail")}>
         <Input value={email} readOnly />
       </Field>
-      <Field label="Card number" hint="Use 4242 4242 4242 4242 (success) or 4000 0000 0000 0002 (declined).">
+      <Field label={tr("Card number")} hint={tr("Use 4242 4242 4242 4242 (success) or 4000 0000 0000 0002 (declined).")}>
         <Input name="card" defaultValue="4242 4242 4242 4242" inputMode="numeric" />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Expiry">
+        <Field label={tr("Expiry")}>
           <Input defaultValue="12 / 30" />
         </Field>
-        <Field label="CVC">
+        <Field label={tr("CVC")}>
           <Input defaultValue="123" />
         </Field>
       </div>
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="text-sm text-danger">{tr(error)}</p>}
       <Button type="submit" size="lg" className="w-full" loading={pending}>
-        Subscribe
-      </Button>
+        {tr("Subscribe")}</Button>
     </form>
   );
 }

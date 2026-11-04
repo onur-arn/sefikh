@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 // Garde légère : la validation réelle de la session se fait côté serveur (getCurrentUser).
-const PROTECTED = ["/dashboard", "/messages", "/onboarding", "/upgrade", "/checkout"];
+const PROTECTED = ["/dashboard", "/messages", "/onboarding", "/upgrade", "/checkout", "/admin"];
 const SESSION_COOKIE = "sefikh_session";
 const VISITOR_COOKIE = "sefikh_vid";
 

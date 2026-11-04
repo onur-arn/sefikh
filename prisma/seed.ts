@@ -286,6 +286,7 @@ const MAKERS: Seed[] = [
   },
 ];
 
+const ADMIN_DEMO = { name: "SEFIKH Admin", email: "admin@sefikh.demo" };
 const CLIENT_DEMO = { name: "Sophie Laurent", email: "client@sefikh.demo", studio: "Studio Laurent Architecture", city: "Paris" };
 
 const rand = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]!;
@@ -401,6 +402,9 @@ async function main() {
     companies.push(company);
   }
   console.log();
+
+  console.log("→ Compte administrateur");
+  await db.user.create({ data: { name: ADMIN_DEMO.name, email: ADMIN_DEMO.email, role: "ADMIN", plan: "CLIENT_STUDIO", passwordHash, emailVerifiedAt: now } });
 
   console.log("→ Comptes créatifs");
   const client = await db.user.create({

@@ -3,6 +3,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState, type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 function strength(pw: string) {
   let s = 0;
@@ -16,6 +17,7 @@ function strength(pw: string) {
 const LABELS = ["Too weak", "Weak", "Fair", "Good", "Strong"];
 
 export function PasswordInput({ withStrength, className, ...props }: ComponentProps<"input"> & { withStrength?: boolean }) {
+  const tr = useT();
   const [visible, setVisible] = useState(false);
   const [value, setValue] = useState("");
   const s = strength(value);
@@ -23,7 +25,7 @@ export function PasswordInput({ withStrength, className, ...props }: ComponentPr
     <div>
       <div className="relative">
         <input {...props} type={visible ? "text" : "password"} className={cn("field pr-11", className)} onChange={(e) => setValue(e.target.value)} />
-        <button type="button" onClick={() => setVisible((v) => !v)} className="absolute right-2 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted hover:text-ink" aria-label={visible ? "Hide password" : "Show password"}>
+        <button type="button" onClick={() => setVisible((v) => !v)} className="absolute right-2 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted hover:text-ink" aria-label={visible ? tr("Hide password") : tr("Show password")}>
           {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
       </div>

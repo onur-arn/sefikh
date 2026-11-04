@@ -1,7 +1,8 @@
 "use client";
 
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { cn, formatNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 // Séries uniques (une seule échelle par graphique) : laiton sur papier ivoire, axes et grilles discrets.
 const SERIES = "#a8794a";
@@ -9,12 +10,13 @@ const AXIS = "#776c61";
 const GRID = "#e2d8ca";
 
 function ChartTooltip({ active, payload, label, unit }: { active?: boolean; payload?: { value: number }[]; label?: string; unit: string }) {
+  const tr = useT();
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-line bg-paper px-3 py-2 text-[12px] shadow-md">
       <p className="text-muted">{label}</p>
       <p className="mt-0.5 font-semibold text-ink">
-        {formatNumber(payload[0]!.value)} {unit}
+        {tr.number(payload[0]!.value)} {unit}
       </p>
     </div>
   );
@@ -22,8 +24,9 @@ function ChartTooltip({ active, payload, label, unit }: { active?: boolean; payl
 
 /** Évolution temporelle d'une seule mesure. */
 export function TrendChart({ data, dataKey, unit, height = 240 }: { data: Record<string, string | number>[]; dataKey: string; unit: string; height?: number }) {
+  const tr = useT();
   return (
-    <div style={{ height }} role="img" aria-label={`${unit} over time`}>
+    <div style={{ height }} role="img" aria-label={tr("{unit} over time", { unit })}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
           <defs>
@@ -45,8 +48,9 @@ export function TrendChart({ data, dataKey, unit, height = 240 }: { data: Record
 
 /** Barres verticales d'une seule mesure (ex. vues quotidiennes). */
 export function ColumnChart({ data, dataKey, unit, height = 220 }: { data: Record<string, string | number>[]; dataKey: string; unit: string; height?: number }) {
+  const tr = useT();
   return (
-    <div style={{ height }} role="img" aria-label={`${unit} per day`}>
+    <div style={{ height }} role="img" aria-label={tr("{unit} per day", { unit })}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }} barCategoryGap={2}>
           <CartesianGrid vertical={false} stroke={GRID} strokeDasharray="2 4" />
@@ -62,15 +66,16 @@ export function ColumnChart({ data, dataKey, unit, height = 220 }: { data: Recor
 
 /** Classement horizontal en HTML (lisible, accessible, valeurs en texte). */
 export function BarList({ items, unit = "searches", dark }: { items: { name: string; count: number }[]; unit?: string; dark?: boolean }) {
+  const tr = useT();
   const max = Math.max(1, ...items.map((i) => i.count));
-  if (!items.length) return <p className={cn("text-sm", dark ? "text-paper/50" : "text-muted")}>Not enough data yet.</p>;
+  if (!items.length) return <p className={cn("text-sm", dark ? "text-paper/50" : "text-muted")}>{tr("Not enough data yet.")}</p>;
   return (
     <ul className="space-y-2.5">
       {items.map((i) => (
-        <li key={i.name} title={`${i.name}: ${formatNumber(i.count)} ${unit}`}>
+        <li key={i.name} title={`${tr(i.name)}: ${tr.number(i.count)} ${unit}`}>
           <div className="flex items-baseline justify-between text-[13px]">
-            <span>{i.name}</span>
-            <span className={dark ? "tabular-nums text-paper/60" : "tabular-nums text-muted"}>{formatNumber(i.count)}</span>
+            <span>{tr(i.name)}</span>
+            <span className={dark ? "tabular-nums text-paper/60" : "tabular-nums text-muted"}>{tr.number(i.count)}</span>
           </div>
           <div className={cn("mt-1 h-2 overflow-hidden rounded-full", dark ? "bg-paper/10" : "bg-sand")}>
             <div className={cn("h-full rounded-full", dark ? "bg-brass-light" : "bg-brass")} style={{ width: `${(i.count / max) * 100}%` }} />

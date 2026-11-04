@@ -6,7 +6,9 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { Archive, ArchiveRestore, ArrowLeft, Camera, Check, CheckCheck, ExternalLink, FileText, FolderOpen, Inbox as InboxIcon, Info, Mail, MapPin, Paperclip, Phone, Search, Send, X } from "lucide-react";
 import { Avatar } from "@/components/ui/misc";
 import { useRealtime, useRealtimeConnected } from "@/lib/realtime-client";
-import { cn, formatBytes, formatRelative } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
+import { TranslateButton, useAutoTranslate } from "@/components/translate/auto-translate";
 
 type ListItem = {
   id: string;
@@ -38,6 +40,7 @@ const FILTERS = [
 ] as const;
 
 export function Inbox({ initialId, me }: { initialId: string | null; me: { id: string; name: string; verified: boolean; role: string } }) {
+  const tr = useT();
   const router = useRouter();
   const [tab, setTab] = useState<"inbox" | "files">("inbox");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
@@ -79,7 +82,7 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
       <div className="flex items-center gap-6 border-b border-line px-4 sm:px-6">
         {(["inbox", "files"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={cn("relative py-3.5 text-[13.5px] font-medium capitalize", tab === t ? "text-ink" : "text-muted hover:text-ink")}>
-            {t === "inbox" ? "Inbox" : "Shared files"}
+            {t === "inbox" ? tr("Inbox") : tr("Shared files")}
             {tab === t && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-ink" />}
           </button>
         ))}
@@ -90,16 +93,16 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
       ) : (
         <div className="grid min-h-0 flex-1 lg:grid-cols-[340px_1fr] xl:grid-cols-[340px_1fr_300px]">
           {/* Liste */}
-          <section className={cn("flex min-h-0 flex-col border-r border-line", activeId && "hidden lg:flex")} aria-label="Conversations">
+          <section className={cn("flex min-h-0 flex-col border-r border-line", activeId && "hidden lg:flex")} aria-label={tr("Conversations")}>
             <div className="space-y-3 border-b border-line p-4">
               <label className="flex items-center gap-2 rounded-full bg-paper px-3.5 py-2 ring-1 ring-line focus-within:ring-ink">
                 <Search className="size-4 text-muted" />
-                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search conversations" className="w-full bg-transparent text-sm focus:outline-none" aria-label="Search conversations" />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={tr("Search conversations")} className="w-full bg-transparent text-sm focus:outline-none" aria-label={tr("Search conversations")} />
               </label>
               <div className="flex gap-1">
                 {FILTERS.map((f) => (
                   <button key={f.id} onClick={() => setFilter(f.id)} className={cn("rounded-full px-3 py-1 text-[12.5px]", filter === f.id ? "bg-ink text-paper" : "text-muted hover:bg-sand hover:text-ink")}>
-                    {f.label}
+                    {tr(f.label)}
                   </button>
                 ))}
               </div>
@@ -118,11 +121,10 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
               ) : items.length === 0 ? (
                 <li className="px-6 py-16 text-center text-sm text-muted">
                   <InboxIcon className="mx-auto mb-3 size-8 text-line" strokeWidth={1.3} />
-                  {filter === "all" ? (me.role === "PRO" ? "Requests from creatives will appear here." : "Start a conversation from a maker's profile.") : "Nothing here."}
+                  {filter === "all" ? (me.role === "PRO" ? tr("Requests from creatives will appear here.") : tr("Start a conversation from a maker's profile.")) : tr("Nothing here.")}
                   {filter === "all" && me.role !== "PRO" && (
                     <Link href="/search" className="mt-3 block font-medium text-ink underline">
-                      Explore makers
-                    </Link>
+                      {tr("Explore makers")}</Link>
                   )}
                 </li>
               ) : (
@@ -133,15 +135,15 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
                       <span className="min-w-0 flex-1">
                         <span className="flex items-baseline justify-between gap-2">
                           <span className={cn("truncate text-[14px]", c.unread ? "font-bold" : "font-semibold")}>{c.other.name}</span>
-                          <span className="shrink-0 text-[11px] text-muted">{formatRelative(c.lastMessageAt)}</span>
+                          <span className="shrink-0 text-[11px] text-muted">{tr.relative(c.lastMessageAt)}</span>
                         </span>
-                        {c.project && <span className="block truncate text-[12px] text-brass-dark">{c.project.title}</span>}
+                        {c.project && <span className="block truncate text-[12px] text-brass-dark">{tr(c.project.title)}</span>}
                         <span className={cn("mt-0.5 flex items-center gap-1.5 text-[13px]", c.unread ? "text-ink" : "text-muted")}>
                           <span className="truncate">
-                            {c.lastMessage?.mine && "You: "}
-                            {c.lastMessage?.body}
+                            {c.lastMessage?.mine && tr("You: ")}
+                            {tr(c.lastMessage?.body)}
                           </span>
-                          {c.unread && <span className="ml-auto size-2 shrink-0 rounded-full bg-brass" aria-label="Unread" />}
+                          {c.unread && <span className="ml-auto size-2 shrink-0 rounded-full bg-brass" aria-label={tr("Unread")} />}
                         </span>
                       </span>
                     </button>
@@ -168,7 +170,7 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
           ) : (
             <div className="hidden flex-col items-center justify-center text-center text-muted lg:flex xl:col-span-2">
               <InboxIcon className="size-10 text-line" strokeWidth={1.2} />
-              <p className="mt-3 text-sm">Select a conversation</p>
+              <p className="mt-3 text-sm">{tr("Select a conversation")}</p>
             </div>
           )}
         </div>
@@ -178,6 +180,7 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
 }
 
 function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { id: string; me: { id: string; verified: boolean }; showDetails: boolean; onToggleDetails: () => void; onBack: () => void; onChanged: () => void }) {
+  const tr = useT();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [otherReadAt, setOtherReadAt] = useState<string | null>(null);
@@ -339,25 +342,25 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
 
   return (
     <>
-      <section className="flex min-h-0 flex-col" aria-label="Conversation">
+      <section className="flex min-h-0 flex-col" aria-label={tr("Conversation")}>
         <header className="flex items-center gap-3 border-b border-line px-4 py-3 sm:px-6">
-          <button onClick={onBack} className="-ml-2 flex size-9 items-center justify-center rounded-full hover:bg-sand lg:hidden" aria-label="Back">
+          <button onClick={onBack} className="-ml-2 flex size-9 items-center justify-center rounded-full hover:bg-sand lg:hidden" aria-label={tr("Back")}>
             <ArrowLeft className="size-5" />
           </button>
           {detail ? (
             <>
               <div className="relative">
                 <Avatar name={detail.other.name} imageKey={detail.other.avatarKey} size={40} />
-                {online && <span className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-ivory bg-success" title="Online" aria-label="Online" />}
+                {online && <span className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-ivory bg-success" title={tr("Online")} aria-label={tr("Online")} />}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14.5px] font-semibold">{detail.other.name}</p>
-                <p className="truncate text-[12px] text-muted">{typing ? <span className="text-brass-dark">typing…</span> : online ? <>Online · {detail.project?.title ?? detail.subject}</> : detail.project?.title ?? detail.subject}</p>
+                <p className="truncate text-[12px] text-muted">{typing ? <span className="text-brass-dark">{tr("typing…")}</span> : online ? <>{tr("Online ·")}{" "}{detail.project?.title ?? detail.subject}</> : detail.project?.title ?? detail.subject}</p>
               </div>
-              <button onClick={toggleArchive} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" title={detail.archived ? "Unarchive" : "Archive"} aria-label={detail.archived ? "Unarchive" : "Archive"}>
+              <button onClick={toggleArchive} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" title={detail.archived ? tr("Unarchive") : tr("Archive")} aria-label={detail.archived ? tr("Unarchive") : tr("Archive")}>
                 {detail.archived ? <ArchiveRestore className="size-[18px]" /> : <Archive className="size-[18px]" />}
               </button>
-              <button onClick={onToggleDetails} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink xl:hidden" aria-label="Details">
+              <button onClick={onToggleDetails} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink xl:hidden" aria-label={tr("Details")}>
                 <Info className="size-[18px]" />
               </button>
             </>
@@ -382,7 +385,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
               <div key={m.id}>
                 {newDay && (
                   <p className="my-5 text-center text-[11px] uppercase tracking-[0.15em] text-muted">
-                    {new Date(m.createdAt).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+                    {tr.date(m.createdAt, { weekday: "long", day: "numeric", month: "long" })}
                   </p>
                 )}
                 <div className={cn("flex", m.mine ? "justify-end" : "justify-start", !grouped && "mt-3")}>
@@ -394,10 +397,10 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
                         ))}
                       </div>
                     )}
-                    {m.body && <div className={cn("whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed", m.mine ? "rounded-br-md bg-ink text-paper" : "rounded-bl-md border border-line bg-paper")}>{m.body}</div>}
+                    {m.body && <MessageBody message={m} />}
                     <p className={cn("mt-1 flex items-center gap-1 text-[10.5px] text-muted", m.mine && "justify-end")}>
-                      {m.failed ? <span className="text-danger">Not sent</span> : new Date(m.createdAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-                      {m.mine && m.id === lastMine?.id && (otherReadAt && otherReadAt >= m.createdAt ? <CheckCheck className="size-3.5 text-brass" aria-label="Read" /> : <Check className="size-3.5" aria-label="Sent" />)}
+                      {m.failed ? <span className="text-danger">{tr("Not sent")}</span> : tr.date(m.createdAt, { hour: "2-digit", minute: "2-digit" })}
+                      {m.mine && m.id === lastMine?.id && (otherReadAt && otherReadAt >= m.createdAt ? <CheckCheck className="size-3.5 text-brass" aria-label={tr("Read")} /> : <Check className="size-3.5" aria-label={tr("Sent")} />)}
                     </p>
                   </div>
                 </div>
@@ -406,7 +409,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
           })}
           {typing && detail && (
             <div className="mt-3 flex justify-start" aria-live="polite">
-              <div className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-line bg-paper px-4 py-3" aria-label={`${detail.other.name} is typing`}>
+              <div className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-line bg-paper px-4 py-3" aria-label={tr("{name} is typing", { name: detail.other.name })}>
                 {[0, 150, 300].map((delay) => (
                   <span key={delay} className="size-1.5 animate-bounce rounded-full bg-muted" style={{ animationDelay: `${delay}ms` }} />
                 ))}
@@ -415,15 +418,14 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
           )}
         </div>
 
-        {error && <p className="px-6 pb-2 text-sm text-danger">{error}</p>}
+        {error && <p className="px-6 pb-2 text-sm text-danger">{tr(error)}</p>}
         {me.verified ? (
           <Composer onSend={send} onTyping={notifyTyping} />
         ) : (
           <p className="border-t border-line p-4 text-center text-sm text-muted">
-            Confirm your e-mail address to reply.{" "}
+            {tr("Confirm your e-mail address to reply.")}
             <Link href="/dashboard" className="font-medium text-ink underline">
-              Resend the link
-            </Link>
+              {tr("Resend the link")}</Link>
           </p>
         )}
       </section>
@@ -431,10 +433,10 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
       {/* Détails */}
       {detail && (
         <aside className={cn("scrollbar-thin min-h-0 overflow-y-auto border-l border-line bg-paper/50 p-6", showDetails ? "fixed inset-y-0 right-0 z-40 w-[min(90vw,320px)] bg-ivory shadow-2xl xl:static xl:w-auto xl:shadow-none" : "hidden xl:block")}>
-          <button onClick={onToggleDetails} className="mb-4 ml-auto flex size-8 items-center justify-center rounded-full hover:bg-sand xl:hidden" aria-label="Close details">
+          <button onClick={onToggleDetails} className="mb-4 ml-auto flex size-8 items-center justify-center rounded-full hover:bg-sand xl:hidden" aria-label={tr("Close details")}>
             <X className="size-4" />
           </button>
-          <p className="text-sm font-semibold">Details</p>
+          <p className="text-sm font-semibold">{tr("Details")}</p>
           <div className="mt-5 flex flex-col items-center text-center">
             <Avatar name={detail.other.name} imageKey={detail.other.avatarKey} size={72} />
             <p className="mt-3 font-semibold">{detail.other.name}</p>
@@ -442,7 +444,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
             <p className="mt-0.5 text-[12px] text-muted">{detail.other.role.replace("_", " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}</p>
             {detail.other.href && (
               <Link href={detail.other.href} className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-brass-dark hover:underline">
-                View profile <ExternalLink className="size-3.5" />
+                {tr("View profile")}{" "}<ExternalLink className="size-3.5" />
               </Link>
             )}
           </div>
@@ -463,10 +465,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
               detail.side === "client" && (
                 <li className="text-[12px] text-muted">
                   <Link href="/pricing" className="underline">
-                    Upgrade to Pro
-                  </Link>{" "}
-                  to see direct contact details.
-                </li>
+                    {tr("Upgrade to Pro")}</Link>{" "}{tr("to see direct contact details.")}</li>
               )
             )}
             {detail.other.phone && (
@@ -477,24 +476,23 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
           </ul>
           {detail.project && (
             <div className="mt-6 border-t border-line pt-5">
-              <p className="eyebrow">Project</p>
-              <p className="mt-2 text-[14px] font-medium">{detail.project.title}</p>
+              <p className="eyebrow">{tr("Project")}</p>
+              <p className="mt-2 text-[14px] font-medium">{tr(detail.project.title)}</p>
               <dl className="mt-2 space-y-1 text-[12.5px] text-muted">
                 {detail.project.city && <dd>{[detail.project.city, detail.project.country].filter(Boolean).join(", ")}</dd>}
-                {detail.project.timeline && <dd>Timeline: {detail.project.timeline}</dd>}
-                {detail.project.budget && <dd>Budget: {detail.project.budget}</dd>}
+                {detail.project.timeline && <dd>{tr("Timeline: {timeline}", { timeline: detail.project.timeline })}</dd>}
+                {detail.project.budget && <dd>{tr("Budget: {budget}", { budget: detail.project.budget })}</dd>}
               </dl>
               {detail.side === "client" && (
                 <Link href={`/dashboard/projects/${detail.project.id}`} className="mt-2 inline-block text-[12.5px] font-medium underline">
-                  Open project
-                </Link>
+                  {tr("Open project")}</Link>
               )}
             </div>
           )}
           <div className="mt-6 border-t border-line pt-5">
-            <p className="eyebrow mb-3">Shared files ({files.length})</p>
+            <p className="eyebrow mb-3">{tr("Shared files ({length})", { length: files.length })}</p>
             {files.length === 0 ? (
-              <p className="text-[12.5px] text-muted">Plans, moodboards and quotes you exchange will appear here.</p>
+              <p className="text-[12.5px] text-muted">{tr("Plans, moodboards and quotes you exchange will appear here.")}</p>
             ) : (
               <ul className="space-y-2">
                 {files.map((f) => (
@@ -502,7 +500,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
                     <a href={f.url} target="_blank" rel="noopener" className="flex items-center gap-2 text-[12.5px] hover:underline">
                       <FileText className="size-4 shrink-0 text-muted" />
                       <span className="truncate">{f.name}</span>
-                      <span className="ml-auto shrink-0 text-muted">{formatBytes(f.size)}</span>
+                      <span className="ml-auto shrink-0 text-muted">{tr.bytes(f.size)}</span>
                     </a>
                   </li>
                 ))}
@@ -516,6 +514,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
 }
 
 function AttachmentView({ a }: { a: AttachmentT }) {
+  const tr = useT();
   if (a.mime.startsWith("image/")) {
     return (
       <a href={a.url} target="_blank" rel="noopener" className="block overflow-hidden rounded-xl border border-line">
@@ -529,13 +528,14 @@ function AttachmentView({ a }: { a: AttachmentT }) {
       <FileText className="size-5 text-brass" strokeWidth={1.5} />
       <span>
         <span className="block max-w-[180px] truncate font-medium">{a.name}</span>
-        <span className="text-[11px] text-muted">{formatBytes(a.size)}</span>
+        <span className="text-[11px] text-muted">{tr.bytes(a.size)}</span>
       </span>
     </a>
   );
 }
 
 function Composer({ onSend, onTyping }: { onSend: (body: string, files: File[]) => Promise<boolean>; onTyping: () => void }) {
+  const tr = useT();
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
@@ -571,7 +571,7 @@ function Composer({ onSend, onTyping }: { onSend: (body: string, files: File[]) 
             {files.map((f, i) => (
               <span key={i} className="flex items-center gap-1.5 rounded-full bg-sand py-1 pl-3 pr-1.5 text-[12px]">
                 <span className="max-w-40 truncate">{f.name}</span>
-                <button onClick={() => setFiles((x) => x.filter((_, j) => j !== i))} className="rounded-full p-0.5 hover:bg-line" aria-label={`Remove ${f.name}`}>
+                <button onClick={() => setFiles((x) => x.filter((_, j) => j !== i))} className="rounded-full p-0.5 hover:bg-line" aria-label={tr("Remove {name}", { name: f.name })}>
                   <X className="size-3" />
                 </button>
               </span>
@@ -592,24 +592,23 @@ function Composer({ onSend, onTyping }: { onSend: (body: string, files: File[]) 
             }
           }}
           rows={1}
-          placeholder="Your message"
-          aria-label="Your message"
+          placeholder={tr("Your message")}
+          aria-label={tr("Your message")}
           className="block w-full resize-none bg-transparent px-4 pt-3 text-[14px] focus:outline-none"
         />
         <div className="flex items-center gap-1 px-2 pb-2">
-          <button onClick={() => fileRef.current?.click()} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" aria-label="Attach a PDF or image" title="Attach a file (PDF, images)">
+          <button onClick={() => fileRef.current?.click()} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" aria-label={tr("Attach a PDF or image")} title={tr("Attach a file (PDF, images)")}>
             <Paperclip className="size-[18px]" />
           </button>
-          <button onClick={() => imageRef.current?.click()} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" aria-label="Add photos" title="Add photos">
+          <button onClick={() => imageRef.current?.click()} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" aria-label={tr("Add photos")} title={tr("Add photos")}>
             <Camera className="size-[18px]" />
           </button>
           <input ref={fileRef} type="file" multiple accept="application/pdf,image/*" className="hidden" onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
           <input ref={imageRef} type="file" multiple accept="image/*" capture="environment" className="hidden" onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
-          <span className="ml-2 hidden text-[11px] text-muted sm:inline">Enter to send · Shift + Enter for a new line</span>
-          <button onClick={submit} disabled={sending || (!body.trim() && !files.length)} className="ml-auto flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-[13px] font-medium text-paper transition hover:bg-ink-soft disabled:opacity-40" aria-label="Send">
+          <span className="ml-2 hidden text-[11px] text-muted sm:inline">{tr("Enter to send · Shift + Enter for a new line")}</span>
+          <button onClick={submit} disabled={sending || (!body.trim() && !files.length)} className="ml-auto flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-[13px] font-medium text-paper transition hover:bg-ink-soft disabled:opacity-40" aria-label={tr("Send")}>
             {sending ? <span className="size-3.5 animate-spin rounded-full border-2 border-paper border-r-transparent" /> : <Send className="size-3.5" />}
-            Send
-          </button>
+            {tr("Send")}</button>
         </div>
       </div>
     </div>
@@ -617,6 +616,7 @@ function Composer({ onSend, onTyping }: { onSend: (body: string, files: File[]) 
 }
 
 function FilesView({ onOpen }: { onOpen: (conversationId: string) => void }) {
+  const tr = useT();
   const [files, setFiles] = useState<FileRow[] | null>(null);
   useEffect(() => {
     fetch("/api/conversations/files", { cache: "no-store" })
@@ -626,15 +626,14 @@ function FilesView({ onOpen }: { onOpen: (conversationId: string) => void }) {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4 sm:p-8">
       <div className="mx-auto max-w-4xl">
-        <h1 className="display text-3xl">Shared files</h1>
-        <p className="mt-1 text-sm text-muted">Every plan, moodboard and quote exchanged in your conversations, in one place.</p>
+        <h1 className="display text-3xl">{tr("Shared files")}</h1>
+        <p className="mt-1 text-sm text-muted">{tr("Every plan, moodboard and quote exchanged in your conversations, in one place.")}</p>
         {files === null ? (
-          <p className="mt-10 text-sm text-muted">Loading…</p>
+          <p className="mt-10 text-sm text-muted">{tr("Loading…")}</p>
         ) : files.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-dashed border-line p-12 text-center text-sm text-muted">
             <FolderOpen className="mx-auto mb-3 size-8 text-line" />
-            No files yet.
-          </div>
+            {tr("No files yet.")}</div>
         ) : (
           <ul className="mt-8 divide-y divide-line rounded-2xl border border-line bg-paper">
             {files.map((f) => (
@@ -652,17 +651,27 @@ function FilesView({ onOpen }: { onOpen: (conversationId: string) => void }) {
                     {f.name}
                   </a>
                   <p className="text-[12px] text-muted">
-                    With {f.with} · {formatBytes(f.size)} · {formatRelative(f.createdAt)}
+                    With {f.with} · {tr.bytes(f.size)} · {tr.relative(f.createdAt)}
                   </p>
                 </div>
                 <button onClick={() => onOpen(f.conversationId)} className="text-[12.5px] font-medium text-brass-dark hover:underline">
-                  Open conversation
-                </button>
+                  {tr("Open conversation")}</button>
               </li>
             ))}
           </ul>
         )}
       </div>
     </div>
+  );
+}
+
+/** Bulle de message ; les messages reçus peuvent être traduits vers la langue de l'utilisateur. */
+function MessageBody({ message }: { message: Msg }) {
+  const state = useAutoTranslate("message", message.id);
+  return (
+    <>
+      <div className={cn("whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed", message.mine ? "rounded-br-md bg-ink text-paper" : "rounded-bl-md border border-line bg-paper")}>{state.translated?.body ?? message.body}</div>
+      {!message.mine && <TranslateButton state={state} className="mt-1 text-muted" />}
+    </>
   );
 }

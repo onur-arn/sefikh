@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { getLocale } from "@/i18n/server";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { sendEmail } from "@/lib/mail";
@@ -33,6 +34,6 @@ export async function contactAction(_: FormState, formData: FormData): Promise<F
   const { name, email, topic, message } = parsed.data;
   await db.contactRequest.create({ data: { name, email, topic, message } });
   await sendEmail({ to: env.contactInbox, replyTo: email, ...contactTemplate({ name, email, topic, message }) });
-  await sendEmail({ to: email, ...contactAckTemplate(name) });
+  await sendEmail({ to: email, ...contactAckTemplate(name, await getLocale()) });
   return { success: "Thank you! Your message has been sent — we'll reply within 2 business days." };
 }

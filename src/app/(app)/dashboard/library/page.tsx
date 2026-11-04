@@ -6,10 +6,15 @@ import { getPlan } from "@/lib/plans";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/misc";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Supplier library", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Supplier library"), robots: { index: false } };
+}
 
 export default async function LibraryPage() {
+  const tr = await getT();
   const user = await requireUser("/dashboard/library");
   const allowed = getPlan(user.plan).limits.savedLibrary;
   const saved = await db.savedCompany.findMany({
@@ -20,17 +25,15 @@ export default async function LibraryPage() {
   return (
     <>
       <header className="mb-8">
-        <h1 className="display text-4xl sm:text-5xl">Supplier library</h1>
-        <p className="mt-2 text-sm text-muted">The makers you&apos;ve saved, ready for your next project.</p>
+        <h1 className="display text-4xl sm:text-5xl">{tr("Supplier library")}</h1>
+        <p className="mt-2 text-sm text-muted">{tr("The makers you've saved, ready for your next project.")}</p>
       </header>
       {!allowed && saved.length === 0 ? (
-        <EmptyState icon={<Lock className="size-8" strokeWidth={1.3} />} title="Build your supplier library" action={<ButtonLink href="/pricing">Upgrade to Pro</ButtonLink>}>
-          Save makers you love and find them in one place. The supplier library is included in Pro and Studio.
-        </EmptyState>
+        <EmptyState icon={<Lock className="size-8" strokeWidth={1.3} />} title={tr("Build your supplier library")} action={<ButtonLink href="/pricing">{tr("Upgrade to Pro")}</ButtonLink>}>
+          {tr("Save makers you love and find them in one place. The supplier library is included in Pro and Studio.")}</EmptyState>
       ) : saved.length === 0 ? (
-        <EmptyState icon={<Bookmark className="size-8" strokeWidth={1.3} />} title="No saved maker yet" action={<ButtonLink href="/search">Explore makers</ButtonLink>}>
-          Use the “Save” button on a maker&apos;s profile to add it here.
-        </EmptyState>
+        <EmptyState icon={<Bookmark className="size-8" strokeWidth={1.3} />} title={tr("No saved maker yet")} action={<ButtonLink href="/search">{tr("Explore makers")}</ButtonLink>}>
+          {tr("Use the “Save” button on a maker's profile to add it here.")}</EmptyState>
       ) : (
         <div className="grid grid-cols-2 gap-x-4 gap-y-10 xl:grid-cols-4">
           {saved.map(({ company: c }) => (

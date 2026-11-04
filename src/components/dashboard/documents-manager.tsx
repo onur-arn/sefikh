@@ -2,11 +2,13 @@
 
 import { useRef, useState } from "react";
 import { FileText, Trash2, Upload } from "lucide-react";
-import { cn, formatBytes, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 type Doc = { id: string; name: string; mime: string; size: number; url: string; createdAt: string; project: { id: string; title: string } | null };
 
 export function DocumentsManager({ initialDocs, projects, initialProject, used }: { initialDocs: Doc[]; projects: { id: string; title: string }[]; initialProject: string; used: number }) {
+  const tr = useT();
   const [docs, setDocs] = useState(initialDocs);
   const [projectId, setProjectId] = useState(initialProject);
   const [filter, setFilter] = useState(initialProject || "all");
@@ -36,7 +38,7 @@ export function DocumentsManager({ initialDocs, projects, initialProject, used }
   }
 
   async function remove(doc: Doc) {
-    if (!confirm(`Delete “${doc.name}”?`)) return;
+    if (!confirm(tr("Delete “{name}”?", { name: doc.name }))) return;
     setDocs((x) => x.filter((d) => d.id !== doc.id));
     setUsage((u) => u - doc.size);
     await fetch(`/api/documents/${doc.id}`, { method: "DELETE" });
@@ -47,40 +49,39 @@ export function DocumentsManager({ initialDocs, projects, initialProject, used }
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl border border-line bg-paper p-5 sm:flex-row sm:items-center">
-        <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="field sm:w-64" aria-label="Attach to project">
-          <option value="">No project</option>
+        <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="field sm:w-64" aria-label={tr("Attach to project")}>
+          <option value="">{tr("No project")}</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.title}
+              {tr(p.title)}
             </option>
           ))}
         </select>
         <button onClick={() => ref.current?.click()} className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-paper hover:bg-ink-soft">
-          {busy ? <span className="size-4 animate-spin rounded-full border-2 border-paper border-r-transparent" /> : <Upload className="size-4" />} Upload files
-        </button>
+          {busy ? <span className="size-4 animate-spin rounded-full border-2 border-paper border-r-transparent" /> : <Upload className="size-4" />} {" "}{tr("Upload files")}</button>
         <input ref={ref} type="file" multiple accept="image/*,application/pdf" className="hidden" onChange={(e) => { upload(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
         <div className="sm:ml-auto sm:w-56">
           <div className="flex justify-between text-[11.5px] text-muted">
-            <span>Storage</span>
-            <span>{formatBytes(usage)} / 500 MB</span>
+            <span>{tr("Storage")}</span>
+            <span>{tr.bytes(usage)} / 500 MB</span>
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-sand">
             <div className="h-full bg-brass" style={{ width: `${Math.min(100, (usage / (500 * 1024 * 1024)) * 100)}%` }} />
           </div>
         </div>
       </div>
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="text-sm text-danger">{tr(error)}</p>}
 
       <div className="flex flex-wrap gap-1.5">
-        {[{ id: "all", title: "All" }, ...projects, { id: "none", title: "Unassigned" }].map((p) => (
+        {[{ id: "all", title: tr("All") }, ...projects, { id: "none", title: tr("Unassigned") }].map((p) => (
           <button key={p.id} onClick={() => setFilter(p.id)} className={cn("rounded-full px-3 py-1 text-[12.5px]", filter === p.id ? "bg-ink text-paper" : "bg-paper text-muted ring-1 ring-line hover:text-ink")}>
-            {p.title}
+            {tr(p.title)}
           </button>
         ))}
       </div>
 
       {visible.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line p-12 text-center text-sm text-muted">No document here yet.</p>
+        <p className="rounded-2xl border border-dashed border-line p-12 text-center text-sm text-muted">{tr("No document here yet.")}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {visible.map((d) => (
@@ -101,11 +102,11 @@ export function DocumentsManager({ initialDocs, projects, initialProject, used }
                     {d.name}
                   </a>
                   <p className="truncate text-[11.5px] text-muted">
-                    {formatBytes(d.size)} · {formatDate(d.createdAt)}
+                    {tr.bytes(d.size)} · {tr.date(d.createdAt)}
                     {d.project && ` · ${d.project.title}`}
                   </p>
                 </div>
-                <button onClick={() => remove(d)} className="rounded-full p-1.5 text-muted hover:bg-sand hover:text-danger" aria-label={`Delete ${d.name}`}>
+                <button onClick={() => remove(d)} className="rounded-full p-1.5 text-muted hover:bg-sand hover:text-danger" aria-label={tr("Delete {name}", { name: d.name })}>
                   <Trash2 className="size-4" />
                 </button>
               </div>

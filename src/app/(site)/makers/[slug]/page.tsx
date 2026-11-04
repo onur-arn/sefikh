@@ -18,6 +18,8 @@ import { MakerCard } from "@/components/makers/maker-card";
 import { PortfolioGallery } from "@/components/makers/portfolio-gallery";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/misc";
+import { AutoTranslate } from "@/components/translate/auto-translate";
+import { getT } from "@/i18n/server";
 
 async function getCompany(slug: string) {
   return db.company.findUnique({
@@ -31,9 +33,10 @@ async function getCompany(slug: string) {
 }
 
 export async function generateMetadata({ params }: PageProps<"/makers/[slug]">): Promise<Metadata> {
+  const tr = await getT();
   const { slug } = await params;
   const c = await getCompany(slug);
-  if (!c) return { title: "Maker not found" };
+  if (!c) return { title: tr("Maker not found") };
   const cover = c.portfolio[0];
   return {
     title: `${c.name} — ${c.tagline ?? "Maker"}`,
@@ -65,6 +68,7 @@ async function similarMakers(company: NonNullable<Awaited<ReturnType<typeof getC
 }
 
 export default async function MakerPage({ params, searchParams }: PageProps<"/makers/[slug]">) {
+  const tr = await getT();
   const { slug } = await params;
   const { src } = await searchParams;
   const company = await getCompany(slug);
@@ -112,60 +116,54 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
 
       {isOwner && !company.published && (
         <div className="bg-brass-light py-3 text-center text-sm text-brass-dark">
-          Preview — your profile is not published yet.{" "}
+          {tr("Preview — your profile is not published yet.")}
           <Link href="/dashboard/profile" className="font-semibold underline">
-            Complete and publish it
-          </Link>
+            {tr("Complete and publish it")}</Link>
         </div>
       )}
 
       {/* ── En-tête ─────────────────────────────── */}
       <section className="container-x pt-10">
-        <nav className="text-[12px] text-muted" aria-label="Breadcrumb">
+        <nav className="text-[12px] text-muted" aria-label={tr("Breadcrumb")}>
           <Link href="/search" className="hover:text-ink">
-            Explore
-          </Link>{" "}
+            {tr("Explore")}</Link>
           / <span className="text-ink-soft">{company.name}</span>
         </nav>
         <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge>{kind}</Badge>
+              <Badge>{tr(kind)}</Badge>
               {company.verified && (
                 <Badge tone="brass">
-                  <BadgeCheck className="size-3" /> Verified
-                </Badge>
+                  <BadgeCheck className="size-3" /> {" "}{tr("Verified")}</Badge>
               )}
-              {plan.id === "PRO_FOUNDING" && <Badge tone="dark">Founding Partner</Badge>}
+              {plan.id === "PRO_FOUNDING" && <Badge tone="dark">{tr("Founding Partner")}</Badge>}
             </div>
             <h1 className="display mt-4 text-5xl sm:text-6xl lg:text-7xl">{company.name}</h1>
-            {company.tagline && <p className="mt-3 font-display text-2xl italic text-muted">{company.tagline}</p>}
+            {company.tagline && <AutoTranslate kind="company" id={company.id} field="tagline" text={company.tagline} className="mt-3 font-display text-2xl italic text-muted" />}
             <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] text-ink-soft">
               <span className="flex items-center gap-1.5">
                 <MapPin className="size-4 text-muted" /> {[company.city, company.country].filter(Boolean).join(", ")}
               </span>
               {company.foundedYear && (
                 <span className="flex items-center gap-1.5">
-                  <Building2 className="size-4 text-muted" /> Since {company.foundedYear}
+                  <Building2 className="size-4 text-muted" /> {" "}{tr("Since {foundedYear}", { foundedYear: company.foundedYear })}
                 </span>
               )}
               {company.teamSize && (
                 <span className="flex items-center gap-1.5">
-                  <Users className="size-4 text-muted" /> {company.teamSize} people
-                </span>
+                  <Users className="size-4 text-muted" /> {tr("{teamSize} people", { teamSize: company.teamSize })}</span>
               )}
               {company.leadTimeMin && (
                 <span className="flex items-center gap-1.5">
-                  <CalendarClock className="size-4 text-muted" /> Lead time {company.leadTimeMin}–{company.leadTimeMax ?? company.leadTimeMin} months
-                </span>
+                  <CalendarClock className="size-4 text-muted" /> {" "}{tr("Lead time {leadTimeMin}–", { leadTimeMin: company.leadTimeMin })}{company.leadTimeMax ?? company.leadTimeMin} {" "}{tr("months")}</span>
               )}
             </div>
           </div>
           <div className="flex items-center gap-2">
             {isOwner ? (
               <ButtonLink href="/dashboard/profile" size="lg" variant="secondary">
-                Edit my profile
-              </ButtonLink>
+                {tr("Edit my profile")}</ButtonLink>
             ) : (
               <>
                 <ShareButton name={company.name} />
@@ -199,16 +197,16 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
       <section className="container-x grid gap-14 py-16 lg:grid-cols-[360px_1fr]">
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="border-t border-line">
-            <AccordionItem title="Skills, materials and techniques" defaultOpen>
+            <AccordionItem title={tr("Skills, materials and techniques")} defaultOpen>
               <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">
                 {(["SKILL", "MATERIAL", "TECHNIQUE"] as TagKind[]).map((k) =>
                   byKind(k).length ? (
                     <div key={k}>
-                      <p className="mb-2 font-display text-xl">{TAG_KIND_LABEL[k]}</p>
+                      <p className="mb-2 font-display text-xl">{tr(TAG_KIND_LABEL[k])}</p>
                       <div className="flex flex-wrap gap-1.5">
                         {byKind(k).map((n) => (
                           <Link key={n} href={`/search?${k === "SKILL" ? "skills" : k === "MATERIAL" ? "materials" : "techniques"}=${encodeURIComponent(n)}`} className="rounded-full border border-line bg-paper px-3 py-1 text-[12.5px] hover:border-ink/40">
-                            {n}
+                            {tr(n)}
                           </Link>
                         ))}
                       </div>
@@ -217,15 +215,15 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
                 )}
               </div>
             </AccordionItem>
-            <AccordionItem title="Project sectors">
+            <AccordionItem title={tr("Project sectors")}>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-1 font-display text-xl">
                 {byKind("SECTOR").map((s) => (
                   <li key={s}>{s}</li>
                 ))}
               </ul>
             </AccordionItem>
-            <AccordionItem title="Areas of operation">
-              <p className="text-sm text-muted">Based in {company.city ?? company.country}. Delivers and installs in:</p>
+            <AccordionItem title={tr("Areas of operation")}>
+              <p className="text-sm text-muted">{tr("Based in")}{" "}{company.city ?? company.country}{tr(". Delivers and installs in:")}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {areas.map((a) => (
                   <span key={a} className="flex items-center gap-1.5 rounded-full bg-sand px-3 py-1 text-[12.5px]">
@@ -234,16 +232,15 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
                 ))}
               </div>
             </AccordionItem>
-            <AccordionItem title="Production capabilities">
-              {company.productionCapacity && <p className="text-sm leading-relaxed text-ink-soft">{company.productionCapacity}</p>}
+            <AccordionItem title={tr("Production capabilities")}>
+              {company.productionCapacity && <AutoTranslate kind="company" id={company.id} field="productionCapacity" text={company.productionCapacity} className="text-sm leading-relaxed text-ink-soft" />}
               {company.leadTimeMin && (
                 <p className="mt-3 text-sm">
-                  <span className="text-muted">Lead time:</span> {company.leadTimeMin}–{company.leadTimeMax ?? company.leadTimeMin} months
-                </p>
+                  <span className="text-muted">{tr("Lead time:")}</span> {company.leadTimeMin}–{company.leadTimeMax ?? company.leadTimeMin} {" "}{tr("months")}</p>
               )}
               {availability.length > 0 && (
                 <div className="mt-5">
-                  <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.15em] text-muted">Availability this year</p>
+                  <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.15em] text-muted">{tr("Availability this year")}</p>
                   <AvailabilityCalendar months={availability} />
                 </div>
               )}
@@ -251,7 +248,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
           </div>
 
           <div className="mt-8 rounded-2xl border border-line bg-paper p-6">
-            <p className="text-sm font-semibold">Contact details</p>
+            <p className="text-sm font-semibold">{tr("Contact details")}</p>
             {canSeeContact ? (
               <ul className="mt-4 space-y-2.5 text-sm">
                 {company.publicEmail && (
@@ -282,14 +279,13 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
             ) : (
               <div className="mt-4">
                 <div className="space-y-2 blur-[3px] select-none" aria-hidden>
-                  <p className="text-sm">contact@atelier.example</p>
+                  <p className="text-sm">{tr("contact@atelier.example")}</p>
                   <p className="text-sm">+33 0 00 00 00 00</p>
                 </div>
                 <p className="mt-4 flex items-start gap-2 text-[13px] text-muted">
-                  <Lock className="mt-0.5 size-3.5 shrink-0" /> Full contact details are available with the Pro plan. You can still send a message.
-                </p>
+                  <Lock className="mt-0.5 size-3.5 shrink-0" /> {" "}{tr("Full contact details are available with the Pro plan. You can still send a message.")}</p>
                 <Link href={user ? "/pricing" : "/register"} className="mt-3 inline-block text-[13px] font-medium text-brass-dark underline-offset-4 hover:underline">
-                  {user ? "Upgrade to Pro" : "Create an account"} →
+                  {user ? tr("Upgrade to Pro") : tr("Create an account")} →
                 </Link>
               </div>
             )}
@@ -297,25 +293,23 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
         </aside>
 
         <div>
-          <p className="eyebrow">About</p>
-          <div className="mt-4 max-w-3xl space-y-4 text-[16px] leading-[1.75] text-ink-soft">
-            {(company.about ?? "").split(/\n{2,}/).map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
+          <p className="eyebrow">{tr("About")}</p>
+          <div className="mt-4 max-w-3xl text-[16px] leading-[1.75] text-ink-soft">
+            {company.about && <AutoTranslate kind="company" id={company.id} field="about" text={company.about} paragraphClassName="mt-4" />}
           </div>
           {keywords.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-1.5">
               {keywords.map((k) => (
                 <span key={k} className="rounded-full bg-brass-light/60 px-3 py-1 text-[12.5px] text-brass-dark">
-                  {k}
+                  {tr(k)}
                 </span>
               ))}
             </div>
           )}
 
           <div className="mt-16 flex items-end justify-between">
-            <h2 className="display text-4xl">Projects & portfolio</h2>
-            <span className="text-sm text-muted">{company.portfolio.length} pieces</span>
+            <h2 className="display text-4xl">{tr("Projects & portfolio")}</h2>
+            <span className="text-sm text-muted">{tr("{length} pieces", { length: company.portfolio.length })}</span>
           </div>
           <div className="mt-8">
             <PortfolioGallery items={company.portfolio.map(({ id, key, thumbKey, width, height, title, description, projectName, location, year }) => ({ id, key, thumbKey, width, height, title, description, projectName, location, year }))} companyName={company.name} />
@@ -326,8 +320,8 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
       {similar.length > 0 && (
         <section className="border-t border-line bg-paper py-20">
           <div className="container-x">
-            <p className="eyebrow">Visually similar</p>
-            <h2 className="display mt-3 text-4xl">You may also like</h2>
+            <p className="eyebrow">{tr("Visually similar")}</p>
+            <h2 className="display mt-3 text-4xl">{tr("You may also like")}</h2>
             <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 lg:gap-x-6">
               {similar.map((o) => (
                 <MakerCard

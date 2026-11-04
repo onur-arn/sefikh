@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { setPublished } from "@/app/(app)/dashboard/actions";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n/client";
 
 export function PublishToggle({ published }: { published: boolean }) {
+  const tr = useT();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -22,9 +24,9 @@ export function PublishToggle({ published }: { published: boolean }) {
           })
         }
       >
-        {published ? "Unpublish" : "Publish my profile"}
+        {published ? tr("Unpublish") : tr("Publish my profile")}
       </Button>
-      {error && <p className="mt-1 text-[12px] text-danger">{error}</p>}
+      {error && <p className="mt-1 text-[12px] text-danger">{tr(error)}</p>}
     </div>
   );
 }

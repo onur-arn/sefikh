@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { cn, fileUrl, initials } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 export function Badge({ children, tone = "neutral", className }: { children: ReactNode; tone?: "neutral" | "brass" | "dark" | "success" | "danger"; className?: string }) {
   const tones = {
@@ -48,9 +51,9 @@ export function SectionTitle({ eyebrow, title, children, className }: { eyebrow?
 }
 
 export function Logo({ className, light }: { className?: string; light?: boolean }) {
+  const tr = useT();
   return (
     <span className={cn("font-display text-[1.65rem] font-semibold leading-none tracking-[0.28em]", light ? "text-paper" : "text-ink", className)}>
-      SEFIKH
-    </span>
+      {tr("SEFIKH")}</span>
   );
 }

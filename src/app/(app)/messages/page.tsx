@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
 import { Inbox } from "@/components/messages/inbox";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Messages", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Messages"), robots: { index: false } };
+}
 
 export default async function MessagesPage({ searchParams }: PageProps<"/messages">) {
   const user = await requireUser("/messages");

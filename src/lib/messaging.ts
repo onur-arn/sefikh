@@ -1,6 +1,7 @@
 import "server-only";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { translatorFor } from "@/i18n/server";
 import { sendEmail } from "@/lib/mail";
 import { newMessageTemplate } from "@/lib/mail/templates";
 import { notify } from "@/lib/notifications";
@@ -73,13 +74,14 @@ export async function assertCanStartConversation(me: { id: string; role: string;
 }
 
 /** Notifie le destinataire (in-app + e-mail, dédupliqué tant que la notification précédente n'est pas lue). */
-export async function notifyNewMessage(opts: { conversationId: string; senderName: string; recipient: { id: string; name: string; email: string; notifyByEmail: boolean; lastSeenAt: Date | null }; body: string; subject?: string | null; isNew: boolean }) {
+export async function notifyNewMessage(opts: { conversationId: string; senderName: string; recipient: { id: string; name: string; email: string; locale?: string | null; notifyByEmail: boolean; lastSeenAt: Date | null }; body: string; subject?: string | null; isNew: boolean }) {
   const link = `/messages?c=${opts.conversationId}`;
   const pending = await db.notification.findFirst({ where: { userId: opts.recipient.id, link, readAt: null } });
   if (pending) return;
+  const tr = translatorFor(opts.recipient.locale);
   await notify(opts.recipient.id, {
     type: opts.isNew ? "CONTACT_REQUEST" : "MESSAGE",
-    title: opts.isNew ? `New request from ${opts.senderName}` : `New message from ${opts.senderName}`,
+    title: tr(opts.isNew ? "New request from {name}" : "New message from {name}", { name: opts.senderName }),
     body: opts.body.slice(0, 140),
     link,
   });
@@ -88,7 +90,7 @@ export async function notifyNewMessage(opts: { conversationId: string; senderNam
   if (opts.recipient.notifyByEmail && !online) {
     await sendEmail({
       to: opts.recipient.email,
-      ...newMessageTemplate({ recipientName: opts.recipient.name, senderName: opts.senderName, preview: opts.body, conversationId: opts.conversationId, subject: opts.subject }),
+      ...newMessageTemplate({ recipientName: opts.recipient.name, senderName: opts.senderName, preview: opts.body, conversationId: opts.conversationId, subject: opts.subject }, opts.recipient.locale),
     });
   }
 }

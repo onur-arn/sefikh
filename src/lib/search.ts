@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
+import { getT } from "@/i18n/server";
 import { embedText } from "@/lib/clip";
 import { VOCABULARY, type TagKind } from "@/lib/constants";
 import { continentOf, detectLocation, distanceKm, findCity, findCountry, type City } from "@/lib/geo";
@@ -97,6 +98,7 @@ const clipTextScale = (s: number) => clamp((s - 0.19) / 0.12);
 const clipImageScale = (s: number) => clamp((s - 0.45) / 0.45);
 
 export async function runSearch(input: SearchInput) {
+  const tr = await getT();
   const parsed = parseQuery(input.q ?? "");
   const requested = new Map<string, DetectedTag>();
   for (const t of parsed.tags) requested.set(`${t.kind}:${t.name}`, t);
@@ -148,7 +150,7 @@ export async function runSearch(input: SearchInput) {
       for (const t of requested.values()) {
         if (has(t.kind, t.name)) {
           hit += t.kind === "SECTOR" ? 0.7 : 1;
-          if (reasons.length < 3) reasons.push(t.name);
+          if (reasons.length < 3) reasons.push(tr(t.name));
         }
       }
       parts.push({ w: 0.4, s: hit / requested.size });
@@ -189,8 +191,8 @@ export async function runSearch(input: SearchInput) {
       else if ((country && areas.includes(country)) || (continent && areas.includes(continent))) s = 0.55;
       else if (continent && c.continent === continent) s = 0.35;
       parts.push({ w: 0.2, s });
-      if (distance != null && distance < 150) reasons.push(distance < 15 ? `In ${city!.name}` : `${Math.round(distance)} km from ${city!.name}`);
-      else if (s >= 0.55) reasons.push(`Works in ${country}`);
+      if (distance != null && distance < 150) reasons.push(distance < 15 ? tr("In {city}", { city: city!.name }) : tr("{km} km from {city}", { km: Math.round(distance), city: city!.name }));
+      else if (s >= 0.55) reasons.push(tr("Works in {country}", { country: country ?? "" }));
     }
 
     const totalW = parts.reduce((a, p) => a + p.w, 0);

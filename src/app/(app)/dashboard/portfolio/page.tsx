@@ -6,10 +6,15 @@ import { db } from "@/lib/db";
 import { formatLimit, getPlan } from "@/lib/plans";
 import { PortfolioManager } from "@/components/dashboard/portfolio-manager";
 import { ButtonLink } from "@/components/ui/button";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Portfolio", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Portfolio"), robots: { index: false } };
+}
 
 export default async function PortfolioPage({ searchParams }: PageProps<"/dashboard/portfolio">) {
+  const tr = await getT();
   const user = await requireRole("PRO", "/dashboard/portfolio");
   if (!user.company) redirect("/onboarding");
   const { onboarding } = await searchParams;
@@ -23,23 +28,21 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/dashbo
     <>
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="display text-4xl sm:text-5xl">Projects & portfolio</h1>
+          <h1 className="display text-4xl sm:text-5xl">{tr("Projects & portfolio")}</h1>
           <p className="mt-2 max-w-xl text-sm text-muted">
-            Add pictures and a description for each one. Every picture is analysed so creatives can find you by searching with an image or a description. {items.length} / {formatLimit(limit)} pictures.
-          </p>
+            {tr("Add pictures and a description for each one. Every picture is analysed so creatives can find you by searching with an image or a description. {length} / {limit} pictures.", { length: items.length, limit: formatLimit(limit) })}</p>
         </div>
         {onboarding && (
           <ButtonLink href="/upgrade" variant={items.length ? "primary" : "secondary"}>
-            {items.length ? "Continue" : "Skip for now"}
+            {items.length ? tr("Continue") : tr("Skip for now")}
           </ButtonLink>
         )}
       </header>
       {onboarding && (
         <p className="mb-6 rounded-xl bg-brass-light/50 px-4 py-3 text-sm">
-          Last step before going live: add at least one picture of your work, then publish your profile from your{" "}
+          {tr("Last step before going live: add at least one picture of your work, then publish your profile from your")}
           <Link href="/dashboard" className="underline">
-            dashboard
-          </Link>
+            {tr("dashboard")}</Link>
           .
         </p>
       )}

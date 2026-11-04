@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getLocale } from "@/i18n/server";
 import { db } from "@/lib/db";
 import { DUMMY_HASH, hashPassword, verifyPassword } from "@/lib/auth/password";
 import { createSession, destroySession, getCurrentUser } from "@/lib/auth/session";
@@ -37,7 +38,7 @@ export async function registerAction(_: FormState, formData: FormData): Promise<
     },
   });
   const token = await issueToken(user.id, "VERIFY_EMAIL");
-  await sendEmail({ to: email, ...verifyEmailTemplate(name, token) });
+  await sendEmail({ to: email, ...verifyEmailTemplate(name, token, await getLocale()) });
   await createSession(user.id);
   redirect("/onboarding");
 }
@@ -55,6 +56,7 @@ export async function loginAction(_: FormState, formData: FormData): Promise<For
   // Comparaison systématique pour ne pas révéler l'existence d'un compte par le temps de réponse.
   const ok = await verifyPassword(password, user?.passwordHash ?? DUMMY_HASH);
   if (!user || !ok) return { error: "Incorrect e-mail or password." };
+  if (user.suspendedAt) return { error: "This account has been suspended. Please contact us." };
 
   await createSession(user.id);
   redirect(safeNext(formData.get("next")));
@@ -75,7 +77,7 @@ export async function forgotPasswordAction(_: FormState, formData: FormData): Pr
   const user = await db.user.findUnique({ where: { email: parsed.data } });
   if (user) {
     const token = await issueToken(user.id, "RESET_PASSWORD");
-    await sendEmail({ to: user.email, ...resetPasswordTemplate(user.name, token) });
+    await sendEmail({ to: user.email, ...resetPasswordTemplate(user.name, token, user.locale) });
   }
   // Réponse identique que le compte existe ou non.
   return { success: "If an account exists for this address, you will receive a reset link within a few minutes." };
@@ -93,7 +95,7 @@ export async function resetPasswordAction(_: FormState, formData: FormData): Pro
     data: { passwordHash: await hashPassword(parsed.data.password), emailVerifiedAt: new Date() },
   });
   await db.session.deleteMany({ where: { userId } });
-  await sendEmail({ to: user.email, ...passwordChangedTemplate(user.name) });
+  await sendEmail({ to: user.email, ...passwordChangedTemplate(user.name, user.locale) });
   await createSession(userId);
   redirect("/dashboard?notice=password-reset");
 }
@@ -105,6 +107,6 @@ export async function resendVerificationAction(): Promise<FormState> {
   const rl = rateLimit(`verify:${user.id}`, 3, 30 * 60_000);
   if (!rl.ok) return TOO_MANY(rl.retryAfter);
   const token = await issueToken(user.id, "VERIFY_EMAIL");
-  await sendEmail({ to: user.email, ...verifyEmailTemplate(user.name, token) });
+  await sendEmail({ to: user.email, ...verifyEmailTemplate(user.name, token, user.locale) });
   return { success: `A new confirmation link has been sent to ${user.email}.` };
 }

@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, MapPin } from "lucide-react";
 import { COMPANY_KINDS } from "@/lib/constants";
 import { cn, fileUrl } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 export type MakerCardData = {
   slug: string;
@@ -21,6 +24,7 @@ export type MakerCardData = {
 };
 
 export function MakerCard({ maker, priority, source, className }: { maker: MakerCardData; priority?: boolean; source?: string; className?: string }) {
+  const tr = useT();
   const kind = COMPANY_KINDS.find((k) => k.value === maker.kind)?.label ?? maker.kind;
   const href = `/makers/${maker.slug}${source ? `?src=${source}` : ""}`;
   return (
@@ -29,7 +33,7 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
         {maker.image ? (
           <Image
             src={fileUrl(maker.image.key)!}
-            alt={maker.image.title ?? `Work by ${maker.name}`}
+            alt={maker.image.title ?? tr("Work by {name}", { name: maker.name })}
             fill
             priority={priority}
             sizes="(min-width: 1280px) 22vw, (min-width: 768px) 33vw, 50vw"
@@ -40,11 +44,11 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
         )}
         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
           {maker.match != null && maker.match > 0 ? (
-            <span className="rounded-full bg-paper/90 px-2.5 py-1 text-[11px] font-semibold text-ink backdrop-blur">{maker.match}% match</span>
+            <span className="rounded-full bg-paper/90 px-2.5 py-1 text-[11px] font-semibold text-ink backdrop-blur">{tr("{match}% match", { match: maker.match })}</span>
           ) : (
             <span />
           )}
-          {maker.featured && <span className="rounded-full bg-ink/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-paper backdrop-blur">Featured</span>}
+          {maker.featured && <span className="rounded-full bg-ink/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-paper backdrop-blur">{tr("Featured")}</span>}
         </div>
         {maker.gallery && maker.gallery.length > 0 && (
           <div className="absolute bottom-3 right-3 flex gap-1.5 opacity-0 transition duration-300 group-hover:opacity-100">
@@ -59,13 +63,13 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
       <div className="mt-3.5">
         <div className="flex items-center gap-1.5">
           <h3 className="truncate text-[15px] font-semibold tracking-tight">{maker.name}</h3>
-          {maker.verified && <BadgeCheck className="size-4 shrink-0 text-brass" strokeWidth={1.8} aria-label="Verified maker" />}
+          {maker.verified && <BadgeCheck className="size-4 shrink-0 text-brass" strokeWidth={1.8} aria-label={tr("Verified maker")} />}
         </div>
         <p className="mt-0.5 line-clamp-1 text-[13.5px] text-muted">{maker.tagline ?? kind}</p>
         <p className="mt-1.5 flex items-center gap-1 text-[12px] text-muted">
           <MapPin className="size-3.5" strokeWidth={1.6} />
           {[maker.city, maker.country].filter(Boolean).join(", ") || "—"}
-          {maker.distance != null && maker.distance > 0 && <span className="text-ink-soft"> · {maker.distance} km</span>}
+          {maker.distance != null && maker.distance > 0 && <span className="text-ink-soft"> {" "}{tr("· {distance} km", { distance: maker.distance })}</span>}
         </p>
         {maker.reasons && maker.reasons.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">

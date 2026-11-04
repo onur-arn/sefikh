@@ -5,21 +5,25 @@ import { requireRole } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getPlan } from "@/lib/plans";
 import { companyStats } from "@/lib/stats";
-import { daysFromNow, formatNumber, parseList } from "@/lib/utils";
+import { daysFromNow, parseList } from "@/lib/utils";
 import { BarList, ColumnChart } from "@/components/charts/charts";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, EmptyState } from "@/components/ui/misc";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Analytics", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Analytics"), robots: { index: false } };
+}
 
 export default async function AnalyticsPage() {
+  const tr = await getT();
   const user = await requireRole("PRO", "/dashboard/analytics");
   if (!user.company) redirect("/onboarding");
   if (!getPlan(user.plan).limits.analytics) {
     return (
-      <EmptyState icon={<Lock className="size-8" strokeWidth={1.3} />} title="Visibility analytics" action={<ButtonLink href="/upgrade">Upgrade to Pro</ButtonLink>}>
-        See how many creatives discover your profile, from which searches, and how your visibility evolves day by day. Included from the Pro business plan.
-      </EmptyState>
+      <EmptyState icon={<Lock className="size-8" strokeWidth={1.3} />} title={tr("Visibility analytics")} action={<ButtonLink href="/upgrade">{tr("Upgrade to Pro")}</ButtonLink>}>
+        {tr("See how many creatives discover your profile, from which searches, and how your visibility evolves day by day. Included from the Pro business plan.")}</EmptyState>
     );
   }
   const stats = await companyStats(user.company.id, 30);
@@ -43,36 +47,36 @@ export default async function AnalyticsPage() {
   return (
     <>
       <header className="mb-8">
-        <h1 className="display text-4xl sm:text-5xl">Visibility analytics</h1>
-        <p className="mt-2 text-sm text-muted">Last 30 days, compared with the previous 30 days.</p>
+        <h1 className="display text-4xl sm:text-5xl">{tr("Visibility analytics")}</h1>
+        <p className="mt-2 text-sm text-muted">{tr("Last 30 days, compared with the previous 30 days.")}</p>
       </header>
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         {[
-          [formatNumber(stats.views), "Profile views", `${stats.viewsDelta >= 0 ? "+" : ""}${stats.viewsDelta}%`],
-          [formatNumber(stats.impressions), "Appearances in search", `${stats.impressionsDelta >= 0 ? "+" : ""}${stats.impressionsDelta}%`],
-          [`${stats.ctr}%`, "Search-to-profile rate", null],
-          [formatNumber(stats.conversations), "New requests", null],
+          [tr.number(stats.views), tr("Profile views"), `${stats.viewsDelta >= 0 ? "+" : ""}${stats.viewsDelta}%`],
+          [tr.number(stats.impressions), tr("Appearances in search"), `${stats.impressionsDelta >= 0 ? "+" : ""}${stats.impressionsDelta}%`],
+          [`${stats.ctr}%`, tr("Search-to-profile rate"), null],
+          [tr.number(stats.conversations), tr("New requests"), null],
         ].map(([v, l, d]) => (
           <Card key={l} className="p-5">
             <p className="display text-4xl">{v}</p>
             <p className="mt-1 text-[13px] text-muted">{l}</p>
-            {d && <p className={`mt-2 text-[12px] font-medium ${String(d).startsWith("-") ? "text-danger" : "text-success"}`}>{d} vs previous period</p>}
+            {d && <p className={`mt-2 text-[12px] font-medium ${String(d).startsWith("-") ? "text-danger" : "text-success"}`}>{tr("{d} vs previous period", { d })}</p>}
           </Card>
         ))}
       </div>
       <Card className="mt-6 p-6">
-        <p className="text-sm font-medium">Profile views per day</p>
+        <p className="text-sm font-medium">{tr("Profile views per day")}</p>
         <div className="mt-4">
           <ColumnChart data={stats.daily} dataKey="views" unit="views" />
         </div>
       </Card>
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         <Card className="p-6">
-          <p className="mb-4 text-sm font-medium">Where your visitors come from</p>
+          <p className="mb-4 text-sm font-medium">{tr("Where your visitors come from")}</p>
           <BarList items={sources} unit="views" />
         </Card>
         <Card className="p-6">
-          <p className="mb-4 text-sm font-medium">Searches you appeared in</p>
+          <p className="mb-4 text-sm font-medium">{tr("Searches you appeared in")}</p>
           <BarList items={topTerms} />
         </Card>
       </div>

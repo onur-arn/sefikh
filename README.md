@@ -5,7 +5,9 @@ Plateforme de sourcing qui met en relation les **créatifs** (architectes, desig
 - **Créatif** : trouve un artisan par description de projet, par image, par compétence/matériau ou par localisation, décrit ses projets, échange avec les makers, sauvegarde ses fournisseurs.
 - **Maker** : crée son profil professionnel et son portfolio, reçoit des demandes qualifiées, suit sa visibilité, souscrit une offre payante.
 
-Contenu du site en anglais (comme la maquette « Version 3 »), code commenté en français.
+Interface en **français, anglais, italien, espagnol et chinois** (détection du navigateur, puis sélecteur dans l'en-tête et le pied de page). Code commenté en français.
+
+> Le projet doit rester **hors du Bureau et de tout dossier iCloud** (ici `~/Projets/SEFIKH`) : iCloud évince des fichiers et casse `node_modules`.
 
 ---
 
@@ -27,11 +29,19 @@ Le premier `db:seed` télécharge le modèle CLIP (~150 Mo, dans `.cache/models`
 |---|---|---|
 | Créatif | `client@sefikh.demo` | Pro |
 | Maker | `pro@sefikh.demo` (Atelier Laiton & Patine) | Visibility |
+| Administrateur | `admin@sefikh.demo` | accès à `/admin` |
 | Autres makers | `cuir@`, `racine@`, `onyx@`, `velours@`, `azur@`, `lumen@`, `zellige@`, `forma@`, `pierrebois@` + `sefikh.demo` | variées |
 
 ### E-mails en développement
 
 Sans `SMTP_HOST`, aucun e-mail ne part : ils sont enregistrés en base et visibles sur **http://localhost:3000/dev/mailbox** (vérification d'adresse, mot de passe oublié, notifications de message, confirmation d'abonnement…). Renseigner les variables `SMTP_*` (Resend, Brevo, Mailtrap, OVH…) pour un envoi réel.
+
+### IA (traduction et assistant)
+
+Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5` par défaut).
+
+- **Sans clé** : le bouton de traduction affiche « indisponible » et l'assistant fait une recherche directe, sans dialogue.
+- **Coût** : chaque texte n'est traduit qu'une fois par langue (table `Translation`). L'API relit le texte en base et n'accepte jamais de texte libre, avec une limite de 40 traductions par heure et par visiteur.
 
 ### Paiements
 
@@ -61,6 +71,14 @@ Sans `SMTP_HOST`, aucun e-mail ne part : ils sont enregistrés en base et visibl
 **Abonnements** — créatifs Free / Pro / Studio, makers Essential / Pro / Visibility / Intelligence + Founding Partner (50 places), engagement 12 mois ou sans engagement, Stripe Checkout, changement d'offre au prorata, résiliation (à l'échéance de l'engagement), reprise, portail client Stripe, factures, webhooks idempotents, e-mails de confirmation / d'échec de paiement.
 
 **Trends & Insights** — pages de données de marché générées automatiquement à partir de l'activité réelle (recherches, vues, mises en relation) : KPI, tendances mensuelles, matériaux/techniques/expertises/lieux les plus recherchés, demande émergente, makers les plus découverts, taux de conversion. Sections détaillées réservées aux offres Intelligence (makers) et Studio (créatifs).
+
+**Langues** — catalogues dans `src/i18n/messages/` : la clé est le texte anglais, `tr("Log in")` côté serveur (`getT`) et client (`useT`). Après un ajout de texte, lancer `npm run i18n:check`, qui liste les traductions manquantes et contrôle les variables `{...}`. E-mails et notifications partent dans la langue du destinataire. La langue est mémorisée par cookie (pas de préfixe d'URL : une version par langue pour le SEO demandera des routes `/fr`, `/it`…).
+
+**Traduction automatique** — les professionnels écrivent dans leur langue : bouton « Traduire automatiquement » sur la présentation, les réalisations du portfolio et les messages reçus. Les recherches en italien, espagnol et chinois sont traduites vers l'anglais avant d'être lancées (sans clé d'API, seuls l'anglais et le français sont compris).
+
+**Assistant** — widget sur les pages publiques : transforme une idée en brief et propose des makers réels de l'annuaire. Mêmes quotas que la recherche texte.
+
+**Administration** — `/admin` (rôle `ADMIN`) : indicateurs, utilisateurs (suspension), makers (publication, vérification), demandes de contact.
 
 **Contenus** — Journal (articles), About, Join (makers), Contact (formulaire + accusé de réception), mentions légales (CGU, confidentialité, cookies), newsletter, 404, sitemap, robots, Open Graph.
 
@@ -125,4 +143,5 @@ Mots de passe hachés (bcrypt), jetons de session/réinitialisation stockés hac
 - **Nombre de compétences par profil** (question de la maquette) : vocabulaire contrôlé illimité + **15 mots-clés libres** en bulles.
 - **Accès multi-utilisateurs** (Studio / Intelligence dans la maquette) : non développé — retiré des listes de fonctionnalités en attendant (comptes d'équipe à prévoir).
 - **Paiement à échéance choisie / moyens de paiement par pays** (notes de la maquette) : facturation mensuelle à la date de souscription ; moyens de paiement locaux gérés par Stripe selon le pays.
-- **Langue** : site en anglais comme la maquette ; le sélecteur EN/FR nécessitera une internationalisation (next-intl) si souhaité.
+- **Traductions** : rédigées pour le lancement, à faire relire par des natifs (surtout le chinois). Les textes juridiques traduits doivent être validés par un juriste, comme l'original.
+- **Anthropic** ajouté aux sous-traitants dans la politique de confidentialité : à valider (RGPD).

@@ -26,7 +26,7 @@ export async function changeEmailAction(_: FormState, formData: FormData): Promi
   if (await db.user.findUnique({ where: { email: parsed.data.email } })) return { error: "This e-mail is already used by another account." };
   await db.user.update({ where: { id: user.id }, data: { email: parsed.data.email, emailVerifiedAt: null } });
   const token = await issueToken(user.id, "VERIFY_EMAIL");
-  await sendEmail({ to: parsed.data.email, ...verifyEmailTemplate(full.name, token) });
+  await sendEmail({ to: parsed.data.email, ...verifyEmailTemplate(full.name, token, full.locale) });
   revalidatePath("/dashboard", "layout");
   return { success: `E-mail updated. Please confirm ${parsed.data.email} with the link we just sent.` };
 }
@@ -43,7 +43,7 @@ export async function changePasswordAction(_: FormState, formData: FormData): Pr
   if (!(await verifyPassword(parsed.data.current, full.passwordHash))) return { error: "Incorrect current password.", fieldErrors: { current: ["Incorrect password."] } };
   await db.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(parsed.data.password) } });
   await destroyOtherSessions(user.id, user.sessionId);
-  await sendEmail({ to: full.email, ...passwordChangedTemplate(full.name) });
+  await sendEmail({ to: full.email, ...passwordChangedTemplate(full.name, full.locale) });
   return { success: "Password updated. Other devices have been signed out." };
 }
 

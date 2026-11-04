@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { DocumentsManager } from "@/components/dashboard/documents-manager";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Documents", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Documents"), robots: { index: false } };
+}
 
 export default async function DocumentsPage({ searchParams }: PageProps<"/dashboard/documents">) {
+  const tr = await getT();
   const user = await requireUser("/dashboard/documents");
   const { project } = await searchParams;
   const [docs, projects] = await Promise.all([
@@ -16,8 +21,8 @@ export default async function DocumentsPage({ searchParams }: PageProps<"/dashbo
   return (
     <>
       <header className="mb-8">
-        <h1 className="display text-4xl sm:text-5xl">Documents</h1>
-        <p className="mt-2 max-w-xl text-sm text-muted">Your moodboards, plans and quotes, stored securely in the cloud and organised by project. Only you can access them.</p>
+        <h1 className="display text-4xl sm:text-5xl">{tr("Documents")}</h1>
+        <p className="mt-2 max-w-xl text-sm text-muted">{tr("Your moodboards, plans and quotes, stored securely in the cloud and organised by project. Only you can access them.")}</p>
       </header>
       <DocumentsManager
         initialDocs={docs.map((d) => ({ id: d.id, name: d.name, mime: d.mime, size: d.size, url: `/files/${d.key}`, createdAt: d.createdAt.toISOString(), project: d.project }))}

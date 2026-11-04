@@ -4,10 +4,15 @@ import { requireRole } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { parseList } from "@/lib/utils";
 import { ProjectWizard } from "@/components/dashboard/project-wizard";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Modify project", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Modify project"), robots: { index: false } };
+}
 
 export default async function EditProjectPage({ params }: PageProps<"/dashboard/projects/[id]/edit">) {
+  const tr = await getT();
   const { id } = await params;
   const user = await requireRole("CLIENT");
   const p = await db.project.findFirst({ where: { id, ownerId: user.id } });
@@ -15,7 +20,7 @@ export default async function EditProjectPage({ params }: PageProps<"/dashboard/
   const s = (v: string | null) => v ?? "";
   return (
     <div className="max-w-3xl">
-      <h1 className="display mb-10 text-4xl sm:text-5xl">Modify “{p.title}”</h1>
+      <h1 className="display mb-10 text-4xl sm:text-5xl">{tr("Modify “{title}”", { title: p.title })}</h1>
       <ProjectWizard
         initial={{
           id: p.id, title: p.title, projectType: s(p.projectType), description: s(p.description), clientType: s(p.clientType), country: s(p.country), region: s(p.region), city: s(p.city), size: s(p.size),

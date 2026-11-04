@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
+import { getT } from "@/i18n/server";
 import { parseList } from "@/lib/utils";
 
 export type Range = { from: Date; to: Date };
@@ -56,9 +57,10 @@ export async function monthlySeries(months = 12) {
     db.searchLog.findMany({ where: { createdAt: { gte: from } }, select: { createdAt: true } }),
     db.conversation.findMany({ where: { createdAt: { gte: from } }, select: { createdAt: true } }),
   ]);
+  const tr = await getT();
   const buckets = Array.from({ length: months }, (_, i) => {
     const d = new Date(from.getFullYear(), from.getMonth() + i, 1);
-    return { key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleString("en-GB", { month: "short" }), searches: 0, connections: 0 };
+    return { key: `${d.getFullYear()}-${d.getMonth()}`, label: tr.date(d, { month: "short" }), searches: 0, connections: 0 };
   });
   const idx = new Map(buckets.map((b, i) => [b.key, i]));
   const bucketOf = (d: Date) => buckets[idx.get(`${d.getFullYear()}-${d.getMonth()}`) ?? -1];
@@ -93,9 +95,10 @@ export async function companyStats(companyId: string, days = 30) {
     db.savedCompany.count({ where: { companyId } }),
     db.profileView.findMany({ where: { companyId, createdAt: { gte: from } }, select: { createdAt: true, source: true } }),
   ]);
+  const tr = await getT();
   const daily = Array.from({ length: days }, (_, i) => {
     const d = new Date(from.getTime() + (i + 1) * 86400_000);
-    return { date: d.toISOString().slice(0, 10), label: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), views: 0 };
+    return { date: d.toISOString().slice(0, 10), label: tr.date(d, { day: "numeric", month: "short" }), views: 0 };
   });
   const map = new Map(daily.map((d, i) => [d.date, i]));
   for (const v of viewRows) {

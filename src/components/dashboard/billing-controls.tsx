@@ -3,8 +3,10 @@
 import { useState, useTransition } from "react";
 import { cancelAction, resumeAction } from "@/app/(app)/dashboard/billing/actions";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n/client";
 
 export function BillingControls({ cancelAtPeriodEnd, provider, hasCustomer }: { cancelAtPeriodEnd: boolean; provider: string; hasCustomer: boolean }) {
+  const tr = useT();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [portalBusy, setPortalBusy] = useState(false);
@@ -24,25 +26,22 @@ export function BillingControls({ cancelAtPeriodEnd, provider, hasCustomer }: { 
     <>
       {provider === "stripe" && hasCustomer && (
         <Button variant="secondary" onClick={portal} loading={portalBusy}>
-          Payment methods & invoices
-        </Button>
+          {tr("Payment methods & invoices")}</Button>
       )}
       {cancelAtPeriodEnd ? (
         <Button variant="secondary" loading={pending} onClick={() => start(async () => setError((await resumeAction())?.error ?? null))}>
-          Resume subscription
-        </Button>
+          {tr("Resume subscription")}</Button>
       ) : (
         <Button
           variant="ghost"
           loading={pending}
           onClick={() => {
-            if (confirm("Cancel your subscription? You keep your benefits until the end of the current period (or of your 12-month commitment).")) start(async () => setError((await cancelAction())?.error ?? null));
+            if (confirm(tr("Cancel your subscription? You keep your benefits until the end of the current period (or of your 12-month commitment)."))) start(async () => setError((await cancelAction())?.error ?? null));
           }}
         >
-          Cancel subscription
-        </Button>
+          {tr("Cancel subscription")}</Button>
       )}
-      {error && <p className="text-[12px] text-danger">{error}</p>}
+      {error && <p className="text-[12px] text-danger">{tr(error)}</p>}
     </>
   );
 }

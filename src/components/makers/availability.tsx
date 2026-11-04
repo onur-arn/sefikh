@@ -1,8 +1,12 @@
+"use client";
+
 import { MONTHS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 /** Calendrier de disponibilité de production (mois disponibles mis en évidence). */
 export function AvailabilityCalendar({ months }: { months: number[] }) {
+  const tr = useT();
   const now = new Date().getMonth() + 1;
   return (
     <div>
@@ -18,8 +22,8 @@ export function AvailabilityCalendar({ months }: { months: number[] }) {
         })}
       </div>
       <div className="mt-3 flex gap-4 text-[11px] text-muted">
-        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-ink" /> Available</span>
-        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-sand" /> Fully booked</span>
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-ink" /> {" "}{tr("Available")}</span>
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-sand" /> {" "}{tr("Fully booked")}</span>
       </div>
     </div>
   );

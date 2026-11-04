@@ -20,6 +20,7 @@ model User {
   name             String
   role             String // CLIENT | PRO | ADMIN
   emailVerifiedAt  DateTime?
+  suspendedAt      DateTime? // compte suspendu par un administrateur
   avatarKey        String?
   locale           String    @default("en")
   // Abonnement courant (dénormalisé pour les contrôles d'accès rapides)
@@ -439,4 +440,15 @@ model ContactRequest {
   topic     String
   message   String
   createdAt DateTime @default(now())
+}
+
+/// Cache des traductions automatiques : un même texte n'est traduit qu'une fois par langue.
+model Translation {
+  id         String   @id @default(cuid())
+  sourceHash String
+  target     String
+  text       String
+  createdAt  DateTime @default(now())
+
+  @@unique([sourceHash, target])
 }

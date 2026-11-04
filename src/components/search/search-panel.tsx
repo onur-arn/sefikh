@@ -5,6 +5,7 @@ import { useRef, useState, useTransition } from "react";
 import { ArrowRight, ImagePlus, MapPin, Sparkles, X } from "lucide-react";
 import { MATERIALS, SKILLS, TECHNIQUES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 type Tab = "project" | "image" | "skills";
 
@@ -17,6 +18,7 @@ const TABS: { id: Tab; label: string }[] = [
 const EXAMPLES = ["Hand-patinated brass kitchen fronts for a villa in Nice", "Tufted leather wall panels for a private cinema", "Backlit onyx vanity for a boutique hotel"];
 
 export function SearchPanel({ initialTab = "project", compact = false }: { initialTab?: Tab; compact?: boolean }) {
+  const tr = useT();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(initialTab);
   const [q, setQ] = useState("");
@@ -75,7 +77,7 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
 
   return (
     <div className={cn("rounded-[1.6rem] border border-line bg-paper/95 p-2 shadow-[0_30px_80px_-40px_rgba(28,23,20,0.35)] backdrop-blur", compact && "shadow-none")}>
-      <div role="tablist" aria-label="Search mode" className="flex gap-1 overflow-x-auto rounded-[1.2rem] bg-ivory p-1">
+      <div role="tablist" aria-label={tr("Search mode")} className="flex gap-1 overflow-x-auto rounded-[1.2rem] bg-ivory p-1">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -87,7 +89,7 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
             }}
             className={cn("flex-1 whitespace-nowrap rounded-[0.95rem] px-4 py-2.5 text-[13px] font-medium transition", tab === t.id ? "bg-paper text-ink shadow-sm" : "text-muted hover:text-ink")}
           >
-            {t.label}
+            {tr(t.label)}
           </button>
         ))}
       </div>
@@ -96,8 +98,7 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
         {tab === "project" && (
           <div>
             <label htmlFor="sp-q" className="sr-only">
-              Describe what you want to create
-            </label>
+              {tr("Describe what you want to create")}</label>
             <textarea
               id="sp-q"
               value={q}
@@ -106,14 +107,14 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit();
               }}
               rows={compact ? 2 : 3}
-              placeholder="Describe what you want to create…"
+              placeholder={tr("Describe what you want to create…")}
               className="w-full resize-none bg-transparent font-display text-xl leading-snug text-ink placeholder:text-[#b3a697] focus:outline-none sm:text-2xl"
             />
             {!compact && (
               <div className="mt-1 flex flex-wrap gap-2">
                 {EXAMPLES.map((ex) => (
-                  <button key={ex} onClick={() => setQ(ex)} className="rounded-full border border-line px-3 py-1 text-[12px] text-muted transition hover:border-ink/40 hover:text-ink">
-                    {ex}
+                  <button key={ex} onClick={() => setQ(tr(ex))} className="rounded-full border border-line px-3 py-1 text-[12px] text-muted transition hover:border-ink/40 hover:text-ink">
+                    {tr(ex)}
                   </button>
                 ))}
               </div>
@@ -138,14 +139,14 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
             {preview ? (
               <div className="relative size-24 shrink-0 overflow-hidden rounded-xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={preview} alt="Selected reference" className="size-full object-cover" />
+                <img src={preview} alt={tr("Selected reference")} className="size-full object-cover" />
                 <button
                   onClick={() => {
                     setFile(null);
                     setPreview(null);
                   }}
                   className="absolute right-1 top-1 rounded-full bg-ink/70 p-1 text-paper"
-                  aria-label="Remove image"
+                  aria-label={tr("Remove image")}
                 >
                   <X className="size-3" />
                 </button>
@@ -156,10 +157,10 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
               </span>
             )}
             <div className="text-sm">
-              <p className="font-medium">{file ? file.name : "Drop a reference picture"}</p>
-              <p className="mt-1 text-muted">A moodboard, a photo of a piece, a texture… We&apos;ll find makers whose work looks alike.</p>
+              <p className="font-medium">{file ? file.name : tr("Drop a reference picture")}</p>
+              <p className="mt-1 text-muted">{tr("A moodboard, a photo of a piece, a texture… We'll find makers whose work looks alike.")}</p>
               <button onClick={() => inputRef.current?.click()} className="mt-2 text-[13px] font-medium text-brass-dark underline-offset-4 hover:underline">
-                {file ? "Choose another image" : "Browse files"}
+                {file ? tr("Choose another image") : tr("Browse files")}
               </button>
               <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => chooseFile(e.target.files?.[0])} />
             </div>
@@ -169,9 +170,9 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
         {tab === "skills" && (
           <div className="scrollbar-thin max-h-56 space-y-4 overflow-y-auto pr-1">
             {[
-              ["skills", "Skills", SKILLS],
-              ["materials", "Materials", MATERIALS],
-              ["techniques", "Techniques", TECHNIQUES],
+              ["skills", tr("Skills"), SKILLS],
+              ["materials", tr("Materials"), MATERIALS],
+              ["techniques", tr("Techniques"), TECHNIQUES],
             ].map(([key, label, list]) => (
               <div key={key as string}>
                 <p className="eyebrow mb-2">{label as string}</p>
@@ -180,7 +181,7 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
                     const on = picked[key as string]!.includes(v.name);
                     return (
                       <button key={v.name} onClick={() => toggle(key as string, v.name)} aria-pressed={on} className={cn("rounded-full border px-3 py-1 text-[12.5px] transition", on ? "border-ink bg-ink text-paper" : "border-line text-ink-soft hover:border-ink/40")}>
-                        {v.name}
+                        {tr(v.name)}
                       </button>
                     );
                   })}
@@ -193,18 +194,18 @@ export function SearchPanel({ initialTab = "project", compact = false }: { initi
         <div className="mt-4 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center">
           <label className="flex flex-1 items-center gap-2 rounded-full bg-ivory px-4 py-2.5">
             <MapPin className="size-4 shrink-0 text-muted" strokeWidth={1.6} />
-            <span className="sr-only">Location</span>
-            <input value={near} onChange={(e) => setNear(e.target.value)} placeholder="Location (city or country) — optional" className="w-full bg-transparent text-sm focus:outline-none" />
+            <span className="sr-only">{tr("Location")}</span>
+            <input value={near} onChange={(e) => setNear(e.target.value)} placeholder={tr("Location (city or country) — optional")} className="w-full bg-transparent text-sm focus:outline-none" />
           </label>
           <button onClick={submit} disabled={pending} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink px-7 text-sm font-medium text-paper transition hover:bg-ink-soft disabled:opacity-60">
             {pending ? <span className="size-4 animate-spin rounded-full border-2 border-paper border-r-transparent" /> : <Sparkles className="size-4" strokeWidth={1.6} />}
-            {tab === "skills" && pickedCount ? `Explore ${pickedCount} criteria` : "Explore expertise"}
+            {tab === "skills" && pickedCount ? tr("Explore {pickedCount} criteria", { pickedCount }) : tr("Explore expertise")}
             <ArrowRight className="size-4" />
           </button>
         </div>
         {error && (
           <p role="alert" className="mt-3 text-sm text-danger">
-            {error}
+            {tr(error)}
           </p>
         )}
       </div>

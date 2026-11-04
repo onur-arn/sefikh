@@ -1,7 +1,11 @@
+"use client";
+
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 export function Field({ label, hint, error, children, className, required }: { label?: ReactNode; hint?: ReactNode; error?: string | string[]; children: ReactNode; className?: string; required?: boolean }) {
+  const tr = useT();
   const err = Array.isArray(error) ? error[0] : error;
   return (
     <label className={cn("block", className)}>
@@ -12,7 +16,7 @@ export function Field({ label, hint, error, children, className, required }: { l
         </span>
       )}
       {children}
-      {err ? <span className="mt-1.5 block text-xs text-danger">{err}</span> : hint ? <span className="mt-1.5 block text-xs text-muted">{hint}</span> : null}
+      {err ? <span className="mt-1.5 block text-xs text-danger">{tr(err)}</span> : hint ? <span className="mt-1.5 block text-xs text-muted">{hint}</span> : null}
     </label>
   );
 }
@@ -34,10 +38,11 @@ export function Select({ className, children, ...props }: ComponentProps<"select
 }
 
 export function FormMessage({ state }: { state?: { error?: string; success?: string } | null }) {
+  const tr = useT();
   if (!state?.error && !state?.success) return null;
   return (
     <p role={state.error ? "alert" : "status"} className={cn("rounded-lg px-4 py-3 text-sm", state.error ? "bg-danger/10 text-danger" : "bg-success/10 text-success")}>
-      {state.error ?? state.success}
+      {state.error ?? tr(state.success)}
     </p>
   );
 }

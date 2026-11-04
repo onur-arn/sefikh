@@ -13,16 +13,22 @@ import { SearchPanel } from "@/components/search/search-panel";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/misc";
+import { getT } from "@/i18n/server";
+import { translateText } from "@/lib/ai";
 
-export const metadata: Metadata = {
-  title: "Explore makers",
-  description: "Search artisans, workshops and manufacturers by project, image, skills, materials and location.",
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return {
+  title: tr("Explore makers"),
+  description: tr("Search artisans, workshops and manufacturers by project, image, skills, materials and location."),
 };
+}
 
 const list = (v: string | string[] | undefined) => (Array.isArray(v) ? v : v ? [v] : []);
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?.trim() || undefined;
 
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
+  const tr = await getT();
   const sp = await searchParams;
   const [user, vid] = await Promise.all([getCurrentUser(), visitorId()]);
   const who = { userId: user?.id ?? null, visitorId: vid };
@@ -61,6 +67,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
     const already = await findRecentSearch(who, "TEXT", q!);
     if (!already && (await searchesThisMonth(who, "TEXT")) >= plan.limits.textSearchesPerMonth) limited = true;
   }
+
+  // La recherche comprend l'anglais et le français ; les autres langues passent par la traduction automatique.
+  if (q && !["en", "fr"].includes(tr.locale)) input.q = await translateText(q, "en").catch(() => q);
 
   const { results, detected, usedVisualAI } = limited ? { results: [], detected: { tags: [], city: null, country: null }, usedVisualAI: false } : await runSearch(input);
 
@@ -104,28 +113,28 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         <div className="flex items-start gap-5">
           {imageSearch?.imageKey && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={fileUrl(imageSearch.imageKey)!} alt="Your reference" className="size-20 shrink-0 rounded-xl object-cover ring-4 ring-paper" />
+            <img src={fileUrl(imageSearch.imageKey)!} alt={tr("Your reference")} className="size-20 shrink-0 rounded-xl object-cover ring-4 ring-paper" />
           )}
           <div>
             <p className="eyebrow flex items-center gap-2">
               {imageSearch ? <ScanSearch className="size-3.5" /> : <Sparkles className="size-3.5" />}
-              {imageSearch ? "Visual search" : q ? "Project search" : "Explore expertise"}
-              {usedVisualAI && <span className="rounded-full bg-brass-light px-2 py-0.5 text-[10px] tracking-normal text-brass-dark normal-case">AI visual matching</span>}
+              {imageSearch ? tr("Visual search") : q ? tr("Project search") : tr("Explore expertise")}
+              {usedVisualAI && <span className="rounded-full bg-brass-light px-2 py-0.5 text-[10px] tracking-normal text-brass-dark normal-case">{tr("AI visual matching")}</span>}
             </p>
             <h1 className="display mt-2 text-3xl sm:text-4xl">
               {limited
-                ? "You've reached your free searches for this month"
+                ? tr("You've reached your free searches for this month")
                 : hasCriteria
-                  ? `Here ${results.length === 1 ? "is 1 maker" : `are ${results.length} makers`} and specialists matching your ${imageSearch ? "reference" : "project requirements"}.`
-                  : `${results.length} makers, workshops and manufacturers`}
+                  ? tr(imageSearch ? (results.length === 1 ? "Here is 1 maker matching your reference." : "Here are {count} makers matching your reference.") : results.length === 1 ? "Here is 1 maker matching your project requirements." : "Here are {count} makers matching your project requirements.", { count: results.length })
+                  : tr("{length} makers, workshops and manufacturers", { length: results.length })}
             </h1>
             {q && <p className="mt-2 line-clamp-2 max-w-2xl text-sm italic text-muted">“{q}”</p>}
             {chips.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                <span className="text-[12px] text-muted">We understood:</span>
+                <span className="text-[12px] text-muted">{tr("We understood:")}</span>
                 {chips.map((c) => (
                   <span key={c} className="rounded-full border border-line bg-paper px-2.5 py-0.5 text-[12px]">
-                    {c}
+                    {tr(c)}
                   </span>
                 ))}
               </div>
@@ -143,27 +152,22 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           {limited ? (
             <div className="rounded-3xl bg-espresso p-10 text-center text-paper">
               <Lock className="mx-auto size-8 text-brass-light" strokeWidth={1.4} />
-              <h2 className="display mt-4 text-3xl">Unlock unlimited AI-powered searches</h2>
+              <h2 className="display mt-4 text-3xl">{tr("Unlock unlimited AI-powered searches")}</h2>
               <p className="mx-auto mt-3 max-w-md text-sm text-paper/60">
-                The Free plan includes {plan.limits.textSearchesPerMonth} project searches per month. You can keep browsing by skills and materials, or upgrade to Pro for unlimited searches, full profiles and direct messaging.
-              </p>
+                {tr("The Free plan includes {textSearchesPerMonth} project searches per month. You can keep browsing by skills and materials, or upgrade to Pro for unlimited searches, full profiles and direct messaging.", { textSearchesPerMonth: plan.limits.textSearchesPerMonth })}</p>
               <div className="mt-7 flex flex-wrap justify-center gap-3">
                 <ButtonLink href={user ? "/pricing" : "/register"} variant="light">
-                  {user ? "See plans" : "Create a free account"}
+                  {user ? tr("See plans") : tr("Create a free account")}
                 </ButtonLink>
                 <ButtonLink href="/search" variant="secondary" className="border-paper/40 text-paper hover:bg-paper hover:text-ink">
-                  Browse by expertise
-                </ButtonLink>
+                  {tr("Browse by expertise")}</ButtonLink>
               </div>
             </div>
           ) : results.length === 0 ? (
-            <EmptyState icon={<Sparkles className="size-8" strokeWidth={1.3} />} title="No maker matches yet" action={<ButtonLink href="/search" variant="secondary">Reset the search</ButtonLink>}>
-              Try fewer filters, a broader location or different words. You can also{" "}
+            <EmptyState icon={<Sparkles className="size-8" strokeWidth={1.3} />} title={tr("No maker matches yet")} action={<ButtonLink href="/search" variant="secondary">{tr("Reset the search")}</ButtonLink>}>
+              {tr("Try fewer filters, a broader location or different words. You can also")}
               <Link href="/dashboard/projects/new" className="text-ink underline">
-                describe your project in detail
-              </Link>{" "}
-              and we&apos;ll match it for you.
-            </EmptyState>
+                {tr("describe your project in detail")}</Link>{" "}{tr("and we'll match it for you.")}</EmptyState>
           ) : (
             <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:gap-x-6">
               {results.map((r, i) => (
@@ -173,10 +177,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           )}
           {!user && !limited && results.length > 0 && (
             <div className="mt-16 flex flex-col items-center justify-between gap-4 rounded-2xl border border-line bg-paper p-6 sm:flex-row">
-              <p className="text-sm text-ink-soft">Create a free account to contact makers, save your favourites and follow your projects.</p>
+              <p className="text-sm text-ink-soft">{tr("Create a free account to contact makers, save your favourites and follow your projects.")}</p>
               <ButtonLink href="/register" size="sm">
-                Join SEFIKH — it&apos;s free
-              </ButtonLink>
+                {tr("Join SEFIKH — it's free")}</ButtonLink>
             </div>
           )}
         </div>

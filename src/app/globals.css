@@ -17,8 +17,8 @@
   --color-success: #3f6b4f;
   --color-danger: #a33a2f;
 
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, "Songti SC", "Noto Serif SC", serif;
 
   --tracking-logo: 0.32em;
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);

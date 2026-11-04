@@ -5,10 +5,15 @@ import { activateSubscription, getStripe } from "@/lib/billing";
 import { getPlan, type PlanId, type Term } from "@/lib/plans";
 import { ButtonLink } from "@/components/ui/button";
 import { daysFromNow } from "@/lib/utils";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Payment confirmed", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Payment confirmed"), robots: { index: false } };
+}
 
 export default async function CheckoutSuccessPage({ searchParams }: PageProps<"/checkout/success">) {
+  const tr = await getT();
   const user = await requireUser("/dashboard/billing");
   const { session_id, changed } = await searchParams;
   let confirmed = !!changed;
@@ -32,17 +37,16 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps<"/
   return (
     <div className="container-x flex min-h-[70vh] max-w-xl flex-col items-center justify-center py-16 text-center">
       {confirmed ? <CheckCircle2 className="size-14 text-success" strokeWidth={1.3} /> : <Clock className="size-14 text-brass" strokeWidth={1.3} />}
-      <h1 className="display mt-6 text-5xl">{confirmed ? "Thank you!" : "Payment processing"}</h1>
+      <h1 className="display mt-6 text-5xl">{confirmed ? tr("Thank you!") : tr("Payment processing")}</h1>
       <p className="mt-4 text-muted">
         {confirmed
-          ? `Your ${plan.name} plan is now active. A confirmation e-mail and your invoice are on their way.`
-          : "Your payment is being confirmed by your bank. Your plan will be activated within a few minutes — you'll receive an e-mail."}
+          ? tr("Your {name} plan is now active. A confirmation e-mail and your invoice are on their way.", { name: plan.name })
+          : tr("Your payment is being confirmed by your bank. Your plan will be activated within a few minutes — you'll receive an e-mail.")}
       </p>
       <div className="mt-8 flex gap-3">
-        <ButtonLink href="/dashboard">Go to my dashboard</ButtonLink>
+        <ButtonLink href="/dashboard">{tr("Go to my dashboard")}</ButtonLink>
         <ButtonLink href="/dashboard/billing" variant="secondary">
-          Billing
-        </ButtonLink>
+          {tr("Billing")}</ButtonLink>
       </div>
     </div>
   );

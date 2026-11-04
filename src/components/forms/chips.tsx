@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/client";
 
 /** Groupe de cases à cocher stylées en « pilules » ; soumet `name` répété pour chaque valeur. */
 export function ChipGroup({ name, options, defaultValue = [], max }: { name: string; options: readonly string[]; defaultValue?: string[]; max?: number }) {
+  const tr = useT();
   const [values, setValues] = useState<string[]>(defaultValue);
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -15,7 +17,7 @@ export function ChipGroup({ name, options, defaultValue = [], max }: { name: str
         return (
           <label key={o} className={cn("cursor-pointer select-none rounded-full border px-3 py-1.5 text-[12.5px] transition", on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40", disabled && "cursor-not-allowed opacity-40")}>
             <input type="checkbox" name={name} value={o} checked={on} disabled={disabled} onChange={() => setValues((v) => (on ? v.filter((x) => x !== o) : [...v, o]))} className="sr-only" />
-            {o}
+            {tr(o)}
           </label>
         );
       })}
@@ -25,6 +27,7 @@ export function ChipGroup({ name, options, defaultValue = [], max }: { name: str
 
 /** Saisie de mots-clés en bulles (Entrée ou virgule pour valider). */
 export function TagInput({ name, defaultValue = [], max = 15, placeholder }: { name: string; defaultValue?: string[]; max?: number; placeholder?: string }) {
+  const tr = useT();
   const [tags, setTags] = useState<string[]>(defaultValue);
   const [draft, setDraft] = useState("");
   function commit() {
@@ -38,7 +41,7 @@ export function TagInput({ name, defaultValue = [], max = 15, placeholder }: { n
         {tags.map((t) => (
           <span key={t} className="flex items-center gap-1 rounded-full bg-brass-light px-2.5 py-1 text-[12.5px] text-brass-dark">
             {t}
-            <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`Remove ${t}`} className="rounded-full p-0.5 hover:bg-brass/20">
+            <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={tr("Remove {t}", { t })} className="rounded-full p-0.5 hover:bg-brass/20">
               <X className="size-3" />
             </button>
             <input type="hidden" name={name} value={t} />
@@ -61,15 +64,16 @@ export function TagInput({ name, defaultValue = [], max = 15, placeholder }: { n
         )}
       </div>
       <p className="mt-1.5 text-xs text-muted">
-        Press Enter to add · {tags.length}/{max}
+        {tr("Press Enter to add · {length}/{max}", { length: tags.length, max })}
       </p>
     </div>
   );
 }
 
 export function MonthPicker({ name, defaultValue = [] }: { name: string; defaultValue?: number[] }) {
+  const tr = useT();
   const [months, setMonths] = useState<number[]>(defaultValue);
-  const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const labels = [tr("Jan"), tr("Feb"), tr("Mar"), tr("Apr"), tr("May"), tr("Jun"), tr("Jul"), tr("Aug"), tr("Sep"), tr("Oct"), tr("Nov"), tr("Dec")];
   return (
     <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-12">
       {labels.map((l, i) => {
@@ -77,7 +81,7 @@ export function MonthPicker({ name, defaultValue = [] }: { name: string; default
         return (
           <label key={l} className={cn("cursor-pointer rounded-lg border py-2 text-center text-[12px] transition", on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40")}>
             <input type="checkbox" name={name} value={i + 1} checked={on} onChange={() => setMonths((m) => (on ? m.filter((x) => x !== i + 1) : [...m, i + 1]))} className="sr-only" />
-            {l}
+            {tr(l)}
           </label>
         );
       })}

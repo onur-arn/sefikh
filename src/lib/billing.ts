@@ -1,12 +1,12 @@
 import "server-only";
 import Stripe from "stripe";
 import { db } from "@/lib/db";
+import { translatorFor } from "@/i18n/server";
 import { env, simulatedPayments } from "@/lib/env";
 import { sendEmail } from "@/lib/mail";
 import { paymentFailedTemplate, subscriptionTemplate } from "@/lib/mail/templates";
 import { notify } from "@/lib/notifications";
 import { defaultPlanFor, getPlan, PLANS, type PlanId, type Term } from "@/lib/plans";
-import { formatMoney } from "@/lib/utils";
 
 let stripe: Stripe | null = null;
 export function getStripe() {
@@ -132,8 +132,9 @@ async function applyPlanChange(subscriptionId: string, userId: string, planId: P
     where: { id: subscriptionId },
     data: { plan: planId, term, amount, cancelAtPeriodEnd: false, ...(term === "ANNUAL" ? { commitmentEndsAt: addMonths(new Date(), 12) } : {}) },
   });
-  await db.user.update({ where: { id: userId }, data: { plan: planId } });
-  await notify(userId, { type: "BILLING", title: `You are now on ${PLANS[planId].name}`, link: "/dashboard/billing" });
+  const user = await db.user.update({ where: { id: userId }, data: { plan: planId } });
+  const tr = translatorFor(user.locale);
+  await notify(userId, { type: "BILLING", title: tr("You are now on {planName}", { planName: tr(PLANS[planId].name) }), link: "/dashboard/billing" });
 }
 
 function addMonths(d: Date, n: number) {
@@ -184,8 +185,9 @@ export async function activateSubscription(opts: {
   if (opts.planId === "PRO_PRO" || opts.planId === "PRO_VISIBILITY" || opts.planId === "PRO_INTELLIGENCE" || opts.planId === "PRO_FOUNDING") {
     await db.company.updateMany({ where: { userId: opts.userId }, data: { verified: true } });
   }
-  await notify(opts.userId, { type: "BILLING", title: `Welcome to ${plan.name}`, body: "Your subscription is active.", link: "/dashboard/billing" });
-  const tpl = subscriptionTemplate({ name: user.name, planName: plan.name, amount: formatMoney(amount), term: TERM_LABEL[opts.term] });
+  const tr = translatorFor(user.locale);
+  await notify(opts.userId, { type: "BILLING", title: tr("Welcome to {planName}", { planName: tr(plan.name) }), body: tr("Your subscription is active."), link: "/dashboard/billing" });
+  const tpl = subscriptionTemplate({ name: user.name, planName: tr(plan.name), amount: tr.money(amount), term: tr(TERM_LABEL[opts.term]) }, user.locale);
   await sendEmail({ to: user.email, ...tpl });
   return sub;
 }
@@ -337,8 +339,8 @@ export async function handleStripeEvent(event: Stripe.Event) {
         if (row) await db.subscription.update({ where: { id: row.id }, data: { status: "PAST_DUE" } });
         const user = await db.user.findUnique({ where: { id: userId } });
         if (user) {
-          await notify(userId, { type: "BILLING", title: "Payment failed", body: "Please update your payment method.", link: "/dashboard/billing" });
-          await sendEmail({ to: user.email, ...paymentFailedTemplate(user.name) });
+          await notify(userId, { type: "BILLING", title: translatorFor(user.locale)("Payment failed"), body: translatorFor(user.locale)("Please update your payment method."), link: "/dashboard/billing" });
+          await sendEmail({ to: user.email, ...paymentFailedTemplate(user.name, user.locale) });
         }
       }
       break;

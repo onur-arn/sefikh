@@ -6,22 +6,27 @@ import { db } from "@/lib/db";
 import { getPlan, formatLimit } from "@/lib/plans";
 import { runSearch, searchesThisMonth } from "@/lib/search";
 import { companyStats } from "@/lib/stats";
-import { formatRelative, parseList } from "@/lib/utils";
+import { parseList } from "@/lib/utils";
 import { unreadConversationCount } from "@/lib/messaging";
 import { Avatar, Badge, Card } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { MakerCard } from "@/components/makers/maker-card";
 import { PublishToggle } from "@/components/dashboard/publish-toggle";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Dashboard", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const tr = await getT();
+  return { title: tr("Dashboard"), robots: { index: false } };
+}
 
 export default async function DashboardPage({ searchParams }: PageProps<"/dashboard">) {
+  const tr = await getT();
   const user = await requireUser("/dashboard");
   const sp = await searchParams;
   const notice = sp.notice === "password-reset" ? "Your password has been updated." : sp.welcome ? "Welcome to SEFIKH — your profile is ready." : null;
   return (
     <>
-      {notice && <p className="mb-6 rounded-xl bg-success/10 px-4 py-3 text-sm text-success">{notice}</p>}
+      {notice && <p className="mb-6 rounded-xl bg-success/10 px-4 py-3 text-sm text-success">{tr(notice)}</p>}
       {user.role === "PRO" ? <ProOverview user={user} /> : <ClientOverview user={user} />}
     </>
   );
@@ -40,6 +45,7 @@ function Stat({ icon: Icon, label, value, hint, href }: { icon: typeof Eye; labe
 }
 
 async function ClientOverview({ user }: { user: CurrentUser }) {
+  const tr = await getT();
   const plan = getPlan(user.plan);
   const [profile, projects, saved, unread, textUsed, imageUsed] = await Promise.all([
     db.clientProfile.findUnique({ where: { userId: user.id } }),
@@ -65,36 +71,34 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
       <header className="flex flex-col gap-6 sm:flex-row sm:items-center">
         <Avatar name={profile?.studioName || user.name} imageKey={user.avatarKey} size={72} />
         <div className="flex-1">
-          <p className="eyebrow">Creative space</p>
+          <p className="eyebrow">{tr("Creative space")}</p>
           <h1 className="display mt-1 text-4xl sm:text-5xl">{profile?.studioName || user.name}</h1>
           <p className="mt-1 text-sm text-muted">{[user.name !== profile?.studioName ? user.name : null, profile?.city, profile?.country].filter(Boolean).join(" · ")}</p>
         </div>
         <div className="flex gap-2">
           <ButtonLink href="/dashboard/projects/new">
-            <Plus className="size-4" /> I have a new project
-          </ButtonLink>
+            <Plus className="size-4" /> {" "}{tr("I have a new project")}</ButtonLink>
           <ButtonLink href="/dashboard/profile" variant="secondary">
-            Modify profile
-          </ButtonLink>
+            {tr("Modify profile")}</ButtonLink>
         </div>
       </header>
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <Stat icon={FolderKanban} label="Active projects" value={active.length} href="/dashboard/projects" />
-        <Stat icon={MessageCircle} label="Unread conversations" value={unread} href="/messages" />
-        <Stat icon={Bookmark} label="Saved makers" value={saved} href="/dashboard/library" />
+        <Stat icon={FolderKanban} label={tr("Active projects")} value={active.length} href="/dashboard/projects" />
+        <Stat icon={MessageCircle} label={tr("Unread conversations")} value={unread} href="/messages" />
+        <Stat icon={Bookmark} label={tr("Saved makers")} value={saved} href="/dashboard/library" />
         <Stat
           icon={Search}
-          label="Searches this month"
+          label={tr("Searches this month")}
           value={textUsed + imageUsed}
-          hint={Number.isFinite(plan.limits.textSearchesPerMonth) ? `${Math.max(0, plan.limits.textSearchesPerMonth - textUsed)} text · ${Math.max(0, plan.limits.imageSearchesPerMonth - imageUsed)} image left` : "Unlimited on your plan"}
+          hint={Number.isFinite(plan.limits.textSearchesPerMonth) ? tr("{v} text · {v2} image left", { v: Math.max(0, plan.limits.textSearchesPerMonth - textUsed), v2: Math.max(0, plan.limits.imageSearchesPerMonth - imageUsed) }) : tr("Unlimited on your plan")}
         />
       </div>
 
       <section className="grid gap-6 lg:grid-cols-2">
         {[
-          ["Active projects", active],
-          ["Archived projects", archived],
+          [tr("Active projects"), active],
+          [tr("Archived projects"), archived],
         ].map(([title, list]) => (
           <Card key={title as string} className="p-6">
             <div className="flex items-center justify-between">
@@ -103,15 +107,15 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
             </div>
             <ul className="mt-4 divide-y divide-line">
               {(list as typeof projects).length === 0 ? (
-                <li className="py-6 text-sm text-muted">{title === "Active projects" ? "Describe your first project to get matched with makers." : "No archived project."}</li>
+                <li className="py-6 text-sm text-muted">{title === tr("Active projects") ? tr("Describe your first project to get matched with makers.") : tr("No archived project.")}</li>
               ) : (
                 (list as typeof projects).slice(0, 5).map((p) => (
                   <li key={p.id}>
                     <Link href={`/dashboard/projects/${p.id}`} className="group flex items-center gap-4 py-3.5">
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[14.5px] font-medium group-hover:underline">{p.title}</p>
+                        <p className="truncate text-[14.5px] font-medium group-hover:underline">{tr(p.title)}</p>
                         <p className="text-[12.5px] text-muted">
-                          {[p.city, p.timeline, `${p._count.conversations} conversation${p._count.conversations === 1 ? "" : "s"}`].filter(Boolean).join(" · ")}
+                          {[p.city, tr(p.timeline), tr(p._count.conversations === 1 ? "{count} conversation" : "{count} conversations", { count: p._count.conversations })].filter(Boolean).join(" · ")}
                         </p>
                       </div>
                       <ArrowUpRight className="size-4 text-muted transition group-hover:text-ink" />
@@ -120,10 +124,9 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
                 ))
               )}
             </ul>
-            {title === "Active projects" && (
+            {title === tr("Active projects") && (
               <Link href="/dashboard/projects/new" className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-brass-dark hover:underline">
-                <Plus className="size-3.5" /> New project
-              </Link>
+                <Plus className="size-3.5" /> {" "}{tr("New project")}</Link>
             )}
           </Card>
         ))}
@@ -134,13 +137,11 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
           <div className="flex items-end justify-between">
             <div>
               <p className="eyebrow flex items-center gap-1.5">
-                <Sparkles className="size-3.5" /> Personalised suggestions
-              </p>
-              <h2 className="display mt-2 text-3xl">For “{active[0]!.title}”</h2>
+                <Sparkles className="size-3.5" /> {" "}{tr("Personalised suggestions")}</p>
+              <h2 className="display mt-2 text-3xl">{tr("For “{title}”", { title: active[0]!.title })}</h2>
             </div>
             <Link href={`/dashboard/projects/${active[0]!.id}`} className="text-sm font-medium underline-offset-4 hover:underline">
-              All matches
-            </Link>
+              {tr("All matches")}</Link>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 xl:grid-cols-4">
             {suggestions.map((r) => (
@@ -152,13 +153,12 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
         !plan.limits.savedLibrary && (
           <div className="rounded-2xl grain flex flex-col items-start gap-5 overflow-hidden bg-espresso p-8 text-paper sm:flex-row sm:items-center">
             <div className="flex-1">
-              <p className="display text-3xl">Go further with Pro</p>
+              <p className="display text-3xl">{tr("Go further with Pro")}</p>
               <p className="mt-2 text-sm text-paper/60">
-                Unlimited searches, full contact details, your supplier library and personalised suggestions — from 39 € per month.
-              </p>
+                {tr("Unlimited searches, full contact details, your supplier library and personalised suggestions — from 39 € per month.")}</p>
             </div>
             <ButtonLink href="/pricing" variant="light">
-              See plans <ArrowRight className="size-4" />
+              {tr("See plans")}{" "}<ArrowRight className="size-4" />
             </ButtonLink>
           </div>
         )
@@ -168,15 +168,16 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
 }
 
 async function ProOverview({ user }: { user: CurrentUser }) {
+  const tr = await getT();
   const plan = getPlan(user.plan);
   const company = await db.company.findUnique({ where: { userId: user.id }, include: { _count: { select: { portfolio: true, tags: true } } } });
   if (!company) {
     return (
       <Card className="p-10 text-center">
-        <h1 className="display text-4xl">Create your business profile</h1>
-        <p className="mx-auto mt-3 max-w-md text-sm text-muted">Tell us about your skills, materials and capabilities. It only takes a few minutes.</p>
+        <h1 className="display text-4xl">{tr("Create your business profile")}</h1>
+        <p className="mx-auto mt-3 max-w-md text-sm text-muted">{tr("Tell us about your skills, materials and capabilities. It only takes a few minutes.")}</p>
         <ButtonLink href="/onboarding" className="mt-6">
-          Start now <ArrowRight className="size-4" />
+          {tr("Start now")}{" "}<ArrowRight className="size-4" />
         </ButtonLink>
       </Card>
     );
@@ -192,11 +193,11 @@ async function ProOverview({ user }: { user: CurrentUser }) {
   ]);
 
   const checklist = [
-    { done: !!company.about && company.about.length > 80, label: "Describe your company", href: "/dashboard/profile" },
-    { done: company._count.tags >= 3, label: "Add skills, materials & techniques", href: "/dashboard/profile" },
-    { done: company._count.portfolio >= 3, label: "Publish at least 3 portfolio pictures", href: "/dashboard/portfolio" },
-    { done: parseList(company.availability).length > 0, label: "Share your production availability", href: "/dashboard/profile" },
-    { done: company.published, label: "Publish your profile", href: "/dashboard/profile" },
+    { done: !!company.about && company.about.length > 80, label: tr("Describe your company"), href: "/dashboard/profile" },
+    { done: company._count.tags >= 3, label: tr("Add skills, materials & techniques"), href: "/dashboard/profile" },
+    { done: company._count.portfolio >= 3, label: tr("Publish at least 3 portfolio pictures"), href: "/dashboard/portfolio" },
+    { done: parseList(company.availability).length > 0, label: tr("Share your production availability"), href: "/dashboard/profile" },
+    { done: company.published, label: tr("Publish your profile"), href: "/dashboard/profile" },
   ];
   const completion = Math.round((checklist.filter((c) => c.done).length / checklist.length) * 100);
 
@@ -204,40 +205,39 @@ async function ProOverview({ user }: { user: CurrentUser }) {
     <div className="space-y-10">
       <header className="flex flex-col gap-6 sm:flex-row sm:items-end">
         <div className="flex-1">
-          <p className="eyebrow">Maker space</p>
+          <p className="eyebrow">{tr("Maker space")}</p>
           <h1 className="display mt-1 text-4xl sm:text-5xl">{company.name}</h1>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Badge tone={company.published ? "success" : "neutral"}>{company.published ? "Published" : "Draft"}</Badge>
-            <Badge tone="brass">{plan.name}</Badge>
-            {company.verified && <Badge tone="dark">Verified</Badge>}
+            <Badge tone={company.published ? "success" : "neutral"}>{company.published ? tr("Published") : tr("Draft")}</Badge>
+            <Badge tone="brass">{tr(plan.name)}</Badge>
+            {company.verified && <Badge tone="dark">{tr("Verified")}</Badge>}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <PublishToggle published={company.published} />
           <ButtonLink href={`/makers/${company.slug}`} variant="secondary">
-            View public page <ArrowUpRight className="size-4" />
+            {tr("View public page")}{" "}<ArrowUpRight className="size-4" />
           </ButtonLink>
         </div>
       </header>
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <Stat icon={Eye} label="Profile views · 30 days" value={stats.views} hint={`${stats.viewsDelta >= 0 ? "+" : ""}${stats.viewsDelta}% vs previous period`} href={plan.limits.analytics ? "/dashboard/analytics" : undefined} />
-        <Stat icon={Search} label="Appearances in search" value={stats.impressions} hint={`${stats.ctr}% click-through`} />
-        <Stat icon={MessageCircle} label="New requests · 30 days" value={stats.conversations} href="/messages" />
-        <Stat icon={Bookmark} label="Saved by creatives" value={stats.saved} />
+        <Stat icon={Eye} label={tr("Profile views · 30 days")} value={stats.views} hint={tr("{v}{viewsDelta}% vs previous period", { v: stats.viewsDelta >= 0 ? "+" : "", viewsDelta: stats.viewsDelta })} href={plan.limits.analytics ? "/dashboard/analytics" : undefined} />
+        <Stat icon={Search} label={tr("Appearances in search")} value={stats.impressions} hint={tr("{ctr}% click-through", { ctr: stats.ctr })} />
+        <Stat icon={MessageCircle} label={tr("New requests · 30 days")} value={stats.conversations} href="/messages" />
+        <Stat icon={Bookmark} label={tr("Saved by creatives")} value={stats.saved} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card className="p-6">
           <div className="flex items-center justify-between">
-            <h2 className="display text-2xl">Latest requests</h2>
+            <h2 className="display text-2xl">{tr("Latest requests")}</h2>
             <Link href="/messages" className="text-[13px] font-medium underline-offset-4 hover:underline">
-              Open inbox
-            </Link>
+              {tr("Open inbox")}</Link>
           </div>
           <ul className="mt-4 divide-y divide-line">
             {requests.length === 0 ? (
-              <li className="py-8 text-center text-sm text-muted">No request yet. A complete profile with great pictures gets found faster.</li>
+              <li className="py-8 text-center text-sm text-muted">{tr("No request yet. A complete profile with great pictures gets found faster.")}</li>
             ) : (
               requests.map((r) => (
                 <li key={r.id}>
@@ -246,9 +246,9 @@ async function ProOverview({ user }: { user: CurrentUser }) {
                     <div className="min-w-0 flex-1">
                       <p className="flex items-baseline justify-between gap-2">
                         <span className="truncate text-[14px] font-medium">{r.client.clientProfile?.studioName || r.client.name}</span>
-                        <span className="shrink-0 text-[11px] text-muted">{formatRelative(r.lastMessageAt)}</span>
+                        <span className="shrink-0 text-[11px] text-muted">{tr.relative(r.lastMessageAt)}</span>
                       </p>
-                      <p className="truncate text-[13px] text-muted">{r.messages[0]?.body}</p>
+                      <p className="truncate text-[13px] text-muted">{tr(r.messages[0]?.body)}</p>
                     </div>
                   </Link>
                 </li>
@@ -259,7 +259,7 @@ async function ProOverview({ user }: { user: CurrentUser }) {
 
         <Card className="p-6">
           <div className="flex items-center justify-between">
-            <h2 className="display text-2xl">Profile strength</h2>
+            <h2 className="display text-2xl">{tr("Profile strength")}</h2>
             <span className="display text-3xl">{completion}%</span>
           </div>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-sand">
@@ -270,25 +270,24 @@ async function ProOverview({ user }: { user: CurrentUser }) {
               <li key={c.label}>
                 <Link href={c.href} className="flex items-center gap-3 text-[13.5px] hover:underline">
                   <span className={c.done ? "flex size-5 items-center justify-center rounded-full bg-success text-paper" : "size-5 rounded-full border border-line"}>{c.done && <Check className="size-3" />}</span>
-                  <span className={c.done ? "text-muted line-through" : ""}>{c.label}</span>
+                  <span className={c.done ? "text-muted line-through" : ""}>{tr(c.label)}</span>
                 </Link>
               </li>
             ))}
           </ul>
           <p className="mt-5 text-[12px] text-muted">
-            Portfolio: {company._count.portfolio} / {formatLimit(plan.limits.portfolioImages)} pictures on your plan.
-          </p>
+            {tr("Portfolio: {portfolio} / {portfolioImages} pictures on your plan.", { portfolio: company._count.portfolio, portfolioImages: formatLimit(plan.limits.portfolioImages) })}</p>
         </Card>
       </div>
 
       {plan.id === "PRO_BASIC" && (
         <div className="rounded-2xl grain flex flex-col items-start gap-5 overflow-hidden bg-espresso p-8 text-paper sm:flex-row sm:items-center">
           <div className="flex-1">
-            <p className="display text-3xl">Would you like to upgrade your profile?</p>
-            <p className="mt-2 text-sm text-paper/60">Verified badge, unlimited portfolio, analytics, boosted ranking and market insights.</p>
+            <p className="display text-3xl">{tr("Would you like to upgrade your profile?")}</p>
+            <p className="mt-2 text-sm text-paper/60">{tr("Verified badge, unlimited portfolio, analytics, boosted ranking and market insights.")}</p>
           </div>
           <ButtonLink href="/upgrade" variant="light">
-            Discover business plans <ArrowRight className="size-4" />
+            {tr("Discover business plans")}{" "}<ArrowRight className="size-4" />
           </ButtonLink>
         </div>
       )}
