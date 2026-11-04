@@ -9,13 +9,13 @@ import { useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 /** Sélecteur de langue : applique le choix sans changer de page. */
-export function LocaleSwitcher({ tone = "light", className }: { tone?: "light" | "dark"; className?: string }) {
+export function LocaleSwitcher({ tone = "light", compact = false, className }: { tone?: "light" | "dark"; compact?: boolean; className?: string }) {
   const tr = useT();
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
-    <label className={cn("relative inline-flex items-center gap-1.5 text-[13px]", tone === "dark" ? "text-paper/70 hover:text-paper" : "text-ink-soft hover:text-ink", pending && "opacity-60", className)}>
-      <Globe className="size-4" aria-hidden />
+    <label className={cn("relative inline-flex items-center gap-1.5", compact ? "text-[11.5px]" : "text-[13px]", tone === "dark" ? "text-paper/70 hover:text-paper" : "text-ink-soft hover:text-ink", pending && "opacity-60", className)}>
+      {!compact && <Globe className="size-4" aria-hidden />}
       <span className="sr-only">{tr("Language")}</span>
       <select
         value={tr.locale}
@@ -31,7 +31,7 @@ export function LocaleSwitcher({ tone = "light", className }: { tone?: "light" |
       >
         {LOCALES.map((l) => (
           <option key={l} value={l} className="text-ink">
-            {LOCALE_LABELS[l]}
+            {compact ? l.toUpperCase() : LOCALE_LABELS[l]}
           </option>
         ))}
       </select>

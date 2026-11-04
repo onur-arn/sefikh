@@ -27,7 +27,7 @@ const PAGES: Record<string, { title: string; updated: string; sections: [string,
       ["Why we use it", "To provide the service (contract), to secure the platform and produce anonymised market statistics (legitimate interest), to send transactional e-mails, and to comply with accounting obligations (legal obligation)."],
       ["Retention", "Account data is kept while your account is active and deleted when you delete your account. Invoices are kept 10 years as required by law. Search logs used for statistics are anonymised."],
       ["Your rights", "You can access, correct, export (Settings → Download my data) and delete your data (Settings → Delete my account). You can also object to processing and lodge a complaint with the CNIL."],
-      ["Sub-processors", "Hosting provider, Stripe (payments), e-mail delivery provider, Anthropic (automatic translation and assistant: only the text concerned is sent). Data may be transferred outside the EU under appropriate safeguards."],
+      ["Sub-processors", "Hosting provider, Stripe (payments), e-mail delivery provider, Anthropic (automatic translation: only the text concerned is sent). Data may be transferred outside the EU under appropriate safeguards."],
     ],
   },
   cookies: {

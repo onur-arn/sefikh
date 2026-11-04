@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { LOCALE_LABELS, type Locale } from "@/i18n/config";
 
-// Accès à Claude pour la traduction automatique et l'assistant.
+// Accès à Claude pour la traduction automatique.
 // `fallbacks: "default"` relance côté serveur une requête refusée par les filtres de sécurité.
 
 export const aiEnabled = () => !!env.anthropicApiKey;

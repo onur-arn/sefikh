@@ -98,7 +98,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
       className={cn("sticky top-0 z-40 transition-colors duration-300", overlay ? "bg-transparent text-paper [&_.text-ink-soft]:!text-paper" : "border-b border-line/80 bg-paper")}
     >
       <div className="container-x grid h-[68px] grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <nav className="hidden items-center gap-5 xl:flex" aria-label={tr("Main")}>
+        <nav className="hidden items-center gap-4 lg:flex xl:gap-5" aria-label={tr("Main")}>
           {NAV.map((n) =>
             n.href === "#search" ? (
               <button key={n.href} type="button" aria-expanded={searchOpen} onClick={() => setSearchOpen((v) => !v)} className={cn(navClass, searchOpen && "text-ink [background-size:100%_1px]")}>
@@ -117,7 +117,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
         </Link>
 
         <div className="col-start-3 flex items-center justify-end gap-1.5">
-          <LocaleSwitcher tone={overlay ? "dark" : "light"} className="mr-1 hidden sm:inline-flex" />
+          <LocaleSwitcher compact tone={overlay ? "dark" : "light"} className="mr-1 hidden sm:inline-flex" />
           {user ? (
             <>
               <IconLink href="/messages" label={tr("Messages")} count={counts.messages}>
@@ -127,14 +127,11 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
               <AccountMenu user={user} />
             </>
           ) : (
-            <div className="hidden items-center gap-2 sm:flex">
-              <Link href="/login" className="px-3 text-[13.5px] text-ink-soft hover:text-ink">
-                {tr("Log in")}</Link>
-              <ButtonLink href="/register" size="sm" variant={overlay ? "light" : "primary"}>
-                {tr("Join SEFIKH")}</ButtonLink>
-            </div>
+            <Link href="/login" className="hidden px-1 text-[11.5px] text-ink-soft hover:text-ink sm:inline">
+              {tr("Log in")}
+            </Link>
           )}
-          <button className="ml-1 inline-flex size-10 items-center justify-center rounded-full hover:bg-sand hover:text-ink xl:hidden" onClick={() => setMobileOpen((o) => !o)} aria-label={tr("Menu")} aria-expanded={mobileOpen}>
+          <button className="ml-1 inline-flex size-10 items-center justify-center rounded-full hover:bg-sand hover:text-ink lg:hidden" onClick={() => setMobileOpen((o) => !o)} aria-label={tr("Menu")} aria-expanded={mobileOpen}>
             {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
@@ -151,7 +148,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
       )}
 
       {mobileOpen && (
-        <div className="border-t border-line bg-paper text-ink xl:hidden">
+        <div className="border-t border-line bg-paper text-ink lg:hidden">
           <nav className="container-x flex flex-col py-4" aria-label={tr("Mobile")}>
             {NAV.map((n) => n.href === "#search" ? (
               <button key={n.href} type="button" onClick={() => { setMobileOpen(false); setSearchOpen(true); }} className="display border-b border-line/70 py-3 text-left text-2xl">

@@ -36,11 +36,11 @@ Le premier `db:seed` télécharge le modèle CLIP (~150 Mo, dans `.cache/models`
 
 Sans `SMTP_HOST`, aucun e-mail ne part : ils sont enregistrés en base et visibles sur **http://localhost:3000/dev/mailbox** (vérification d'adresse, mot de passe oublié, notifications de message, confirmation d'abonnement…). Renseigner les variables `SMTP_*` (Resend, Brevo, Mailtrap, OVH…) pour un envoi réel.
 
-### IA (traduction et assistant)
+### Traduction automatique
 
 Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5` par défaut).
 
-- **Sans clé** : le bouton de traduction affiche « indisponible » et l'assistant fait une recherche directe, sans dialogue.
+- **Sans clé** : le bouton de traduction affiche « indisponible ».
 - **Coût** : chaque texte n'est traduit qu'une fois par langue (table `Translation`). L'API relit le texte en base et n'accepte jamais de texte libre, avec une limite de 40 traductions par heure et par visiteur.
 
 ### Paiements
@@ -66,7 +66,7 @@ Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5`
 
 **Profils makers** — fiche publique (accordéons de la maquette : zones d'intervention, compétences/matériaux/techniques, secteurs, capacités de production avec calendrier de disponibilité), portfolio avec visionneuse « About the project », coordonnées réservées aux offres Pro, makers visuellement similaires, données structurées JSON-LD.
 
-**Projets (créatifs)** — assistant en 7 étapes reprenant les questions de la maquette (champs obligatoires en gras), récapitulatif, pièces jointes, makers correspondants, archivage, modification.
+**Projets (créatifs)** — questionnaire en 7 étapes reprenant les questions de la maquette (champs obligatoires en gras), récapitulatif, pièces jointes, makers correspondants, archivage, modification.
 
 **Messagerie** — conversations par projet, filtres (tous / non lus / archivés), recherche, pièces jointes (images ré-encodées, PDF vérifiés), accusés de lecture, présence en ligne, panneau « Details », onglet « Shared files » (cloud), notifications in-app + e-mail (dédupliquées, uniquement si le destinataire n'est pas en ligne), quota de mises en relation pour l'offre gratuite.
 
@@ -79,8 +79,6 @@ Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5`
 **Langues** — catalogues dans `src/i18n/messages/` : la clé est le texte anglais, `tr("Log in")` côté serveur (`getT`) et client (`useT`). Après un ajout de texte, lancer `npm run i18n:check`, qui liste les traductions manquantes et contrôle les variables `{...}`. E-mails et notifications partent dans la langue du destinataire. La langue est mémorisée par cookie (pas de préfixe d'URL : une version par langue pour le SEO demandera des routes `/fr`, `/it`…).
 
 **Traduction automatique** — les professionnels écrivent dans leur langue : bouton « Traduire automatiquement » sur la présentation, les réalisations du portfolio et les messages reçus. Les recherches en italien, espagnol et chinois sont traduites vers l'anglais avant d'être lancées (sans clé d'API, seuls l'anglais et le français sont compris).
-
-**Assistant** — widget sur les pages publiques : transforme une idée en brief et propose des makers réels de l'annuaire. Mêmes quotas que la recherche texte.
 
 **Administration** — `/admin` (rôle `ADMIN`) : indicateurs, utilisateurs (suspension), makers (publication, vérification), demandes de contact.
 

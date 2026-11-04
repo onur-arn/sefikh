@@ -1,4 +1,3 @@
-import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getT } from "@/i18n/server";
@@ -14,7 +13,6 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <SiteFooter />
-      <AssistantWidget />
     </>
   );
 }
