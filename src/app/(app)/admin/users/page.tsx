@@ -41,7 +41,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/admin
               <tr key={u.id} className="border-t border-line">
                 <td className="px-4 py-3">{u.name}</td>
                 <td className="px-4 py-3 text-ink-soft">{u.email}</td>
-                <td className="px-4 py-3">{tr(u.role === "PRO" ? "Maker" : u.role === "ADMIN" ? "Administrator" : "Creative")}</td>
+                <td className="px-4 py-3">{tr(u.role === "PRO" ? "Maker" : u.role === "ADMIN" ? "Administrator" : "Project owner")}</td>
                 <td className="px-4 py-3">{tr(getPlan(u.plan).name)}</td>
                 <td className="px-4 py-3 text-ink-soft">{tr.date(u.createdAt)}</td>
                 <td className="px-4 py-3 text-right">

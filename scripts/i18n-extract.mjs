@@ -83,6 +83,10 @@ for (const l of LOCALES) {
   const cat = JSON.parse(fs.readFileSync(`${DIR}/${l}.json`, "utf8"));
   const missing = keys.filter((k) => !cat[k]);
   const stale = Object.keys(cat).filter((k) => !all.has(k));
+  if (process.argv.includes("--prune") && stale.length) {
+    for (const k of stale) delete cat[k];
+    fs.writeFileSync(`${DIR}/${l}.json`, JSON.stringify(cat, null, 0));
+  }
   const vars = keys.filter((k) => cat[k] && [...k.matchAll(/\{\w+\}/g)].some(([v]) => !cat[k].includes(v)));
   report[l] = { total: keys.length, missing: missing.length, stale: stale.length, brokenPlaceholders: vars.length };
   bad += missing.length + vars.length;

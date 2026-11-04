@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
-import { assertCanStartConversation, MessagingError, notifyNewMessage, participantWhere, sideOf } from "@/lib/messaging";
+import { assertCanStartConversation, canContactMakers, MessagingError, notifyNewMessage, participantWhere, sideOf } from "@/lib/messaging";
 import { publish } from "@/lib/realtime";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -61,6 +61,7 @@ export async function POST(request: Request) {
   const me = await getCurrentUser();
   if (!me) return NextResponse.json({ error: "Please log in." }, { status: 401 });
   if (!me.emailVerifiedAt) return NextResponse.json({ error: "Please confirm your e-mail address first." }, { status: 403 });
+  if (!canContactMakers(me)) return NextResponse.json({ error: "Upgrade to Pro to contact makers.", code: "LIMIT" }, { status: 402 });
   const rl = rateLimit(`conv:${me.id}`, 10, 60 * 60_000);
   if (!rl.ok) return NextResponse.json({ error: "Too many new conversations. Please try again later." }, { status: 429 });
 

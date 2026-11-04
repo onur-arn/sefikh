@@ -9,6 +9,8 @@ import { SearchPanel } from "@/components/search/search-panel";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionTitle } from "@/components/ui/misc";
+import { anonymize, canSeeMakers } from "@/lib/access";
+import { getCurrentUser } from "@/lib/auth/session";
 import { getT } from "@/i18n/server";
 
 const CRAFTS = [
@@ -44,43 +46,24 @@ async function getHomeData() {
 
 export default async function HomePage() {
   const tr = await getT();
-  const { featured, crafts, kpis, portfolioCount, countries, makers } = await getHomeData();
+  const [{ featured, crafts, kpis, portfolioCount, countries, makers }, user] = await Promise.all([getHomeData(), getCurrentUser()]);
+  const access = canSeeMakers(user);
 
   return (
     <>
       {/* ── Hero ───────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        <div className="container-x grid items-center gap-12 pb-20 pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-28 lg:pt-16">
-          <div className="min-w-0 animate-fade-up">
-            <p className="eyebrow">{tr("The sourcing platform for interior professionals")}</p>
-            <h1 className="display mt-5 text-[3.2rem] sm:text-7xl xl:text-[5.4rem]">
-              {tr("From inspiration")}{" "}<br />
-              {tr("to")}{" "}<em className="text-brass">{tr("realization.")}</em>
-            </h1>
-            <p className="mt-6 max-w-lg text-[16px] leading-relaxed text-muted">
-              {tr("Find the right skills, materials and makers to bring your ideas to life — by describing a project, sharing a picture or browsing expertise.")}</p>
-            <div className="mt-9 max-w-2xl">
-              <SearchPanel />
-            </div>
-            <p className="mt-5 text-[12px] tracking-[0.18em] text-muted uppercase">{tr("Artisans · Workshops · Manufacturers · Materials")}</p>
+      <section className="container-x pt-2">
+        <div className="relative h-[38vh] min-h-64 overflow-hidden rounded-[2rem] sm:h-[46vh]">
+          <Image src="/images/hero-drape.webp" alt="" fill priority sizes="100vw" className="object-cover object-[50%_62%]" />
+        </div>
+        <div className="mx-auto max-w-3xl pb-16 pt-9">
+          <p className="eyebrow">{tr("The sourcing platform for interior professionals")}</p>
+          <h1 className="mt-3 text-[1.7rem] font-semibold leading-tight tracking-tight sm:text-4xl">{tr("From inspiration to realization.")}</h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-muted">{tr("Find the right skills, materials and makers to bring your ideas to life.")}</p>
+          <div className="mt-6">
+            <SearchPanel />
           </div>
-
-          <div className="relative hidden h-[640px] lg:block" aria-hidden>
-            <div className="absolute right-0 top-0 h-[78%] w-[62%] overflow-hidden rounded-[2rem]">
-              <Image src="/images/hero.webp" alt="" fill priority sizes="30vw" className="object-cover" />
-            </div>
-            <div className="absolute bottom-0 left-0 h-[58%] w-[46%] overflow-hidden rounded-[2rem] border-[6px] border-ivory">
-              <Image src="/images/hero-2.webp" alt="" fill priority sizes="22vw" className="object-cover" />
-            </div>
-            <div className="absolute bottom-[6%] right-[8%] h-[30%] w-[30%] overflow-hidden rounded-[1.5rem] border-[6px] border-ivory">
-              <Image src="/images/hero-3.webp" alt="" fill sizes="15vw" className="object-cover" />
-            </div>
-            <div className="absolute left-[12%] top-[14%] rounded-2xl bg-paper/95 px-5 py-4 shadow-xl shadow-ink/10 backdrop-blur">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-muted">{tr("Image match")}</p>
-              <p className="display mt-1 text-3xl">94%</p>
-              <p className="text-xs text-muted">{tr("Patinated brass · Lyon")}</p>
-            </div>
-          </div>
+          <p className="mt-4 text-[12px] tracking-[0.14em] text-muted uppercase">{tr("Artisans · Workshops · Manufacturers · Materials")}</p>
         </div>
       </section>
 
@@ -141,18 +124,15 @@ export default async function HomePage() {
                 {tr("Explore all makers")}</ButtonLink>
             </div>
             <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-6">
-              {featured.map((c, i) => (
-                <MakerCard
-                  key={c.id}
-                  priority={i < 4}
-                  maker={{
+              {featured.map((c, i) => {
+                const maker = {
                     ...c,
                     featured: getPlan(c.user.plan).limits.featured,
                     image: c.portfolio[0] ? { key: c.portfolio[0].thumbKey ?? c.portfolio[0].key, width: c.portfolio[0].width, height: c.portfolio[0].height, title: c.portfolio[0].title } : null,
                     gallery: c.portfolio.slice(1).map((p) => p.thumbKey ?? p.key),
-                  }}
-                />
-              ))}
+                };
+                return <MakerCard key={i} priority={i < 4} maker={access ? maker : anonymize(maker, i)} />;
+              })}
             </div>
           </div>
         </section>
@@ -184,8 +164,8 @@ export default async function HomePage() {
               cta: [tr("Join as a maker"), "/join"],
             },
           ].map((col, idx) => (
-            <div key={col.who} className={idx === 0 ? "rounded-[1.75rem] border border-line bg-paper p-8 sm:p-10" : "grain rounded-[1.75rem] bg-espresso p-8 text-paper sm:p-10"}>
-              <p className={idx === 0 ? "eyebrow" : "eyebrow !text-paper/50"}>{tr(col.who)}</p>
+            <div key={col.who} className={idx === 0 ? "rounded-[1.75rem] border border-line bg-paper p-8 sm:p-10" : "rounded-[1.75rem] border border-line bg-sand p-8 text-paper sm:p-10"}>
+              <p className={idx === 0 ? "eyebrow" : "eyebrow"}>{tr(col.who)}</p>
               <h3 className="display mt-3 text-3xl sm:text-4xl">{tr(col.title)}</h3>
               <ol className="mt-8 space-y-6">
                 {col.steps.map(([Icon, t, d], i) => {
@@ -200,13 +180,13 @@ export default async function HomePage() {
                           <span className="mr-2 font-display text-brass">0{i + 1}</span>
                           {t as string}
                         </p>
-                        <p className={idx === 0 ? "mt-1 text-sm leading-relaxed text-muted" : "mt-1 text-sm leading-relaxed text-paper/60"}>{d as string}</p>
+                        <p className={idx === 0 ? "mt-1 text-sm leading-relaxed text-muted" : "mt-1 text-sm leading-relaxed text-muted"}>{d as string}</p>
                       </div>
                     </li>
                   );
                 })}
               </ol>
-              <ButtonLink href={col.cta[1]!} variant={idx === 0 ? "primary" : "light"} className="mt-9">
+              <ButtonLink href={col.cta[1]!} variant="primary" className="mt-9">
                 {col.cta[0]} <ArrowRight className="size-4" />
               </ButtonLink>
             </div>
@@ -243,12 +223,12 @@ export default async function HomePage() {
       </section>
 
       {/* ── Données marché ─────────────────────────────────── */}
-      <section className="grain bg-espresso py-24 text-paper">
+      <section className="bg-sand py-24">
         <div className="container-x grid items-center gap-14 lg:grid-cols-[1fr_1.2fr]">
           <div>
-            <p className="eyebrow !text-paper/50">{tr("SEFIKH market data")}</p>
+            <p className="eyebrow">{tr("SEFIKH market data")}</p>
             <h2 className="display mt-4 text-4xl sm:text-5xl">{tr("A live view of what the creative industries are looking for.")}</h2>
-            <p className="mt-5 max-w-md text-paper/60">{tr("Every search, match and connection feeds an anonymised barometer of demand for craftsmanship.")}</p>
+            <p className="mt-5 max-w-md text-muted">{tr("Every search, match and connection feeds an anonymised barometer of demand for craftsmanship.")}</p>
             <ButtonLink href="/insights" variant="light" className="mt-8">
               {tr("Trends & Insights")}{" "}<ArrowRight className="size-4" />
             </ButtonLink>
@@ -260,9 +240,9 @@ export default async function HomePage() {
               [kpis.matches, tr("Qualified matches")],
               [kpis.connections, tr("Connection requests")],
             ].map(([n, l]) => (
-              <div key={l as string} className="rounded-3xl border border-paper/10 bg-paper/[0.04] p-6 sm:p-8">
+              <div key={l as string} className="rounded-3xl border border-line bg-paper p-6 sm:p-8">
                 <p className="display text-5xl sm:text-6xl">{tr.number(n as number)}</p>
-                <p className="mt-2 text-[13px] text-paper/55">{l as string}</p>
+                <p className="mt-2 text-[13px] text-muted">{l as string}</p>
               </div>
             ))}
           </div>

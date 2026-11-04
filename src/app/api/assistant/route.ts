@@ -3,6 +3,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
 import { ai, aiEnabled, aiRequest } from "@/lib/ai";
+import { canSeeMakers } from "@/lib/access";
 import { getPlan } from "@/lib/plans";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { logSearch, runSearch, searchesThisMonth, type SearchResult } from "@/lib/search";
@@ -37,9 +38,17 @@ const SEARCH_TOOL: Anthropic.Beta.BetaTool = {
   },
 };
 
-type Card = { slug: string; name: string; tagline: string | null; city: string | null; country: string | null; image: string | null; match: number };
+type Card = { slug: string; name: string; anonymous: boolean; kind: string; city: string | null; country: string | null; image: string | null };
 
-const toCard = (r: SearchResult): Card => ({ slug: r.slug, name: r.name, tagline: r.tagline, city: r.city, country: r.country, image: r.image?.key ?? null, match: r.match });
+const toCard = (r: SearchResult, access: boolean): Card => ({
+  slug: access ? r.slug : "",
+  name: access ? r.name : "",
+  anonymous: !access,
+  kind: r.kind,
+  city: r.city,
+  country: r.country,
+  image: r.image?.key ?? null,
+});
 
 export async function POST(request: Request) {
   const parsed = Body.safeParse(await request.json().catch(() => null));
@@ -53,12 +62,13 @@ export async function POST(request: Request) {
   if (!rateLimit(`assistant:${key}`, 30, 60 * 60_000).ok) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
 
   const who = { userId: user?.id ?? null, visitorId: vid };
-  const limit = getPlan(user?.plan ?? "CLIENT_FREE").limits.textSearchesPerMonth;
+  const limit = getPlan(user?.plan ?? "CLIENT_FREE").limits.searchesPerMonth;
+  const access = canSeeMakers(user);
   const tr = await getT();
 
   /** Une recherche de l'assistant compte comme une recherche texte (mêmes quotas que la page de recherche). */
   async function search(query: string, near: string | null): Promise<SearchResult[] | "limit"> {
-    if (Number.isFinite(limit) && (await searchesThisMonth(who, "TEXT")) >= limit) return "limit";
+    if (Number.isFinite(limit) && (await searchesThisMonth(who)) >= limit) return "limit";
     const { results } = await runSearch({ q: query, near: near ?? undefined });
     await logSearch({ userId: user?.id, visitorId: vid, mode: "TEXT", query, terms: [], results }).catch(() => {});
     return results.slice(0, 4);
@@ -72,12 +82,12 @@ export async function POST(request: Request) {
     if (found === "limit") return NextResponse.json(limitReply);
     return NextResponse.json({
       reply: found.length ? tr("Here are the makers closest to your request.") : tr("I couldn't find a maker for this request. Try describing the craft or the material."),
-      makers: found.map(toCard),
+      makers: found.map((r) => toCard(r, access)),
     });
   }
 
   const history: Anthropic.Beta.BetaMessageParam[] = messages.map((m) => ({ role: m.role, content: m.content }));
-  const system = `${SYSTEM}\nAlways answer in ${LOCALE_LABELS[tr.locale]}.`;
+  const system = `${SYSTEM}\nAlways answer in ${LOCALE_LABELS[tr.locale]}.${access ? "" : "\nThis user is on the free plan: makers are anonymous. Describe them by craft and city, and explain that a Pro plan reveals names and allows contact."}`;
   const cards = new Map<string, Card>();
 
   try {
@@ -108,11 +118,11 @@ export async function POST(request: Request) {
         }
         const found = await search(input.data.query, input.data.near);
         if (found === "limit") return NextResponse.json(limitReply);
-        found.forEach((r) => cards.set(r.slug, toCard(r)));
+        found.forEach((r) => cards.set(r.id, toCard(r, access)));
         results.push({
           type: "tool_result",
           tool_use_id: call.id,
-          content: JSON.stringify(found.map((r) => ({ name: r.name, tagline: r.tagline, kind: r.kind, city: r.city, country: r.country, match: r.match, reasons: r.reasons }))),
+          content: JSON.stringify(found.map((r) => ({ ...(access ? { name: r.name, tagline: r.tagline } : {}), kind: r.kind, city: r.city, country: r.country, match: r.match, reasons: r.reasons }))),
         });
       }
       history.push({ role: "user", content: results });

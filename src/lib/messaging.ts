@@ -62,15 +62,19 @@ export class MessagingError extends Error {
   }
 }
 
+/** Un créatif sans offre payante ne peut pas écrire aux makers, même dans une conversation existante. */
+export function canContactMakers(me: { role: string; plan: string }) {
+  return me.role !== "CLIENT" || getPlan(me.plan).limits.newConversationsPerMonth > 0;
+}
+
 /** Vérifie le quota de nouvelles mises en relation (offre gratuite côté créatifs). */
 export async function assertCanStartConversation(me: { id: string; role: string; plan: string }) {
   if (me.role === "PRO") throw new MessagingError("Makers reply to requests; they cannot start new conversations.", 403);
   const limit = getPlan(me.plan).limits.newConversationsPerMonth;
+  if (limit === 0) throw new MessagingError("Upgrade to Pro to contact makers.", 402, "LIMIT");
   if (!Number.isFinite(limit)) return;
   const used = await db.conversation.count({ where: { clientId: me.id, createdAt: { gte: startOfMonth() } } });
-  if (used >= limit) {
-    throw new MessagingError(`Your Free plan includes ${limit} new conversations per month. Upgrade to Pro for unlimited messaging.`, 402, "LIMIT");
-  }
+  if (used >= limit) throw new MessagingError("Upgrade to Pro to contact makers.", 402, "LIMIT");
 }
 
 /** Notifie le destinataire (in-app + e-mail, dédupliqué tant que la notification précédente n'est pas lue). */

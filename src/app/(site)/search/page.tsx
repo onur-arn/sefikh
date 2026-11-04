@@ -13,6 +13,7 @@ import { SearchPanel } from "@/components/search/search-panel";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/misc";
+import { anonymize, canSeeMakers } from "@/lib/access";
 import { getT } from "@/i18n/server";
 import { translateText } from "@/lib/ai";
 
@@ -60,12 +61,14 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
     }
   }
 
-  // Quota de recherches textuelles (offre gratuite / visiteurs).
+  // Quota mensuel, tous modes confondus (offre gratuite et visiteurs). Une recherche par image est décomptée au dépôt.
+  const hasCriteria = !!(q || imageSearch || input.skills?.length || input.materials?.length || input.techniques?.length || input.sectors?.length || input.near);
   const mode: SearchMode = imageSearch ? "IMAGE" : q ? "TEXT" : "FILTER";
+  const logKey = mode === "TEXT" ? q! : JSON.stringify([q, input.near, input.skills, input.materials, input.techniques, input.sectors]);
   let limited = false;
-  if (mode === "TEXT" && Number.isFinite(plan.limits.textSearchesPerMonth)) {
-    const already = await findRecentSearch(who, "TEXT", q!);
-    if (!already && (await searchesThisMonth(who, "TEXT")) >= plan.limits.textSearchesPerMonth) limited = true;
+  if (hasCriteria && !imageSearch && Number.isFinite(plan.limits.searchesPerMonth)) {
+    const already = await findRecentSearch(who, mode, logKey);
+    if (!already && (await searchesThisMonth(who)) >= plan.limits.searchesPerMonth) limited = true;
   }
 
   // La recherche comprend l'anglais et le français ; les autres langues passent par la traduction automatique.
@@ -74,7 +77,6 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const { results, detected, usedVisualAI } = limited ? { results: [], detected: { tags: [], city: null, country: null }, usedVisualAI: false } : await runSearch(input);
 
   // Journalisation (statistiques marché + impressions), sans double comptage des rechargements.
-  const hasCriteria = !!(q || imageSearch || input.skills?.length || input.materials?.length || input.techniques?.length || input.sectors?.length || input.near);
   if (!limited && hasCriteria) {
     const terms = [
       ...detected.tags.map((t) => `${t.kind}:${t.name}`),
@@ -90,13 +92,14 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         await db.searchImpression.createMany({ data: results.slice(0, 24).map((r, i) => ({ searchId: imageSearch!.id, companyId: r.id, rank: i + 1 })) });
       }
     } else {
-      const key = JSON.stringify([q, input.near, input.skills, input.materials, input.techniques, input.sectors]);
-      if (!(await findRecentSearch(who, mode, mode === "TEXT" ? q! : key))) {
-        await logSearch({ ...who, mode, query: mode === "TEXT" ? q : key, terms: [...new Set(terms)], location: detected.city ?? detected.country, results });
+      if (!(await findRecentSearch(who, mode, logKey))) {
+        await logSearch({ ...who, mode, query: logKey, terms: [...new Set(terms)], location: detected.city ?? detected.country, results });
       }
     }
   }
 
+  const access = canSeeMakers(user);
+  const shown = access ? results : results.map(anonymize);
   const source = imageSearch ? "IMAGE" : hasCriteria ? "SEARCH" : undefined;
   const chips = [
     ...detected.tags.map((t) => t.name),
@@ -106,7 +109,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   return (
     <div className="container-x pb-24 pt-10">
       <div className="mx-auto max-w-3xl">
-        <SearchPanel compact initialTab={one(sp.mode) === "image" ? "image" : "project"} />
+        <SearchPanel compact initial={{ q, near: input.near }} />
       </div>
 
       <div className="mt-14 flex flex-col gap-6 border-b border-line pb-6 md:flex-row md:items-end md:justify-between">
@@ -146,40 +149,39 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         </div>
       </div>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[250px_1fr]">
-        <SearchFilters />
+      <div className={access ? "mt-8 grid gap-10 lg:grid-cols-[250px_1fr]" : "mt-8"}>
+        {access && <SearchFilters />}
         <div>
           {limited ? (
-            <div className="rounded-3xl bg-espresso p-10 text-center text-paper">
-              <Lock className="mx-auto size-8 text-brass-light" strokeWidth={1.4} />
+            <div className="rounded-3xl border border-line bg-sand p-10 text-center">
+              <Lock className="mx-auto size-8 text-muted" strokeWidth={1.4} />
               <h2 className="display mt-4 text-3xl">{tr("Unlock unlimited AI-powered searches")}</h2>
-              <p className="mx-auto mt-3 max-w-md text-sm text-paper/60">
-                {tr("The Free plan includes {textSearchesPerMonth} project searches per month. You can keep browsing by skills and materials, or upgrade to Pro for unlimited searches, full profiles and direct messaging.", { textSearchesPerMonth: plan.limits.textSearchesPerMonth })}</p>
+              <p className="mx-auto mt-3 max-w-md text-sm text-muted">
+                {tr("The Free plan includes {limit} searches per month. Upgrade to Pro for unlimited searches, the names of makers and direct messaging.", { limit: plan.limits.searchesPerMonth })}</p>
               <div className="mt-7 flex flex-wrap justify-center gap-3">
-                <ButtonLink href={user ? "/pricing" : "/register"} variant="light">
-                  {user ? tr("See plans") : tr("Create a free account")}
+                <ButtonLink href="/pricing">
+                  {tr("See plans")}
                 </ButtonLink>
-                <ButtonLink href="/search" variant="secondary" className="border-paper/40 text-paper hover:bg-paper hover:text-ink">
-                  {tr("Browse by expertise")}</ButtonLink>
               </div>
             </div>
           ) : results.length === 0 ? (
             <EmptyState icon={<Sparkles className="size-8" strokeWidth={1.3} />} title={tr("No maker matches yet")} action={<ButtonLink href="/search" variant="secondary">{tr("Reset the search")}</ButtonLink>}>
-              {tr("Try fewer filters, a broader location or different words. You can also")}
+              {tr("Try fewer filters, a broader location or different words. You can also")}{" "}
               <Link href="/dashboard/projects/new" className="text-ink underline">
                 {tr("describe your project in detail")}</Link>{" "}{tr("and we'll match it for you.")}</EmptyState>
           ) : (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:gap-x-6">
-              {results.map((r, i) => (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-6">
+              {shown.map((r, i) => (
                 <MakerCard key={r.id} maker={{ ...r, match: hasCriteria ? r.match : undefined }} priority={i < 3} source={source} />
               ))}
             </div>
           )}
-          {!user && !limited && results.length > 0 && (
+          {!access && !limited && results.length > 0 && (
             <div className="mt-16 flex flex-col items-center justify-between gap-4 rounded-2xl border border-line bg-paper p-6 sm:flex-row">
-              <p className="text-sm text-ink-soft">{tr("Create a free account to contact makers, save your favourites and follow your projects.")}</p>
-              <ButtonLink href="/register" size="sm">
-                {tr("Join SEFIKH — it's free")}</ButtonLink>
+              <p className="text-sm text-ink-soft">{tr("Names and profiles are reserved for Pro and Studio plans. Choose a plan to discover these makers and contact them.")}</p>
+              <ButtonLink href="/pricing" size="sm">
+                {tr("See plans")}
+              </ButtonLink>
             </div>
           )}
         </div>

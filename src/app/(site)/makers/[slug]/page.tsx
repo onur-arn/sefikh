@@ -19,6 +19,7 @@ import { PortfolioGallery } from "@/components/makers/portfolio-gallery";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/misc";
 import { AutoTranslate } from "@/components/translate/auto-translate";
+import { canSeeMakers } from "@/lib/access";
 import { getT } from "@/i18n/server";
 
 async function getCompany(slug: string) {
@@ -35,8 +36,9 @@ async function getCompany(slug: string) {
 export async function generateMetadata({ params }: PageProps<"/makers/[slug]">): Promise<Metadata> {
   const tr = await getT();
   const { slug } = await params;
-  const c = await getCompany(slug);
+  const [c, viewer] = await Promise.all([getCompany(slug), getCurrentUser()]);
   if (!c) return { title: tr("Maker not found") };
+  if (!canSeeMakers(viewer) && c.userId !== viewer?.id) return { title: tr("Maker profile"), robots: { index: false } };
   const cover = c.portfolio[0];
   return {
     title: `${c.name} — ${c.tagline ?? "Maker"}`,
@@ -67,6 +69,23 @@ async function similarMakers(company: NonNullable<Awaited<ReturnType<typeof getC
     .map(({ o }) => o);
 }
 
+/** Sans offre payante : aucune donnée du maker n'est envoyée au navigateur. */
+async function LockedMaker() {
+  const tr = await getT();
+  return (
+    <div className="container-x flex min-h-[60vh] items-center justify-center py-20">
+      <div className="max-w-md rounded-[1.5rem] border border-line bg-paper p-10 text-center">
+        <Lock className="mx-auto size-7 text-muted" strokeWidth={1.4} />
+        <h1 className="display mt-4 text-3xl">{tr("Create an account to continue")}</h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted">{tr("Names and profiles are reserved for Pro and Studio plans. Choose a plan to discover these makers and contact them.")}</p>
+        <ButtonLink href="/pricing" className="mt-6">
+          {tr("Choose your monthly subscription")}
+        </ButtonLink>
+      </div>
+    </div>
+  );
+}
+
 export default async function MakerPage({ params, searchParams }: PageProps<"/makers/[slug]">) {
   const tr = await getT();
   const { slug } = await params;
@@ -75,6 +94,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
   const user = await getCurrentUser();
   const isOwner = !!user && company?.userId === user.id;
   if (!company || (!company.published && !isOwner)) notFound();
+  if (!isOwner && !canSeeMakers(user)) return <LockedMaker />;
 
   // Statistiques de vues (hors propriétaire), dédoublonnées sur 30 min.
   const vid = await visitorId();
@@ -116,7 +136,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
 
       {isOwner && !company.published && (
         <div className="bg-brass-light py-3 text-center text-sm text-brass-dark">
-          {tr("Preview — your profile is not published yet.")}
+          {tr("Preview — your profile is not published yet.")}{" "}
           <Link href="/dashboard/profile" className="font-semibold underline">
             {tr("Complete and publish it")}</Link>
         </div>

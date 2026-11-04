@@ -116,7 +116,7 @@ export function ContactButton({ company, viewer, projects, className }: { compan
             <h2 className="display mt-2 text-3xl">{tr("Write to {name}", { name: company.name })}</h2>
             {!viewer.verified ? (
               <div className="mt-6 rounded-xl bg-brass-light/50 p-4 text-sm">
-                {tr("Please confirm your e-mail address before contacting makers. Check your inbox, or resend the link from your")}
+                {tr("Please confirm your e-mail address before contacting makers. Check your inbox, or resend the link from your")}{" "}
                 <Link href="/dashboard" className="font-medium underline">
                   {tr("dashboard")}</Link>
                 .

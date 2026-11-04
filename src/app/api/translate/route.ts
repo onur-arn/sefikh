@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { canSeeMakers } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { translateText, TranslationUnavailable } from "@/lib/ai";
@@ -24,13 +25,14 @@ export async function POST(request: Request) {
   if (!rateLimit(`translate:${who}`, 40, 60 * 60_000).ok) return NextResponse.json({ error: "Too many translations. Please try again later." }, { status: 429 });
 
   let fields: Record<string, string | null | undefined> | null = null;
-  if (kind === "company") {
-    const c = await db.company.findFirst({ where: { id, published: true }, select: { tagline: true, about: true, productionCapacity: true } });
-    fields = c;
-  } else if (kind === "portfolio") {
-    const p = await db.portfolioImage.findFirst({ where: { id, company: { published: true } }, select: { title: true, description: true } });
-    fields = p;
-  } else if (me) {
+  // Fiches : mêmes droits que la page du maker (offre payante, ou sa propre fiche).
+  const visible = canSeeMakers(me) ? { published: true } : me ? { userId: me.id } : null;
+  if (kind === "company" && visible) {
+    fields = await db.company.findFirst({ where: { id, ...visible }, select: { tagline: true, about: true, productionCapacity: true } });
+  } else if (kind === "portfolio" && visible) {
+    fields = await db.portfolioImage.findFirst({ where: { id, company: visible }, select: { title: true, description: true } });
+  }
+  if (kind === "message" && me) {
     const m = await db.message.findUnique({ where: { id }, select: { body: true, conversationId: true } });
     if (m && (await getConversationForUser(me, m.conversationId))) fields = { body: m.body };
   }

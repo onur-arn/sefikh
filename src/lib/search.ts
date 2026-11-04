@@ -123,7 +123,7 @@ export async function runSearch(input: SearchInput) {
   }
   const continent = continentOf(country);
 
-  const textEmbedding = input.q && !input.imageEmbedding ? await embedText(input.q) : null;
+  const textEmbedding = input.q ? await embedText(input.q) : null;
   const candidates = await loadCandidates();
   const now = new Date();
 
@@ -169,16 +169,18 @@ export async function runSearch(input: SearchInput) {
     let best: { img: (typeof c.portfolio)[number]; s: number } | null = null;
     if (input.imageEmbedding || input.imageColors || textEmbedding) {
       for (const img of c.portfolio) {
-        let s = 0;
+        let image: number | null = null;
         const emb = fromBytes(img.embedding);
-        if (input.imageEmbedding && emb) s = clipImageScale(cosine(input.imageEmbedding, emb));
-        else if (input.imageColors && img.colorVector) s = clamp((cosine(input.imageColors, parseList<number>(img.colorVector)) - 0.5) / 0.5) * 0.8;
-        else if (textEmbedding && emb) s = clipTextScale(cosine(textEmbedding, emb));
+        if (input.imageEmbedding && emb) image = clipImageScale(cosine(input.imageEmbedding, emb));
+        else if (input.imageColors && img.colorVector) image = clamp((cosine(input.imageColors, parseList<number>(img.colorVector)) - 0.5) / 0.5) * 0.8;
+        const text = textEmbedding && emb ? clipTextScale(cosine(textEmbedding, emb)) : null;
+        // Image et texte combinés : l'image guide, le texte précise.
+        const s = image != null && text != null ? image * 0.7 + text * 0.3 : (image ?? text ?? 0);
         if (!best || s > best.s) best = { img, s };
       }
       const weight = input.imageEmbedding || input.imageColors ? 0.75 : 0.3;
       parts.push({ w: weight, s: best?.s ?? 0 });
-      if (best && best.s > 0.55 && (input.imageEmbedding || input.imageColors)) reasons.unshift("Visually similar work");
+      if (best && best.s > 0.55 && (input.imageEmbedding || input.imageColors)) reasons.unshift(tr("Visually similar work"));
     }
 
     // 4. Localisation
@@ -247,11 +249,12 @@ export async function runSearch(input: SearchInput) {
 
 export type SearchMode = "TEXT" | "IMAGE" | "FILTER" | "PROJECT";
 
-export async function searchesThisMonth(who: { userId?: string | null; visitorId?: string | null }, mode: SearchMode) {
+/** Recherches du mois, tous modes confondus (projet, image, catégories). */
+export async function searchesThisMonth(who: { userId?: string | null; visitorId?: string | null }) {
   const since = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   if (!who.userId && !who.visitorId) return 0;
   return db.searchLog.count({
-    where: { mode, createdAt: { gte: since }, ...(who.userId ? { userId: who.userId } : { visitorId: who.visitorId }) },
+    where: { mode: { in: ["TEXT", "IMAGE", "FILTER"] }, createdAt: { gte: since }, ...(who.userId ? { userId: who.userId } : { visitorId: who.visitorId }) },
   });
 }
 

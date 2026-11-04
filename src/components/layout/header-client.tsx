@@ -16,10 +16,10 @@ type HeaderUser = { name: string; role: string; avatarKey: string | null; plan: 
 type Notif = { id: string; title: string; body: string | null; link: string | null; readAt: string | null; createdAt: string };
 
 const NAV = [
-  { href: "/search", label: "Explore" },
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About us" },
+  { href: "/journal", label: "Content" },
   { href: "/insights", label: "Trends & Insights" },
-  { href: "/journal", label: "Journal" },
-  { href: "/about", label: "About" },
   { href: "/pricing", label: "Pricing" },
 ];
 
@@ -74,7 +74,7 @@ export function HeaderClient({ user, initialCounts, variant }: { user: HeaderUse
           <Logo />
         </Link>
 
-        <nav className="ml-6 hidden items-center gap-7 lg:flex" aria-label={tr("Main")}>
+        <nav className="ml-auto hidden items-center gap-7 lg:flex" aria-label={tr("Main")}>
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} className={cn("link-underline text-[13.5px] text-ink-soft hover:text-ink", pathname.startsWith(n.href) && "text-ink [background-size:100%_1px]")}>
               {tr(n.label)}
@@ -82,7 +82,7 @@ export function HeaderClient({ user, initialCounts, variant }: { user: HeaderUse
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-1.5 lg:ml-4">
           <LocaleSwitcher className="mr-1 hidden sm:inline-flex" />
           {user ? (
             <>
@@ -237,7 +237,7 @@ function AccountMenu({ user }: { user: HeaderUser }) {
         <div className="absolute right-0 top-12 w-64 animate-fade-in overflow-hidden rounded-2xl border border-line bg-paper py-2 shadow-xl shadow-ink/5">
           <div className="border-b border-line px-4 pb-3 pt-1">
             <p className="truncate text-sm font-semibold">{user.name}</p>
-            <p className="text-xs text-muted">{user.role === "PRO" ? tr("Maker account") : tr("Creative account")}</p>
+            <p className="text-xs text-muted">{user.role === "PRO" ? tr("Maker account") : tr("Project owner account")}</p>
           </div>
           {links.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href} onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-[13.5px] hover:bg-ivory">

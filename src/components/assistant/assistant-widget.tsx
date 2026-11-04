@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Loader2, Sparkles, X } from "lucide-react";
 import { useT } from "@/i18n/client";
+import { COMPANY_KINDS } from "@/lib/constants";
 import { cn, fileUrl } from "@/lib/utils";
 
-type Card = { slug: string; name: string; tagline: string | null; city: string | null; country: string | null; image: string | null; match: number };
+type Card = { slug: string; name: string; anonymous: boolean; kind: string; city: string | null; country: string | null; image: string | null };
 type Turn = { role: "user" | "assistant"; content: string; makers?: Card[]; upgrade?: boolean };
 
 /** Assistant de sourcing : transforme une idée en brief et propose des makers de l'annuaire. */
@@ -45,9 +46,9 @@ export function AssistantWidget() {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-3 text-[13.5px] font-medium text-ivory shadow-lg transition hover:bg-espresso">
+      <button type="button" onClick={() => setOpen(true)} aria-label={tr("Ask the assistant")} className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-ink p-3.5 text-[13.5px] font-medium text-paper shadow-lg transition hover:bg-espresso sm:px-4 sm:py-3">
         <Sparkles className="size-4" />
-        {tr("Ask the assistant")}
+        <span className="hidden sm:inline">{tr("Ask the assistant")}</span>
       </button>
     );
   }
@@ -74,11 +75,11 @@ export function AssistantWidget() {
                 {tr("See plans")}
               </Link>
             )}
-            {t.makers?.map((m) => (
-              <Link key={m.slug} href={`/makers/${m.slug}`} className="flex items-center gap-3 rounded-xl border border-line bg-paper p-2 transition hover:border-ink/40">
+            {t.makers?.map((m, n) => (
+              <Link key={n} href={m.anonymous ? "/pricing?reason=locked" : `/makers/${m.slug}`} className="flex items-center gap-3 rounded-xl border border-line bg-paper p-2 transition hover:border-ink/40">
                 <span className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-sand">{m.image && <Image src={fileUrl(m.image)!} alt="" fill sizes="56px" className="object-cover" />}</span>
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium">{m.name}</span>
+                  <span className="block truncate text-sm font-medium">{m.anonymous ? tr(COMPANY_KINDS.find((k) => k.value === m.kind)?.label ?? m.kind) : m.name}</span>
                   <span className="block truncate text-[12px] text-muted">{[m.city, m.country].filter(Boolean).join(", ")}</span>
                 </span>
               </Link>

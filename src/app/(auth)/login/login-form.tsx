@@ -32,7 +32,7 @@ export function LoginForm({ next }: { next: string }) {
       <Button type="submit" loading={pending} className="w-full" size="lg">
         {tr("Log in")}</Button>
       <p className="text-center text-sm text-muted">
-        {tr("New to SEFIKH?")}
+        {tr("New to SEFIKH?")}{" "}
         <Link href="/register" className="font-medium text-ink underline-offset-4 hover:underline">
           {tr("Create an account")}</Link>
       </p>

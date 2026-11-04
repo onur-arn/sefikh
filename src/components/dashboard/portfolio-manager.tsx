@@ -77,7 +77,7 @@ export function PortfolioManager({ initialItems, limit }: { initialItems: Item[]
         <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { uploadFiles(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
         {limitHit && (
           <p className="mt-4 text-sm text-danger">
-            {tr("Portfolio limit reached on your plan.")}
+            {tr("Portfolio limit reached on your plan.")}{" "}
             <Link href="/upgrade" className="font-medium underline">
               {tr("Upgrade")}</Link>
           </p>

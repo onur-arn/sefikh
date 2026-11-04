@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { UPLOAD_LIMITS } from "@/lib/constants";
 import { processImage, UploadError } from "@/lib/images";
-import { getConversationForUser, notifyNewMessage, otherUserId } from "@/lib/messaging";
+import { canContactMakers, getConversationForUser, notifyNewMessage, otherUserId } from "@/lib/messaging";
 import { publish, type WireMessage } from "@/lib/realtime";
 import { rateLimit } from "@/lib/rate-limit";
 import { newKey, putFile } from "@/lib/storage";
@@ -24,6 +24,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/conversatio
   const found = await getConversationForUser(me, id);
   if (!found) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const { conv, side } = found;
+
+  if (!canContactMakers(me)) return NextResponse.json({ error: "Upgrade to Pro to contact makers.", code: "LIMIT" }, { status: 402 });
 
   const form = await request.formData().catch(() => null);
   if (!form) return NextResponse.json({ error: "Invalid request." }, { status: 400 });

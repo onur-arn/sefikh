@@ -19,17 +19,10 @@ export async function POST(request: Request) {
   const rl = rateLimit(`imgsearch:${user?.id ?? vid}`, 20, 10 * 60_000);
   if (!rl.ok) return NextResponse.json({ error: "Too many searches, please wait a moment." }, { status: 429 });
 
-  // Quota mensuel (visiteurs anonymes : quota de l'offre gratuite).
-  const plan = getPlan(user?.plan ?? "CLIENT_FREE");
-  const limit = plan.limits.imageSearchesPerMonth;
-  if (Number.isFinite(limit)) {
-    const used = await searchesThisMonth({ userId: user?.id, visitorId: vid }, "IMAGE");
-    if (used >= limit) {
-      return NextResponse.json(
-        { error: `You've used your ${limit} image searches for this month. Upgrade to Pro for unlimited image search.`, code: "LIMIT" },
-        { status: 402 },
-      );
-    }
+  // Quota mensuel partagé avec les autres modes (visiteurs anonymes : quota de l'offre gratuite).
+  const limit = getPlan(user?.plan ?? "CLIENT_FREE").limits.searchesPerMonth;
+  if (Number.isFinite(limit) && (await searchesThisMonth({ userId: user?.id, visitorId: vid })) >= limit) {
+    return NextResponse.json({ error: "You've reached your free searches for this month", code: "LIMIT" }, { status: 402 });
   }
 
   const form = await request.formData().catch(() => null);

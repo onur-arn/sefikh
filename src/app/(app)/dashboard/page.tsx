@@ -12,6 +12,7 @@ import { Avatar, Badge, Card } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { MakerCard } from "@/components/makers/maker-card";
 import { PublishToggle } from "@/components/dashboard/publish-toggle";
+import { anonymize, canSeeMakers } from "@/lib/access";
 import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -47,13 +48,12 @@ function Stat({ icon: Icon, label, value, hint, href }: { icon: typeof Eye; labe
 async function ClientOverview({ user }: { user: CurrentUser }) {
   const tr = await getT();
   const plan = getPlan(user.plan);
-  const [profile, projects, saved, unread, textUsed, imageUsed] = await Promise.all([
+  const [profile, projects, saved, unread, used] = await Promise.all([
     db.clientProfile.findUnique({ where: { userId: user.id } }),
     db.project.findMany({ where: { ownerId: user.id }, orderBy: { updatedAt: "desc" }, include: { _count: { select: { conversations: true } } } }),
     db.savedCompany.count({ where: { userId: user.id } }),
     unreadConversationCount(user),
-    searchesThisMonth({ userId: user.id }, "TEXT"),
-    searchesThisMonth({ userId: user.id }, "IMAGE"),
+    searchesThisMonth({ userId: user.id }),
   ]);
   const active = projects.filter((p) => p.status === "ACTIVE");
   const archived = projects.filter((p) => p.status === "ARCHIVED");
@@ -90,8 +90,8 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
         <Stat
           icon={Search}
           label={tr("Searches this month")}
-          value={textUsed + imageUsed}
-          hint={Number.isFinite(plan.limits.textSearchesPerMonth) ? tr("{v} text · {v2} image left", { v: Math.max(0, plan.limits.textSearchesPerMonth - textUsed), v2: Math.max(0, plan.limits.imageSearchesPerMonth - imageUsed) }) : tr("Unlimited on your plan")}
+          value={used}
+          hint={Number.isFinite(plan.limits.searchesPerMonth) ? tr("{count} of {limit} free searches used", { count: used, limit: plan.limits.searchesPerMonth }) : tr("Unlimited on your plan")}
         />
       </div>
 
@@ -144,7 +144,7 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
               {tr("All matches")}</Link>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 xl:grid-cols-4">
-            {suggestions.map((r) => (
+            {(canSeeMakers(user) ? suggestions : suggestions.map(anonymize)).map((r) => (
               <MakerCard key={r.id} maker={r} source="SEARCH" />
             ))}
           </div>

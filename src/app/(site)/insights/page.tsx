@@ -46,11 +46,11 @@ export default async function InsightsPage({ searchParams }: PageProps<"/insight
 
   return (
     <div className="pb-24">
-      <section className="grain bg-espresso py-16 text-paper sm:py-20">
+      <section className="bg-sand py-16 sm:py-20">
         <div className="container-x text-center">
           <p className="display text-6xl tracking-[0.18em] sm:text-7xl">{tr("SEFIKH")}</p>
-          <p className="mt-2 font-display text-2xl italic text-paper/70">{tr("Search Engine For Know-How")}</p>
-          <p className="mx-auto mt-8 max-w-xl text-sm text-paper/60">{tr("A live, anonymised view of what architects, designers and hoteliers are looking for — generated automatically from activity on the platform.")}</p>
+          <p className="mt-2 font-display text-2xl italic text-muted">{tr("Search Engine For Know-How")}</p>
+          <p className="mx-auto mt-8 max-w-xl text-sm text-muted">{tr("A live, anonymised view of what architects, designers and hoteliers are looking for — generated automatically from activity on the platform.")}</p>
         </div>
       </section>
 
@@ -80,7 +80,7 @@ export default async function InsightsPage({ searchParams }: PageProps<"/insight
           ].map(([n, l]) => (
             <div key={l as string} className="rounded-3xl bg-ink p-6 text-paper">
               <p className="display text-5xl">{tr.number(n as number)}</p>
-              <p className="mt-1 text-[13px] text-paper/60">{l as string}</p>
+              <p className="mt-1 text-[13px] text-muted">{l as string}</p>
             </div>
           ))}
         </div>
@@ -165,7 +165,7 @@ export default async function InsightsPage({ searchParams }: PageProps<"/insight
                           <span className="mr-2 text-muted">{i + 1}.</span>
                           {d.name} <span className="text-muted">· {d.city}</span>
                         </span>
-                        <span className="tabular-nums text-muted">{tr.number(d.views)} views</span>
+                        <span className="tabular-nums text-muted">{tr("{count} views", { count: tr.number(d.views) })}</span>
                       </li>
                     ))}
                   </ol>

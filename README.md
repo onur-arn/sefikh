@@ -2,7 +2,7 @@
 
 Plateforme de sourcing qui met en relation les **créatifs** (architectes, designers, hôteliers, particuliers) avec les **makers** (artisans, ateliers, fabricants, fournisseurs de matériaux).
 
-- **Créatif** : trouve un artisan par description de projet, par image, par compétence/matériau ou par localisation, décrit ses projets, échange avec les makers, sauvegarde ses fournisseurs.
+- **Client** : trouve un artisan avec une seule barre de recherche, qui combine description, image de référence, catégories et localisation, décrit ses projets, échange avec les makers, sauvegarde ses fournisseurs.
 - **Maker** : crée son profil professionnel et son portfolio, reçoit des demandes qualifiées, suit sa visibilité, souscrit une offre payante.
 
 Interface en **français, anglais, italien, espagnol et chinois** (détection du navigateur, puis sélecteur dans l'en-tête et le pied de page). Code commenté en français.
@@ -54,11 +54,13 @@ Renseigner `ANTHROPIC_API_KEY` (et éventuellement `AI_MODEL`, `claude-opus-5-5`
 
 **Authentification** — inscription (choix créatif / maker), connexion, déconnexion, vérification d'e-mail, mot de passe oublié / réinitialisation (jeton à usage unique, 1 h), changement d'e-mail et de mot de passe, liste des sessions et déconnexion des autres appareils, suppression du compte et export RGPD (JSON).
 
+**Accès** — sans offre payante (visiteurs, offre gratuite) : 3 recherches par mois tous modes confondus (`searchesPerMonth`), makers anonymes et contact impossible. L'anonymisation se fait côté serveur (`src/lib/access.ts`) : nom, slug et identifiant ne sont jamais envoyés au navigateur. Les fiches ne sont donc plus indexables (retirées du sitemap).
+
 **Recherche**
 - *Describe a project* : analyse du texte (compétences, matériaux, techniques, secteurs, ville/pays avec synonymes FR/EN) + similarité sémantique texte → photos (CLIP) + proximité géographique.
 - *Search by image* : la photo déposée est comparée aux photos des portfolios (embeddings CLIP calculés localement, repli sur empreinte couleur). Chaque résultat affiche la photo la plus proche.
 - *Skills & materials* : filtres (type de maker, compétences, matériaux, techniques, secteurs, rayon, délai), tri par pertinence ou distance.
-- Quotas de l'offre gratuite (10 recherches texte / 3 image par mois, visiteurs inclus via cookie anonyme), journalisation pour les statistiques.
+- Texte, image et catégories se combinent dans une seule barre. Journalisation pour les statistiques.
 
 **Profils makers** — fiche publique (accordéons de la maquette : zones d'intervention, compétences/matériaux/techniques, secteurs, capacités de production avec calendrier de disponibilité), portfolio avec visionneuse « About the project », coordonnées réservées aux offres Pro, makers visuellement similaires, données structurées JSON-LD.
 

@@ -12,8 +12,8 @@ import { registerAction } from "../actions";
 import { useT } from "@/i18n/client";
 
 const ROLES = [
-  { value: "CLIENT", title: "I am a creative", text: "Architect, designer, hotelier or private client looking for know-how.", icon: Compass },
-  { value: "PRO", title: "I offer a skill", text: "Artisan, workshop, manufacturer or material supplier.", icon: Hammer },
+  { value: "CLIENT", title: "I have an idea, I'm looking for the right hands", text: "Architect, designer, hotelier or private individual: you imagine, we find who can make it.", icon: Compass },
+  { value: "PRO", title: "I have the know-how, I'm looking for great projects", text: "Artisan, workshop, manufacturer or material supplier: show what your hands can do.", icon: Hammer },
 ] as const;
 
 export function RegisterForm({ initialRole }: { initialRole: "CLIENT" | "PRO" }) {
@@ -48,9 +48,9 @@ export function RegisterForm({ initialRole }: { initialRole: "CLIENT" | "PRO" })
       <label className="flex items-start gap-3 text-[13px] text-muted">
         <input type="checkbox" name="terms" className="mt-0.5 size-4 accent-ink" required />
         <span>
-          {tr("I agree to the")}
+          {tr("I agree to the")}{" "}
           <Link href="/legal/terms" className="text-ink underline" target="_blank">
-            {tr("terms")}</Link>{" "}{tr("and the")}
+            {tr("terms")}</Link>{" "}{tr("and the")}{" "}
           <Link href="/legal/privacy" className="text-ink underline" target="_blank">
             {tr("privacy policy")}</Link>
           .
@@ -60,7 +60,7 @@ export function RegisterForm({ initialRole }: { initialRole: "CLIENT" | "PRO" })
       <Button type="submit" loading={pending} className="w-full" size="lg">
         {tr("Create my account")}</Button>
       <p className="text-center text-sm text-muted">
-        {tr("Already a member?")}
+        {tr("Already a member?")}{" "}
         <Link href="/login" className="font-medium text-ink underline-offset-4 hover:underline">
           {tr("Log in")}</Link>
       </p>

@@ -39,7 +39,9 @@ export default async function PricingPage({ searchParams }: PageProps<"/pricing"
       </header>
 
       {sp.canceled && <p className="mx-auto mt-8 max-w-md rounded-xl bg-sand px-4 py-3 text-center text-sm">{tr("Payment cancelled — you have not been charged.")}</p>}
-      {sp.reason === "image-limit" && <p className="mx-auto mt-8 max-w-md rounded-xl bg-brass-light/60 px-4 py-3 text-center text-sm">{tr("You've used your free image searches for this month.")}</p>}
+      {(sp.reason === "limit" || sp.reason === "locked") && (
+        <p className="mx-auto mt-8 max-w-md rounded-xl bg-sand px-4 py-3 text-center text-sm">{tr(sp.reason === "limit" ? "You've reached your free searches for this month" : "Names and profiles are reserved for Pro and Studio plans. Choose a plan to discover these makers and contact them.")}</p>
+      )}
 
       <div className="mx-auto mt-10 flex w-fit gap-1 rounded-full bg-sand p-1">
         {[

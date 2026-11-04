@@ -15,7 +15,7 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
           <div className="mx-auto w-full max-w-[420px] animate-fade-up">{children}</div>
         </main>
         <p className="text-xs text-muted">
-          {tr("© {v} SEFIKH ·", { v: new Date().getFullYear() })}
+          {tr("© {v} SEFIKH ·", { v: new Date().getFullYear() })}{" "}
           <Link href="/legal/privacy" className="underline-offset-2 hover:underline">
             {tr("Privacy")}</Link>
           ·

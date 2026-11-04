@@ -53,7 +53,7 @@ export function SectionTitle({ eyebrow, title, children, className }: { eyebrow?
 export function Logo({ className, light }: { className?: string; light?: boolean }) {
   const tr = useT();
   return (
-    <span className={cn("font-display text-[1.65rem] font-semibold leading-none tracking-[0.28em]", light ? "text-paper" : "text-ink", className)}>
+    <span className={cn("text-[1.35rem] font-semibold leading-none tracking-[0.04em]", light ? "text-paper" : "text-ink", className)}>
       {tr("SEFIKH")}</span>
   );
 }

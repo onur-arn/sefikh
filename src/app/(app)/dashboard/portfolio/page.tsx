@@ -40,7 +40,7 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/dashbo
       </header>
       {onboarding && (
         <p className="mb-6 rounded-xl bg-brass-light/50 px-4 py-3 text-sm">
-          {tr("Last step before going live: add at least one picture of your work, then publish your profile from your")}
+          {tr("Last step before going live: add at least one picture of your work, then publish your profile from your")}{" "}
           <Link href="/dashboard" className="underline">
             {tr("dashboard")}</Link>
           .

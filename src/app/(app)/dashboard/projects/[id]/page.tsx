@@ -11,6 +11,7 @@ import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/misc";
 import { ProjectActions } from "@/components/dashboard/project-actions";
+import { anonymize, canSeeMakers } from "@/lib/access";
 import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -138,7 +139,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
           <Sparkles className="size-3.5" /> {" "}{tr("Matching makers")}</p>
         <h2 className="display mt-2 text-3xl sm:text-4xl">{tr("Here are {length} makers and specialists matching your project requirements.", { length: matches.length })}</h2>
         <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4">
-          {matches.map((r) => (
+          {(canSeeMakers(user) ? matches : matches.map(anonymize)).map((r) => (
             <MakerCard key={r.id} maker={r} source="SEARCH" />
           ))}
         </div>

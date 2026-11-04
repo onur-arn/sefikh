@@ -36,7 +36,7 @@ export function DashboardNav({ role, planName, insights, analytics }: { role: st
   return (
     <nav aria-label={tr("Dashboard")} className="lg:sticky lg:top-24 lg:self-start">
       <div className="mb-5 hidden rounded-2xl bg-espresso p-4 text-paper lg:block">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-paper/50">{role === "PRO" ? tr("Maker account") : tr("Creative account")}</p>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-paper/50">{role === "PRO" ? tr("Maker account") : tr("Project owner account")}</p>
         <p className="display mt-1 text-2xl">{tr(planName)}</p>
         <Link href="/pricing" className="mt-2 inline-block text-[12px] text-brass-light underline-offset-4 hover:underline">
           {tr("Compare plans →")}</Link>

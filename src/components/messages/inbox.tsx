@@ -423,7 +423,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
           <Composer onSend={send} onTyping={notifyTyping} />
         ) : (
           <p className="border-t border-line p-4 text-center text-sm text-muted">
-            {tr("Confirm your e-mail address to reply.")}
+            {tr("Confirm your e-mail address to reply.")}{" "}
             <Link href="/dashboard" className="font-medium text-ink underline">
               {tr("Resend the link")}</Link>
           </p>

@@ -23,10 +23,10 @@ export type Plan = {
   features: string[];
   highlight?: boolean;
   limits: {
-    textSearchesPerMonth: number; // Infinity = illimité
-    imageSearchesPerMonth: number;
+    searchesPerMonth: number; // tous modes confondus ; Infinity = illimité
     newConversationsPerMonth: number;
     portfolioImages: number;
+    seeMakers: boolean; // noms et fiches ; sinon résultats anonymes
     seeContactDetails: boolean;
     savedLibrary: boolean;
     marketInsights: boolean;
@@ -47,17 +47,15 @@ export const PLANS: Record<PlanId, Plan> = {
     tagline: "Explore · Search · Discover",
     prices: { ANNUAL: 0, MONTHLY: 0 },
     features: [
-      "Search by project (10 / month)",
-      "Search by image (3 / month)",
-      "Search by material or expertise",
+      "3 free searches per month: project, image or category",
       "AI-powered results and matches",
-      "Contact up to 2 makers / month",
+      "Anonymous preview of matching makers",
     ],
     limits: {
-      textSearchesPerMonth: 10,
-      imageSearchesPerMonth: 3,
-      newConversationsPerMonth: 2,
+      searchesPerMonth: 3,
+      newConversationsPerMonth: 0,
       portfolioImages: 0,
+      seeMakers: false,
       seeContactDetails: false,
       savedLibrary: false,
       marketInsights: false,
@@ -82,10 +80,10 @@ export const PLANS: Record<PlanId, Plan> = {
       "Personalised suggestions",
     ],
     limits: {
-      textSearchesPerMonth: UNLIMITED,
-      imageSearchesPerMonth: UNLIMITED,
+      searchesPerMonth: UNLIMITED,
       newConversationsPerMonth: UNLIMITED,
       portfolioImages: 0,
+      seeMakers: true,
       seeContactDetails: true,
       savedLibrary: true,
       marketInsights: false,
@@ -108,10 +106,10 @@ export const PLANS: Record<PlanId, Plan> = {
       "Priority support",
     ],
     limits: {
-      textSearchesPerMonth: UNLIMITED,
-      imageSearchesPerMonth: UNLIMITED,
+      searchesPerMonth: UNLIMITED,
       newConversationsPerMonth: UNLIMITED,
       portfolioImages: 0,
+      seeMakers: true,
       seeContactDetails: true,
       savedLibrary: true,
       marketInsights: true,
@@ -128,10 +126,10 @@ export const PLANS: Record<PlanId, Plan> = {
     prices: { ANNUAL: 0, MONTHLY: 0 },
     features: ["Business profile", "Up to 6 portfolio pictures", "Receive messages from creatives"],
     limits: {
-      textSearchesPerMonth: UNLIMITED,
-      imageSearchesPerMonth: 10,
+      searchesPerMonth: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 6,
+      seeMakers: false,
       seeContactDetails: true,
       savedLibrary: false,
       marketInsights: false,
@@ -148,10 +146,10 @@ export const PLANS: Record<PlanId, Plan> = {
     prices: { ANNUAL: 149, MONTHLY: 179 },
     features: ["Professional profile with verified badge", "Unlimited projects & portfolio", "Visibility analytics"],
     limits: {
-      textSearchesPerMonth: UNLIMITED,
-      imageSearchesPerMonth: UNLIMITED,
+      searchesPerMonth: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 60,
+      seeMakers: true,
       seeContactDetails: true,
       savedLibrary: true,
       marketInsights: false,
@@ -169,10 +167,10 @@ export const PLANS: Record<PlanId, Plan> = {
     highlight: true,
     features: ["Everything in Pro", "Boosted ranking in search results", "Featured on the home page", "Editorial features & dedicated content"],
     limits: {
-      textSearchesPerMonth: UNLIMITED,
-      imageSearchesPerMonth: UNLIMITED,
+      searchesPerMonth: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 120,
+      seeMakers: true,
       seeContactDetails: true,
       savedLibrary: true,
       marketInsights: false,
@@ -189,10 +187,10 @@ export const PLANS: Record<PlanId, Plan> = {
     prices: { ANNUAL: 499, MONTHLY: 579 },
     features: ["Everything in Visibility", "Advanced demand analysis", "Full market insights", "Quarterly demand reporting"],
     limits: {
-      textSearchesPerMonth: UNLIMITED,
-      imageSearchesPerMonth: UNLIMITED,
+      searchesPerMonth: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 200,
+      seeMakers: true,
       seeContactDetails: true,
       savedLibrary: true,
       marketInsights: true,
@@ -210,10 +208,10 @@ export const PLANS: Record<PlanId, Plan> = {
     features: ["Full Intelligence package", "12-month partnership for launch-phase supporters", "Founding Partner badge", "Price locked for 12 months"],
     seatsLimit: 50,
     limits: {
-      textSearchesPerMonth: UNLIMITED,
-      imageSearchesPerMonth: UNLIMITED,
+      searchesPerMonth: UNLIMITED,
       newConversationsPerMonth: 0,
       portfolioImages: 200,
+      seeMakers: true,
       seeContactDetails: true,
       savedLibrary: true,
       marketInsights: true,

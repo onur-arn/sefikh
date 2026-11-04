@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, MapPin } from "lucide-react";
+import { BadgeCheck, Lock, MapPin } from "lucide-react";
 import { COMPANY_KINDS } from "@/lib/constants";
 import { cn, fileUrl } from "@/lib/utils";
 import { useT } from "@/i18n/client";
@@ -10,6 +10,7 @@ import { useT } from "@/i18n/client";
 export type MakerCardData = {
   slug: string;
   name: string;
+  anonymous?: boolean;
   tagline: string | null;
   kind: string;
   city: string | null;
@@ -26,14 +27,14 @@ export type MakerCardData = {
 export function MakerCard({ maker, priority, source, className }: { maker: MakerCardData; priority?: boolean; source?: string; className?: string }) {
   const tr = useT();
   const kind = COMPANY_KINDS.find((k) => k.value === maker.kind)?.label ?? maker.kind;
-  const href = `/makers/${maker.slug}${source ? `?src=${source}` : ""}`;
+  const href = maker.anonymous ? "/pricing?reason=locked" : `/makers/${maker.slug}${source ? `?src=${source}` : ""}`;
   return (
     <Link href={href} className={cn("group block", className)}>
       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-sand">
         {maker.image ? (
           <Image
             src={fileUrl(maker.image.key)!}
-            alt={maker.image.title ?? tr("Work by {name}", { name: maker.name })}
+            alt={maker.anonymous ? "" : (maker.image.title ?? tr("Work by {name}", { name: maker.name }))}
             fill
             priority={priority}
             sizes="(min-width: 1280px) 22vw, (min-width: 768px) 33vw, 50vw"
@@ -62,10 +63,11 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
       </div>
       <div className="mt-3.5">
         <div className="flex items-center gap-1.5">
-          <h3 className="truncate text-[15px] font-semibold tracking-tight">{maker.name}</h3>
+          <h3 className="truncate text-[15px] font-semibold tracking-tight">{maker.anonymous ? tr(kind) : maker.name}</h3>
+          {maker.anonymous && <Lock className="size-3.5 shrink-0 text-muted" strokeWidth={1.8} aria-label={tr("Name reserved for Pro and Studio plans")} />}
           {maker.verified && <BadgeCheck className="size-4 shrink-0 text-brass" strokeWidth={1.8} aria-label={tr("Verified maker")} />}
         </div>
-        <p className="mt-0.5 line-clamp-1 text-[13.5px] text-muted">{maker.tagline ?? kind}</p>
+        <p className="mt-0.5 line-clamp-1 text-[13.5px] text-muted">{maker.anonymous ? tr("Name reserved for Pro and Studio plans") : (maker.tagline ?? tr(kind))}</p>
         <p className="mt-1.5 flex items-center gap-1 text-[12px] text-muted">
           <MapPin className="size-3.5" strokeWidth={1.6} />
           {[maker.city, maker.country].filter(Boolean).join(", ") || "—"}

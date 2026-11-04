@@ -41,9 +41,9 @@ export default async function AboutPage() {
         <h2 className="display text-4xl sm:text-5xl">{tr("Join the community.")}</h2>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <ButtonLink href="/register" size="lg">
-            {tr("I am a creative")}</ButtonLink>
+            {tr("I have an idea, I'm looking for the right hands")}</ButtonLink>
           <ButtonLink href="/join" size="lg" variant="secondary">
-            {tr("I offer a skill")}</ButtonLink>
+            {tr("I have the know-how, I'm looking for great projects")}</ButtonLink>
         </div>
       </section>
     </>

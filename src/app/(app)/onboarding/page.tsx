@@ -23,7 +23,7 @@ export default async function OnboardingPage() {
       <Steps role={user.role} />
       <header className="mb-12 mt-10 text-center">
         <p className="eyebrow">{user.role === "PRO" ? tr("Showcase your craft. Get discovered.") : tr("Welcome to SEFIKH")}</p>
-        <h1 className="display mt-3 text-5xl sm:text-6xl">{user.role === "PRO" ? tr("I have a skill · I offer a skill") : tr("I am a creative")}</h1>
+        <h1 className="display mt-3 text-5xl sm:text-6xl">{user.role === "PRO" ? tr("I have the know-how, I'm looking for great projects") : tr("I have an idea, I'm looking for the right hands")}</h1>
         <p className="mx-auto mt-3 max-w-lg text-sm text-muted">
           {user.role === "PRO"
             ? tr("Tell us about your skills, materials and capabilities. It only takes a few minutes — you can refine everything later.")

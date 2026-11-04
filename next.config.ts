@@ -8,6 +8,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   // Application fortement dynamique (sessions, messagerie) : modèle de rendu classique.
   cacheComponents: false,
   poweredByHeader: false,
