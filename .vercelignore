@@ -1,0 +1,8 @@
+.cache
+.next
+.next-*
+storage
+prisma/*.db
+prisma/*.db-journal
+prisma/postgres
+.env*

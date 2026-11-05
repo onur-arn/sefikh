@@ -4,6 +4,9 @@ import { subscribe, type RealtimeEvent } from "@/lib/realtime";
 
 const HEARTBEAT_MS = 25_000;
 
+// Sur Vercel le flux est coupé à cette limite ; le navigateur se reconnecte et resynchronise.
+export const maxDuration = 300;
+
 /**
  * Flux temps réel de l'utilisateur connecté (Server-Sent Events) : nouveaux messages, accusés de lecture,
  * « en train d'écrire », présence, compteurs. Le navigateur se reconnecte seul en cas de coupure.

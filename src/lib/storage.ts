@@ -1,11 +1,14 @@
 import "server-only";
 import { mkdir, readFile, unlink, writeFile, stat } from "node:fs/promises";
 import path from "node:path";
+import { del, get, put } from "@vercel/blob";
 import { randomToken } from "@/lib/auth/crypto";
 import { env } from "@/lib/env";
 
-// Stockage disque local. L'interface (put/get/remove) permet de basculer vers S3 / R2 / Vercel Blob
-// sans toucher au reste de l'application.
+// Stockage disque en local, Vercel Blob (magasin privé) dès que BLOB_READ_WRITE_TOKEN est défini.
+// Tous les fichiers passent par la route /files, qui applique les contrôles d'accès.
+
+const useBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
 
 const root = path.resolve(process.cwd(), env.storageDir);
 
@@ -29,6 +32,10 @@ export function newKey(prefix: string, ext: string) {
 
 export async function putFile(key: string, data: Buffer) {
   const full = resolveKey(key);
+  if (useBlob) {
+    await put(key, data, { access: "private", addRandomSuffix: false, allowOverwrite: true, contentType: MIME_BY_EXT[key.split(".").pop()!.toLowerCase()] });
+    return key;
+  }
   await mkdir(path.dirname(full), { recursive: true });
   await writeFile(full, data);
   return key;
@@ -37,6 +44,12 @@ export async function putFile(key: string, data: Buffer) {
 export async function getFile(key: string) {
   try {
     const full = resolveKey(key);
+    if (useBlob) {
+      const blob = await get(key, { access: "private" });
+      if (!blob || blob.statusCode !== 200) return null;
+      const data = Buffer.from(await new Response(blob.stream).arrayBuffer());
+      return { data, size: data.length, mtime: blob.blob.uploadedAt };
+    }
     const [data, info] = await Promise.all([readFile(full), stat(full)]);
     return { data, size: info.size, mtime: info.mtime };
   } catch {
@@ -46,7 +59,8 @@ export async function getFile(key: string) {
 
 export async function removeFile(key: string | null | undefined) {
   if (!key) return;
-  await unlink(resolveKey(key)).catch(() => {});
+  const full = resolveKey(key);
+  await (useBlob ? del(key) : unlink(full)).catch(() => {});
 }
 
 export const MIME_BY_EXT: Record<string, string> = {

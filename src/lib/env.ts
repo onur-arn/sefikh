@@ -8,6 +8,8 @@ export const env = {
   appUrl: read("APP_URL", "http://localhost:3000").replace(/\/$/, ""),
   authSecret: read("AUTH_SECRET", "dev-insecure-secret"),
   isProd: process.env.NODE_ENV === "production",
+  /** Site de recette en ligne : paiements simulés, e-mails confirmés d'office, pas d'indexation. */
+  demoMode: read("DEMO_MODE") === "1",
   smtp: {
     host: read("SMTP_HOST"),
     port: Number(read("SMTP_PORT", "587")),
@@ -28,5 +30,5 @@ if (env.isProd && env.authSecret === "dev-insecure-secret") {
   console.warn("[sefikh] AUTH_SECRET n'est pas défini : à configurer avant la mise en production.");
 }
 
-/** Paiement simulé autorisé uniquement hors production et sans clé Stripe. */
-export const simulatedPayments = !env.stripeSecretKey && !env.isProd;
+/** Paiement simulé autorisé uniquement sans clé Stripe, hors production ou sur le site de recette. */
+export const simulatedPayments = !env.stripeSecretKey && (!env.isProd || env.demoMode);

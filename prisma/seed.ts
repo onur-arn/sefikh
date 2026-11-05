@@ -13,7 +13,8 @@ import { embedImage } from "../src/lib/clip";
 import { slugify } from "../src/lib/utils";
 
 const db = new PrismaClient();
-const PASSWORD = "Sefikh2026!";
+const PASSWORD = process.env.SEED_PASSWORD || "Sefikh2026!";
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || PASSWORD;
 const asset = (n: string) => path.join(__dirname, "seed-assets", `${n}.jpg`);
 
 type Seed = {
@@ -404,7 +405,7 @@ async function main() {
   console.log();
 
   console.log("→ Compte administrateur");
-  await db.user.create({ data: { name: ADMIN_DEMO.name, email: ADMIN_DEMO.email, role: "ADMIN", plan: "CLIENT_STUDIO", passwordHash, emailVerifiedAt: now } });
+  await db.user.create({ data: { name: ADMIN_DEMO.name, email: ADMIN_DEMO.email, role: "ADMIN", plan: "CLIENT_STUDIO", passwordHash: await bcrypt.hash(ADMIN_PASSWORD, 12), emailVerifiedAt: now } });
 
   console.log("→ Comptes créatifs");
   const client = await db.user.create({
@@ -573,7 +574,7 @@ async function main() {
     await db.message.create({ data: { conversationId: conv.id, senderId: o.id, body: "Hello, we would like to discuss a project with you.", createdAt: created } });
   }
 
-  console.log(`\n✔ Seed terminé.\n  Créatif : ${CLIENT_DEMO.email}\n  Maker   : pro@sefikh.demo\n  Mot de passe : ${PASSWORD}`);
+  console.log(`\n✔ Seed terminé.\n  Créatif : ${CLIENT_DEMO.email}\n  Maker   : pro@sefikh.demo\n  Mot de passe : ${process.env.SEED_PASSWORD ? "(SEED_PASSWORD)" : PASSWORD}`);
 }
 
 main()

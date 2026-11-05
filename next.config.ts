@@ -7,6 +7,8 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
 ];
 
+if (process.env.DEMO_MODE === "1") securityHeaders.push({ key: "X-Robots-Tag", value: "noindex, nofollow" });
+
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   // Application fortement dynamique (sessions, messagerie) : modèle de rendu classique.
@@ -14,6 +16,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Modules natifs à ne pas bundler (CLIP / ONNX, traitement d'image).
   serverExternalPackages: ["@huggingface/transformers", "onnxruntime-node", "sharp"],
+  // CLIP est coupé sur Vercel (CLIP_MODE=off) : son moteur dépasserait la taille maximale d'une fonction.
+  outputFileTracingExcludes: {
+    "*": ["node_modules/onnxruntime-node/**", "node_modules/onnxruntime-web/**", "node_modules/@huggingface/transformers/**", ".cache/**", "storage/**", "prisma/*.db"],
+  },
   images: {
     qualities: [60, 75, 85],
     localPatterns: [{ pathname: "/files/**" }, { pathname: "/images/**" }],
