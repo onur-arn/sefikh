@@ -452,3 +452,13 @@ model Translation {
 
   @@unique([sourceHash, target])
 }
+
+// ───────────────────────────── Choix du visuel (interface /visuel) ─────────────────────────────
+
+model DesignChoice {
+  id         String   @id @default(cuid())
+  clientName String
+  comment    String?
+  theme      String // JSON, voir src/lib/visuel/theme.ts
+  createdAt  DateTime @default(now())
+}

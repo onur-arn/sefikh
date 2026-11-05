@@ -22,6 +22,8 @@ export const env = {
   stripeWebhookSecret: read("STRIPE_WEBHOOK_SECRET"),
   storageDir: read("STORAGE_DIR", "./storage"),
   clipEnabled: read("CLIP_MODE", "on") !== "off",
+  /** Clé du lien privé de l'interface de choix du visuel (/visuel/<clé>). */
+  visuelKey: read("VISUEL_KEY", process.env.NODE_ENV === "production" ? "" : "demo"),
   anthropicApiKey: read("ANTHROPIC_API_KEY"),
   aiModel: read("AI_MODEL", "claude-opus-5-5"),
 };

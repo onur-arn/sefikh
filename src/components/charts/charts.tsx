@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/client";
 
 // Séries uniques (une seule échelle par graphique) : laiton sur papier ivoire, axes et grilles discrets.
-const SERIES = "#a8794a";
-const AXIS = "#776c61";
-const GRID = "#e2d8ca";
+const SERIES = "var(--color-brass)";
+const AXIS = "var(--color-muted)";
+const GRID = "var(--color-line)";
 
 function ChartTooltip({ active, payload, label, unit }: { active?: boolean; payload?: { value: number }[]; label?: string; unit: string }) {
   const tr = useT();
@@ -56,7 +56,7 @@ export function ColumnChart({ data, dataKey, unit, height = 220 }: { data: Recor
           <CartesianGrid vertical={false} stroke={GRID} strokeDasharray="2 4" />
           <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
           <YAxis tick={{ fill: AXIS, fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
-          <Tooltip content={<ChartTooltip unit={unit} />} cursor={{ fill: "rgba(168,121,74,0.08)" }} />
+          <Tooltip content={<ChartTooltip unit={unit} />} cursor={{ fill: "color-mix(in srgb, var(--color-brass) 8%, transparent)" }} />
           <Bar dataKey={dataKey} fill={SERIES} radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>

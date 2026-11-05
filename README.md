@@ -147,3 +147,12 @@ Mots de passe hachés (bcrypt), jetons de session/réinitialisation stockés hac
 - **Paiement à échéance choisie / moyens de paiement par pays** (notes de la maquette) : facturation mensuelle à la date de souscription ; moyens de paiement locaux gérés par Stripe selon le pays.
 - **Traductions** : rédigées pour le lancement, à faire relire par des natifs (surtout le chinois). Les textes juridiques traduits doivent être validés par un juriste, comme l'original.
 - **Anthropic** ajouté aux sous-traitants dans la politique de confidentialité : à valider (RGPD).
+
+## Choix du visuel (`/visuel/<VISUEL_KEY>`)
+
+Interface privée où la cliente essaie directions, couleurs, polices et détails sur les vraies pages du site, puis valide son choix.
+
+- **Principe :** chaque page s'affiche dans un cadre du même domaine, dans lequel `src/lib/visuel/theme.ts` dépose une feuille de style. Le site lui-même ne change pas tant que le choix n'est pas reporté.
+- **Accès :** `VISUEL_KEY` dans l'environnement (`demo` en local). Sans clé, la page renvoie une 404.
+- **Résultat :** table `DesignChoice`, à lire sur `/admin/visuel`. La validation la plus récente fait foi ; la page donne les variables à reporter dans `src/app/globals.css`, les polices à charger dans `src/app/layout.tsx`, et un lien pour rouvrir le réglage.
+- **Polices :** chargées depuis Google Fonts dans l'interface seulement. Celles retenues passeront par `next/font`.
