@@ -64,7 +64,7 @@ export default async function HomePage() {
       {/* ── Manifeste ──────────────────────────────────────── */}
       <section className="container-x border-t border-line py-20 sm:py-28">
         <div className="grid gap-8 lg:grid-cols-12">
-          <p className="folio lg:col-span-3">{tr("N° 01 — Manifesto")}</p>
+          <p className="folio lg:col-span-3">{tr("Manifesto")}</p>
           <div className="lg:col-span-9">
             <p className="display text-[2.3rem] sm:text-6xl lg:text-[4.6rem]">{tr("An interior cannot be bought. It is built, by hand, by people you have not met yet.")}</p>
             <p className="mt-8 max-w-xl text-[16px] leading-relaxed text-ink-soft">{tr("SEFIKH brings together the cabinetmakers, metalworkers, stone carvers and weavers that architects keep to themselves. Describe an idea, show an image: we look for who can make it.")}</p>
@@ -79,7 +79,7 @@ export default async function HomePage() {
       <section className="border-t border-line">
         <div className="container-x py-16 sm:py-20">
           <div className="grid gap-4 lg:grid-cols-12">
-            <p className="folio lg:col-span-3">{tr("N° 02 — Index of crafts")}</p>
+            <p className="folio lg:col-span-3">{tr("Index of crafts")}</p>
             <h2 className="display text-4xl sm:text-5xl lg:col-span-9">{tr("Know-how, organised.")}</h2>
           </div>
           <ul className="mt-12 border-t border-ink/70">
@@ -106,7 +106,7 @@ export default async function HomePage() {
           <Image src="/images/join-1.webp" alt={tr("A cabinetmaker's hands planing wood")} fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
         </div>
         <div className="flex flex-col justify-center bg-paper px-4 py-14 sm:px-10 lg:px-16">
-          <p className="folio">{tr("N° 03 — Workshops")}</p>
+          <p className="folio">{tr("Workshops")}</p>
           <h2 className="display mt-4 text-4xl sm:text-[3.4rem]">{tr("Showcase your craft. Get discovered.")}</h2>
           <p className="mt-5 max-w-md leading-relaxed text-ink-soft">{tr("Join SEFIKH and connect with architects, designers and creative professionals looking for unique skills, materials and expertise.")}</p>
           <div className="mt-8 flex flex-wrap gap-3">

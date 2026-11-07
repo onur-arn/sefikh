@@ -34,14 +34,8 @@ export async function SiteFooter() {
           ))}
         </div>
       </div>
-      <div className="container-x overflow-hidden border-t border-line pt-4">
-        <p aria-hidden className="display select-none text-center text-[23vw] leading-[0.82] tracking-[0.02em] text-ink">
-          SEFIKH
-        </p>
-      </div>
-      <div className="container-x folio flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-5">
+      <div className="container-x folio flex border-t border-line flex-wrap items-center justify-between gap-x-6 gap-y-2 py-5">
         <p>{tr("© {v} SEFIKH. All rights reserved.", { v: new Date().getFullYear() })}</p>
-        <p>{tr("SEFIKH takes no commission on projects conducted through the platform.")}</p>
         <LocaleRow />
       </div>
     </footer>

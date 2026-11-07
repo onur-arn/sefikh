@@ -11,12 +11,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const tr = await getT();
   return {
   title: tr("Subscription"),
-  description: tr("Plans for creatives (Free, Pro, Studio) and makers (Pro, Visibility, Intelligence, Founding Partner). No commission on projects."),
+  description: tr("Plans for creatives (Free, Pro, Studio) and makers (Pro, Visibility, Intelligence, Founding Partner)."),
 };
 }
 
 const FAQ = [
-  ["Does SEFIKH take a commission on projects?", "Never. SEFIKH does not take any commission or percentage on projects conducted through the platform: you only pay your subscription."],
   ["What does the 12-month commitment mean?", "You are billed monthly at a reduced price and commit for 12 months. You can cancel at any time; the cancellation takes effect at the end of the commitment period."],
   ["Which payment methods are accepted?", "Cards (Visa, Mastercard, American Express) everywhere, plus local methods depending on your country such as SEPA Direct Debit, Bancontact or iDEAL. Payments are processed securely by Stripe."],
   ["Can I change plan later?", "Yes. Upgrades are applied immediately with a prorated amount; downgrades apply at the end of the current period."],
@@ -68,7 +67,7 @@ export default async function PricingPage({ searchParams }: PageProps<"/subscrip
       </div>
 
       <p className="folio mt-8">
-        {tr("Prices include VAT. *SEFIKH does not take any commission or percentage on projects conducted through the platform.")}{" "}{simulatedPayments && <span className="mt-1 block text-brass-dark">{tr("Development mode: Stripe is not configured, payments are simulated.")}</span>}
+        {tr("Prices include VAT.")}{" "}{simulatedPayments && <span className="mt-1 block text-brass-dark">{tr("Development mode: Stripe is not configured, payments are simulated.")}</span>}
       </p>
 
       <section className="mt-24 grid gap-8 lg:grid-cols-12">

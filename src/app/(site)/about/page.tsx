@@ -28,14 +28,13 @@ export default async function AboutPage() {
             <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-ink-soft">{tr("Behind every remarkable interior there is a cabinetmaker, a metalworker, a stone carver or an upholsterer whose know-how rarely appears online. SEFIKH exists to make that know-how searchable.")}</p>
           </div>
         </div>
-        <dl className="mt-16 grid grid-cols-2 border-t border-line lg:grid-cols-4">
+        <dl className="mt-16 grid grid-cols-3 border-t border-line">
           {[
             [tr.number(makers), tr("Curated makers")],
             [tr.number(countries), tr("Countries")],
             [tr.number(portfolioCount), tr("Portfolio pieces")],
-            ["0 %", tr("Commission on projects")],
           ].map(([n, l], i) => (
-            <div key={l} className={i % 2 ? "border-l border-line py-5 pl-5" : "py-5 lg:border-l lg:border-line lg:pl-5 lg:first:border-l-0 lg:first:pl-0"}>
+            <div key={l} className={i ? "border-l border-line py-5 pl-5" : "py-5"}>
               <dd className="display text-5xl">{n}</dd>
               <dt className="folio mt-2">{l}</dt>
             </div>
@@ -55,7 +54,7 @@ export default async function AboutPage() {
         <div className="grid border-t border-ink/70 md:grid-cols-3">
           {[
             [tr("Our mission"), tr("Give architects, interior designers and hoteliers a professional sourcing tool to identify the right skills, materials and makers — anywhere in the world.")],
-            [tr("Our promise to makers"), tr("A business profile that does justice to your craft, qualified requests with clear briefs, and no commission on the projects you win.")],
+            [tr("Our promise to makers"), tr("A business profile that does justice to your craft and qualified requests with clear briefs.")],
             [tr("How we work"), tr("An AI search engine that understands materials, techniques and images — and a team that curates the platform by hand.")],
           ].map(([t, d], i) => (
             <div key={t} className={i ? "border-t border-line py-8 md:border-l md:border-t-0 md:pl-8" : "py-8 md:pr-8"}>
@@ -77,7 +76,7 @@ export default async function AboutPage() {
               steps: [
                 [tr("Describe your project"), tr("Write it in your own words: our engine understands materials, techniques, sectors and places.")],
                 [tr("Search with a picture"), tr("Drop a moodboard image and discover makers whose portfolio looks alike.")],
-                [tr("Talk directly to makers"), tr("Share plans and references in a dedicated project inbox — no middleman, no commission.")],
+                [tr("Talk directly to makers"), tr("Share plans and references in a dedicated project inbox, with no middleman.")],
               ],
               cta: [tr("Start a project"), "/dashboard/projects/new"],
             },

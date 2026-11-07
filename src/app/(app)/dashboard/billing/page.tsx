@@ -26,7 +26,7 @@ export default async function BillingPage() {
     <>
       <header className="mb-8">
         <h1 className="display text-4xl sm:text-5xl">{tr("Plan & billing")}</h1>
-        <p className="mt-2 text-sm text-muted">{tr("Manage your subscription, payment methods and invoices. SEFIKH never takes a commission on your projects.")}</p>
+        <p className="mt-2 text-sm text-muted">{tr("Manage your subscription, payment methods and invoices.")}</p>
       </header>
 
       <Card className="p-6 sm:p-8">
@@ -60,7 +60,7 @@ export default async function BillingPage() {
                 )}
               </dl>
             ) : (
-              <p className="mt-6 text-sm">{tr("You are on the free plan. Upgrade at any time — no commission, cancel whenever you like on the no-commitment option.")}</p>
+              <p className="mt-6 text-sm">{tr("You are on the free plan. Upgrade at any time and cancel whenever you like on the no-commitment option.")}</p>
             )}
           </div>
           <div className="flex flex-col gap-2 sm:w-56">

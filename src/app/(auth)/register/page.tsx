@@ -17,7 +17,7 @@ export default async function RegisterPage({ searchParams }: PageProps<"/registe
     <>
       <p className="eyebrow">{tr("Join SEFIKH")}</p>
       <h1 className="display mt-3 text-5xl">{tr("Create your account")}</h1>
-      <p className="mt-3 text-sm text-muted">{tr("It only takes a minute. No commission is ever taken on your projects.")}</p>
+      <p className="mt-3 text-sm text-muted">{tr("It only takes a minute.")}</p>
       {reason === "search" && <p className="mt-4 rounded-xl bg-sand px-4 py-3 text-sm">{tr("Create a free account to search: 3 free searches are included.")}</p>}
       <RegisterForm initialRole={role === "pro" ? "PRO" : "CLIENT"} />
     </>

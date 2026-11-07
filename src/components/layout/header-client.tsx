@@ -71,6 +71,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
   // Le panneau de recherche se referme en changeant de page ou avec Échap.
   // Accueil : barre transparente sur l'image d'ouverture, blanche au survol et après le défilement.
   const overlay = pathname === "/" && !pastIntro && !hovered && !mobileOpen;
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   const navClass = "link-underline font-mono text-[11.5px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink";
 
   return (
@@ -81,11 +82,15 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
     >
       <div className="container-x grid h-[68px] grid-cols-[1fr_auto_1fr] items-center gap-4">
         <nav className="hidden items-center gap-4 lg:flex xl:gap-5" aria-label={tr("Main")}>
-          {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className={cn(navClass, (n.href === "/" ? pathname === "/" : pathname.startsWith(n.href)) && "text-ink [background-size:100%_1px]")}>
+          {NAV.map((n) => {
+            // Page en cours : en gras, sans soulignement.
+            const active = isActive(n.href);
+            return (
+              <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined} className={cn(navClass, active && "font-semibold text-ink [background-image:none]")}>
                 {tr(n.label)}
               </Link>
-          ))}
+            );
+          })}
         </nav>
 
         <Link href="/" aria-label={tr("SEFIKH — home")} className="col-start-2 shrink-0">
@@ -117,7 +122,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
         <div className="border-t border-line bg-paper text-ink lg:hidden">
           <nav className="container-x flex flex-col py-4" aria-label={tr("Mobile")}>
             {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className="display border-b border-line/70 py-3 text-2xl">
+              <Link key={n.href} href={n.href} aria-current={isActive(n.href) ? "page" : undefined} className={cn("display border-b border-line/70 py-3 text-2xl", isActive(n.href) && "font-semibold")}>
                 {tr(n.label)}
               </Link>
             ))}

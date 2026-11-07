@@ -151,7 +151,7 @@ export function ContactButton({ company, viewer, projects, className }: { compan
                 )}
                 <Button onClick={send} loading={pending} className="mt-6 w-full" size="lg">
                   <Send className="size-4" /> {" "}{tr("Send message")}</Button>
-                <p className="mt-3 text-center text-[12px] text-muted">{tr("The maker will be notified by e-mail. SEFIKH takes no commission.")}</p>
+                <p className="mt-3 text-center text-[12px] text-muted">{tr("The maker will be notified by e-mail.")}</p>
               </>
             )}
           </div>

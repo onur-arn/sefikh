@@ -10,7 +10,7 @@ const PAGES: Record<string, { title: string; updated: string; sections: [string,
     sections: [
       ["1. Purpose", "These terms govern the use of SEFIKH, a platform connecting creative professionals (architects, designers, hoteliers, private clients) with makers (artisans, workshops, manufacturers, material suppliers)."],
       ["2. Accounts", "You must provide accurate information and keep your password confidential. Each account is personal. Makers guarantee that the work shown in their portfolio is their own or that they hold the rights to publish it."],
-      ["3. Role of SEFIKH", "SEFIKH is an intermediary: contracts for the supply of goods or services are concluded directly between creatives and makers. SEFIKH takes no commission on these projects and is not a party to them."],
+      ["3. Role of SEFIKH", "SEFIKH is an intermediary: contracts for the supply of goods or services are concluded directly between creatives and makers. SEFIKH is not a party to them."],
       ["4. Subscriptions", "Paid plans are billed monthly. Plans with a 12-month commitment are billed monthly over a minimum period of 12 months; cancellation takes effect at the end of the commitment. Plans without commitment can be cancelled at any time and remain active until the end of the paid period. Payments are processed by Stripe."],
       ["5. Acceptable use", "Spam, unsolicited commercial messages, harassment, illegal content and attempts to circumvent usage limits are forbidden and may lead to account suspension."],
       ["6. Content", "You keep ownership of the content you publish and grant SEFIKH a licence to display it on the platform and in its promotion, for as long as it is online."],
