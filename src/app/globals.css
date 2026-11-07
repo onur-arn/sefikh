@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
-/* ── Identité SEFIKH : un cahier d'architecte. Chaux, encre de noix, terre cuite ─────────────────────────── */
+/* ── Identité SEFIKH : galerie blanche, encre noire, accent terre cuite (choix de la cliente, 06/11/2026) ── */
 @theme {
-  --color-ivory: #f6f3ec;
-  --color-paper: #fbf9f4;
-  --color-sand: #ebe5d9;
-  --color-line: #d9d2c3;
-  --color-ink: #1f1c17;
-  --color-ink-soft: #3d382f;
-  --color-muted: #7b7366;
+  --color-ivory: #ffffff;
+  --color-paper: #f7f7f6;
+  --color-sand: #eeeeee;
+  --color-line: #d9d9d9;
+  --color-ink: #111111;
+  --color-ink-soft: #373737;
+  --color-muted: #757575;
   --color-brass: #a2492a;
-  --color-brass-dark: #7a3519;
-  --color-brass-light: #f0ddd0;
-  --color-espresso: #26221c;
-  --color-wine: #6b2320;
+  --color-brass-dark: #773823;
+  --color-brass-light: #eeded9;
+  --color-espresso: #141414;
+  --color-wine: #693421;
   --color-success: #4c6b4f;
   --color-danger: #a33a2f;
 
@@ -63,6 +63,16 @@
   :focus-visible {
     outline: 1px solid var(--color-brass);
     outline-offset: 2px;
+  }
+  /* Bandeaux sombres : clair sur sombre, encre inversée pour les boutons. */
+  [class*="bg-espresso"] {
+    --color-paper: #f7f7f6;
+    --color-ivory: #f7f7f6;
+    --color-ink: #141414;
+  }
+  /* Photographies : traitement chaud. */
+  main img, aside img {
+    filter: sepia(0.2) saturate(0.92);
   }
   h1, h2, h3 {
     text-wrap: balance;
