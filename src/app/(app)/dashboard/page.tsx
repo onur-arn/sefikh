@@ -157,7 +157,7 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
               <p className="mt-2 text-sm text-paper/60">
                 {tr("Unlimited searches, full contact details, your supplier library and personalised suggestions — from 39 € per month.")}</p>
             </div>
-            <ButtonLink href="/pricing" variant="light">
+            <ButtonLink href="/subscription" variant="light">
               {tr("See plans")}{" "}<ArrowRight className="size-4" />
             </ButtonLink>
           </div>

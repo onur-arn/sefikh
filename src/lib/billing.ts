@@ -120,7 +120,7 @@ export async function startCheckout(
     subscription_data: { metadata: { userId: user.id, planId, term } },
     metadata: { userId: user.id, planId, term },
     success_url: `${env.appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${env.appUrl}/pricing?canceled=1`,
+    cancel_url: `${env.appUrl}/subscription?canceled=1`,
   });
   await db.subscription.create({
     data: { userId: user.id, plan: planId, term, status: "INCOMPLETE", provider: "stripe", stripeCheckoutId: session.id, amount },

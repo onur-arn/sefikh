@@ -35,6 +35,9 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  async redirects() {
+    return [{ source: "/pricing", destination: "/subscription", permanent: true }];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

@@ -30,7 +30,7 @@ export default async function LibraryPage() {
         <p className="mt-2 text-sm text-muted">{tr("The makers you've saved, ready for your next project.")}</p>
       </header>
       {!allowed ? (
-        <EmptyState icon={<Lock className="size-8" strokeWidth={1.3} />} title={tr("Build your supplier library")} action={<ButtonLink href="/pricing">{tr("Upgrade to Pro")}</ButtonLink>}>
+        <EmptyState icon={<Lock className="size-8" strokeWidth={1.3} />} title={tr("Build your supplier library")} action={<ButtonLink href="/subscription">{tr("Upgrade to Pro")}</ButtonLink>}>
           {tr("Save makers you love and find them in one place. The supplier library is included in Pro and Studio.")}</EmptyState>
       ) : saved.length === 0 ? (
         <EmptyState icon={<Bookmark className="size-8" strokeWidth={1.3} />} title={tr("No saved maker yet")} action={<ButtonLink href="/search">{tr("Explore makers")}</ButtonLink>}>

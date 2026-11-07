@@ -73,7 +73,7 @@ export function FilterBar({ locked = false }: { locked?: boolean }) {
             <span key={t.key}>{tr(t.label)}</span>
           ))}
         </p>
-        <Link href="/pricing" className="link-underline font-mono text-[11.5px] uppercase tracking-[0.05em] text-brass">
+        <Link href="/subscription" className="link-underline font-mono text-[11.5px] uppercase tracking-[0.05em] text-brass">
           {tr("Filters are included in Pro and Studio")}
         </Link>
       </div>

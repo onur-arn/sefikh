@@ -78,7 +78,7 @@ async function LockedMaker() {
         <Lock className="mx-auto size-7 text-muted" strokeWidth={1.4} />
         <h1 className="display mt-4 text-3xl">{tr("Create an account to continue")}</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted">{tr("Names and contact details are reserved for Pro and Studio plans. Choose a plan to discover these makers and write to them.")}</p>
-        <ButtonLink href="/pricing" className="mt-6">
+        <ButtonLink href="/subscription" className="mt-6">
           {tr("Choose your monthly subscription")}
         </ButtonLink>
       </div>
@@ -308,7 +308,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
                 </div>
                 <p className="mt-4 flex items-start gap-2 text-[13px] text-muted">
                   <Lock className="mt-0.5 size-3.5 shrink-0" /> {" "}{tr("Full contact details are available with the Pro plan. You can still send a message.")}</p>
-                <Link href={user ? "/pricing" : "/register"} className="mt-3 inline-block text-[13px] font-medium text-brass-dark underline-offset-4 hover:underline">
+                <Link href={user ? "/subscription" : "/register"} className="mt-3 inline-block text-[13px] font-medium text-brass-dark underline-offset-4 hover:underline">
                   {user ? tr("Upgrade to Pro") : tr("Create an account")} →
                 </Link>
               </div>

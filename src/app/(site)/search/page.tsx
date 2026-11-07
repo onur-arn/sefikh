@@ -156,7 +156,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
             <Lock className="mx-auto size-6 text-muted" strokeWidth={1.2} />
             <h2 className="display mt-4 text-4xl">{tr("Unlock unlimited AI-powered searches")}</h2>
             <p className="mx-auto mt-3 max-w-md text-[15px] text-muted">{tr("The Free plan includes {limit} searches in total. Upgrade to Pro for unlimited searches, the names of makers and direct messaging.", { limit: plan.limits.freeSearches })}</p>
-            <ButtonLink href="/pricing" className="mt-7">
+            <ButtonLink href="/subscription" className="mt-7">
               {tr("See plans")}
             </ButtonLink>
           </div>
@@ -178,7 +178,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         {!access && !limited && results.length > 0 && (
           <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-line pt-6 sm:flex-row sm:items-center">
             <p className="max-w-xl text-[15px] text-ink-soft">{tr("Names and contact details are reserved for Pro and Studio plans. Choose a plan to discover these makers and write to them.")}</p>
-            <ButtonLink href="/pricing" size="sm">
+            <ButtonLink href="/subscription" size="sm">
               {tr("See plans")}
             </ButtonLink>
           </div>

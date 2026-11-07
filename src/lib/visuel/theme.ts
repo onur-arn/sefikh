@@ -167,7 +167,7 @@ export const PREVIEW_PAGES: { path: string; label: string }[] = [
   { path: "/about", label: "À propos" },
   { path: "/content", label: "Contenus" },
   { path: "/insights", label: "Tendances" },
-  { path: "/pricing", label: "Tarifs" },
+  { path: "/subscription", label: "Tarifs" },
   { path: "/journal/the-return-of-patinated-brass", label: "Article" },
   { path: "/register", label: "Inscription" },
 ];

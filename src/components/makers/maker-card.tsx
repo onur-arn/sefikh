@@ -6,8 +6,11 @@ import { BadgeCheck, Lock } from "lucide-react";
 import { COMPANY_KINDS } from "@/lib/constants";
 import { cn, fileUrl } from "@/lib/utils";
 import { useT } from "@/i18n/client";
+import { TranslateButton, useAutoTranslate } from "@/components/translate/auto-translate";
 
 export type MakerCardData = {
+  /** Identifiant de l'entreprise : active la traduction de son accroche. */
+  id?: string;
   slug: string;
   name: string;
   anonymous?: boolean;
@@ -39,8 +42,12 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
     .sort((a, b) => a.wait - b.wait)
     .slice(0, 3)
     .map(({ m }) => tr.date(new Date(2026, m - 1, 1), { month: "short" }));
+  const translation = useAutoTranslate("company", maker.id ?? "");
+  const tagline = translation.translated?.tagline ?? maker.tagline;
+  const canTranslate = !maker.anonymous && !!maker.id && !!maker.tagline;
+  // Lien étiré sur toute la carte : le bouton de traduction reste cliquable par-dessus.
   return (
-    <Link href={href} className={cn("group block", className)}>
+    <div className={cn("group relative", className)}>
       <div className="relative aspect-[4/5] overflow-hidden bg-sand">
         {maker.image ? (
           <Image
@@ -58,13 +65,16 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
       </div>
       <div className="mt-3 border-t border-ink/70 pt-2.5">
         <div className="flex items-baseline justify-between gap-3">
-          <h3 className="display truncate text-[1.65rem] transition-colors group-hover:text-brass">{maker.anonymous ? tr(kind) : maker.name}</h3>
+          <h3 className="display truncate text-[1.65rem] transition-colors group-hover:text-brass">
+            <Link href={href} className="after:absolute after:inset-0 after:content-['']">{maker.anonymous ? tr(kind) : maker.name}</Link>
+          </h3>
           <span className="flex shrink-0 items-center gap-1.5 text-muted">
             {maker.verified && <BadgeCheck className="size-3.5" strokeWidth={1.4} aria-label={tr("Verified maker")} />}
             {maker.anonymous && <Lock className="size-3.5" strokeWidth={1.4} aria-label={tr("Name reserved for Pro and Studio plans")} />}
           </span>
         </div>
-        {!maker.anonymous && <p className="mt-0.5 line-clamp-1 text-[14px] text-muted">{maker.tagline ?? tr(kind)}</p>}
+        {!maker.anonymous && <p className="mt-0.5 line-clamp-2 text-[14px] text-muted">{tagline ?? tr(kind)}</p>}
+        {canTranslate && <TranslateButton state={translation} className="relative z-10 mt-1 text-muted" />}
         <dl className="folio mt-2 space-y-0.5">
           <div className="flex gap-2">
             <dt className="sr-only">{tr("Location")}</dt>
@@ -89,6 +99,6 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
           {maker.reasons && maker.reasons.length > 0 && <dd className="text-brass">{maker.reasons.join(" · ")}</dd>}
         </dl>
       </div>
-    </Link>
+    </div>
   );
 }

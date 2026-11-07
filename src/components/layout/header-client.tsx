@@ -20,7 +20,7 @@ const NAV = [
   { href: "/about", label: "About us" },
   { href: "/content", label: "Content" },
   { href: "/insights", label: "Trends & Insights" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/subscription", label: "Subscription" },
 ];
 
 export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null; initialCounts: { messages: number; notifications: number } }) {

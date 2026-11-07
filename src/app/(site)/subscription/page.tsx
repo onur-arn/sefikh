@@ -10,7 +10,7 @@ import { getT } from "@/i18n/server";
 export async function generateMetadata(): Promise<Metadata> {
   const tr = await getT();
   return {
-  title: tr("Pricing"),
+  title: tr("Subscription"),
   description: tr("Plans for creatives (Free, Pro, Studio) and makers (Pro, Visibility, Intelligence, Founding Partner). No commission on projects."),
 };
 }
@@ -23,7 +23,7 @@ const FAQ = [
   ["Will I get invoices?", "Yes, every payment generates an invoice available in your billing space, with your company details and VAT number."],
 ];
 
-export default async function PricingPage({ searchParams }: PageProps<"/pricing">) {
+export default async function PricingPage({ searchParams }: PageProps<"/subscription">) {
   const tr = await getT();
   const sp = await searchParams;
   const user = await getCurrentUser();
@@ -47,8 +47,8 @@ export default async function PricingPage({ searchParams }: PageProps<"/pricing"
 
       <div className="mt-12 flex gap-6 border-b border-line">
         {[
-          ["CLIENT", tr("For creatives"), "/pricing?for=creative"],
-          ["PRO", tr("For makers"), "/pricing?for=pro"],
+          ["CLIENT", tr("For creatives"), "/subscription?for=creative"],
+          ["PRO", tr("For makers"), "/subscription?for=pro"],
         ].map(([a, label, href]) => (
           <Link key={a} href={href!} scroll={false} className={cn("-mb-px border-b py-3 font-mono text-[12px] uppercase tracking-[0.05em]", audience === a ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink")}>
             {tr(label)}

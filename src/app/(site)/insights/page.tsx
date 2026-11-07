@@ -195,7 +195,7 @@ export default async function InsightsPage({ searchParams }: PageProps<"/insight
                 <Lock className="mx-auto size-7 text-brass" strokeWidth={1.4} />
                 <h3 className="display mt-3 text-3xl">{tr("Full market intelligence")}</h3>
                 <p className="mt-2 text-sm text-muted">{tr("Demand by expertise, locations, emerging trends, discovery and matching rates are included in the Intelligence plan for makers and the Studio plan for creatives, with detailed quarterly reporting.")}</p>
-                <ButtonLink href={user?.role === "PRO" ? "/upgrade" : "/pricing"} className="mt-6">
+                <ButtonLink href={user?.role === "PRO" ? "/upgrade" : "/subscription"} className="mt-6">
                   {tr("See plans")}</ButtonLink>
               </div>
             </div>

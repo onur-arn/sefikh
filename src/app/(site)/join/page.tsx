@@ -23,7 +23,7 @@ export default async function JoinPage() {
             <ButtonLink href="/register?role=pro" size="lg">
               {tr("Join SEFIKH")} <ArrowRight className="size-3.5" />
             </ButtonLink>
-            <ButtonLink href="/pricing?for=pro" size="lg" variant="secondary">
+            <ButtonLink href="/subscription?for=pro" size="lg" variant="secondary">
               {tr("Business plans")}</ButtonLink>
           </div>
           <p className="mt-4 text-[13px] text-muted">{tr("Subscription required to appear · No commission on projects")}</p>

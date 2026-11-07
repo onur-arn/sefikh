@@ -240,7 +240,7 @@ export default async function HomePage() {
             <ButtonLink href="/register?role=pro">
               {tr("Join SEFIKH")} <ArrowRight className="size-3.5" />
             </ButtonLink>
-            <ButtonLink href="/pricing?for=pro" variant="secondary">
+            <ButtonLink href="/subscription?for=pro" variant="secondary">
               {tr("Business plans")}
             </ButtonLink>
           </div>

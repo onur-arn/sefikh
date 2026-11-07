@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { LocaleRow } from "./locale-switcher";
-import { NewsletterForm } from "./newsletter-form";
 import { getT } from "@/i18n/server";
 
 const COLUMNS = [
-  { title: "Platform", links: [["Trends & Insights", "/insights"], ["Journal", "/journal"], ["Pricing", "/pricing"]] },
-  { title: "For makers", links: [["Join as a maker", "/join"], ["Business plans", "/pricing?for=pro"]] },
+  { title: "Platform", links: [["Trends & Insights", "/insights"], ["Journal", "/journal"], ["Subscription", "/subscription"]] },
+  { title: "For makers", links: [["Join as a maker", "/join"], ["Business plans", "/subscription?for=pro"]] },
   { title: "Company", links: [["About us", "/about"], ["Join our team", "/contact?topic=Careers"], ["Contact us", "/contact"]] },
   { title: "Resources", links: [["Terms and conditions", "/legal/terms"], ["Privacy policy", "/legal/privacy"], ["Cookie policy", "/legal/cookies"]] },
 ] as const;
@@ -17,7 +16,6 @@ export async function SiteFooter() {
       <div className="container-x grid gap-12 py-14 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <p className="display max-w-xs text-3xl">{tr("A directory of hands, materials and know-how.")}</p>
-          <NewsletterForm />
         </div>
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-8">
           {COLUMNS.map((col) => (

@@ -64,7 +64,7 @@ export default async function BillingPage() {
             )}
           </div>
           <div className="flex flex-col gap-2 sm:w-56">
-            <ButtonLink href={user.role === "PRO" ? "/upgrade" : "/pricing"}>{sub ? tr("Change plan") : tr("Upgrade")}</ButtonLink>
+            <ButtonLink href={user.role === "PRO" ? "/upgrade" : "/subscription"}>{sub ? tr("Change plan") : tr("Upgrade")}</ButtonLink>
             {sub && <BillingControls cancelAtPeriodEnd={sub.cancelAtPeriodEnd} provider={sub.provider} hasCustomer={!!user.stripeCustomerId} />}
           </div>
         </div>

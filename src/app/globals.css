@@ -19,7 +19,7 @@
 
   --font-sans: var(--font-text), ui-sans-serif, system-ui, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --font-display: var(--font-serif), ui-serif, Georgia, "Songti SC", "Noto Serif SC", serif;
-  --font-mono: var(--font-caption), ui-monospace, Menlo, "PingFang SC", monospace;
+  --font-mono: var(--font-text), ui-sans-serif, system-ui, Menlo, "PingFang SC", monospace;
 
   /* Angles droits : on dessine au tire-ligne. */
   --radius-sm: 1px;

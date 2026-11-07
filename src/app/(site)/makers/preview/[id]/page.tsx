@@ -80,7 +80,7 @@ export default async function MakerPreviewPage({ params, searchParams }: PagePro
             {tr("Name reserved for Pro and Studio plans")}
           </p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{tr("Upgrade to see this maker's name, full portfolio and contact details, and to write to them.")}</p>
-          <ButtonLink href="/pricing" size="sm" className="mt-4">
+          <ButtonLink href="/subscription" size="sm" className="mt-4">
             {tr("See plans")}
           </ButtonLink>
         </div>

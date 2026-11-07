@@ -47,7 +47,7 @@ export function LocaleMenu({ tone = "light", className }: { tone?: "light" | "da
         {CODES[tr.locale]}
       </button>
       {open && (
-        <ul role="menu" className="absolute right-0 top-full z-50 mt-5 w-40 border border-line bg-ivory py-2 text-ink">
+        <ul role="menu" className="absolute right-0 top-full z-50 mt-5 w-20 border border-line bg-ivory py-2 text-ink">
           {LOCALES.map((l) => (
             <li key={l} role="none">
               <button
@@ -58,10 +58,10 @@ export function LocaleMenu({ tone = "light", className }: { tone?: "light" | "da
                   setOpen(false);
                   if (l !== tr.locale) choose(l);
                 }}
-                className="flex w-full items-baseline justify-between px-4 py-1.5 text-left transition-colors hover:text-brass"
+                aria-label={LOCALE_LABELS[l]}
+                className={cn("block w-full px-4 py-1.5 text-left font-mono text-[11.5px] tracking-[0.05em] transition-colors hover:text-brass", l === tr.locale && "text-brass")}
               >
-                <span className={cn("font-display text-[1.3rem] leading-tight", l === tr.locale && "text-brass")}>{LOCALE_LABELS[l]}</span>
-                <span className="font-mono text-[10.5px] text-muted">{CODES[l]}</span>
+                {CODES[l]}
               </button>
             </li>
           ))}

@@ -39,7 +39,7 @@ export function SaveButton({ companyId, initialSaved, viewer }: { companyId: str
       {msg && (
         <div className="absolute right-0 top-13 z-10 w-64 rounded-xl border border-line bg-paper p-4 text-sm shadow-lg">
           <p>{tr(msg)}</p>
-          <Link href="/pricing" className="mt-2 inline-block font-medium text-brass-dark underline">
+          <Link href="/subscription" className="mt-2 inline-block font-medium text-brass-dark underline">
             {tr("See plans")}</Link>
         </div>
       )}
@@ -144,7 +144,7 @@ export function ContactButton({ company, viewer, projects, className }: { compan
                   <p className="mt-3 text-sm text-danger" role="alert">
                     {tr(error.text)}
                     {error.upgrade && (
-                      <Link href="/pricing" className="font-medium underline">
+                      <Link href="/subscription" className="font-medium underline">
                         {tr("Upgrade")}</Link>
                     )}
                   </p>
