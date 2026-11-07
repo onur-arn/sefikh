@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { ButtonLink } from "@/components/ui/button";
+import { LISTED_COMPANY } from "@/lib/access";
+import { db } from "@/lib/db";
 import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -10,6 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const tr = await getT();
+  const [makers, countries, portfolioCount] = await Promise.all([
+    db.company.count({ where: LISTED_COMPANY }),
+    db.company.groupBy({ by: ["country"], where: LISTED_COMPANY }).then((r) => r.length),
+    db.portfolioImage.count({ where: { company: LISTED_COMPANY } }),
+  ]);
   return (
     <>
       <section className="container-x pb-16 pt-12">
@@ -20,10 +28,29 @@ export default async function AboutPage() {
             <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-ink-soft">{tr("Behind every remarkable interior there is a cabinetmaker, a metalworker, a stone carver or an upholsterer whose know-how rarely appears online. SEFIKH exists to make that know-how searchable.")}</p>
           </div>
         </div>
+        <dl className="mt-16 grid grid-cols-2 border-t border-line lg:grid-cols-4">
+          {[
+            [tr.number(makers), tr("Curated makers")],
+            [tr.number(countries), tr("Countries")],
+            [tr.number(portfolioCount), tr("Portfolio pieces")],
+            ["0 %", tr("Commission on projects")],
+          ].map(([n, l], i) => (
+            <div key={l} className={i % 2 ? "border-l border-line py-5 pl-5" : "py-5 lg:border-l lg:border-line lg:pl-5 lg:first:border-l-0 lg:first:pl-0"}>
+              <dd className="display text-5xl">{n}</dd>
+              <dt className="folio mt-2">{l}</dt>
+            </div>
+          ))}
+        </dl>
       </section>
-      <div className="relative h-[60vh] min-h-80">
-        <Image src="/images/intro/1.webp" alt="" fill priority sizes="100vw" className="object-cover" />
-      </div>
+      <section className="relative h-[70vh] min-h-96 overflow-hidden bg-espresso">
+        <Image src="/images/intro/2.webp" alt="" fill priority sizes="100vw" className="object-cover opacity-80" />
+        <div className="container-x relative flex h-full items-end pb-10 text-paper">
+          <blockquote>
+            <p className="display max-w-3xl text-4xl italic sm:text-6xl">{tr("“The details are not the details. They make the design.”")}</p>
+            <footer className="mt-4 font-mono text-[11px] uppercase tracking-[0.06em] text-paper/80">{tr("Charles Eames")}</footer>
+          </blockquote>
+        </div>
+      </section>
       <section className="container-x py-16 sm:py-24">
         <div className="grid border-t border-ink/70 md:grid-cols-3">
           {[
@@ -39,14 +66,50 @@ export default async function AboutPage() {
           ))}
         </div>
       </section>
-      <section className="border-t border-line bg-sand">
-        <div className="container-x grid gap-px bg-line md:grid-cols-2">
-          <Link href="/register" className="group bg-sand py-14 md:pr-10">
-            <span className="display block text-4xl transition-colors group-hover:text-brass">{tr("I have an idea, I'm looking for the right hands")}</span>
-          </Link>
-          <Link href="/join" className="group bg-sand py-14 md:pl-10">
-            <span className="display block text-4xl transition-colors group-hover:text-brass">{tr("I have the know-how, I'm looking for great projects")}</span>
-          </Link>
+      {/* ── Deux chemins ───────────────────────────────────── */}
+      <section className="border-t border-line bg-paper">
+        <div className="container-x py-16 sm:py-24">
+        <p className="folio">{tr("How it works")}</p>
+        <div className="mt-8 grid border-t border-ink/70 lg:grid-cols-2">
+          {[
+            {
+              who: tr("I have an idea, I'm looking for the right hands"),
+              steps: [
+                [tr("Describe your project"), tr("Write it in your own words: our engine understands materials, techniques, sectors and places.")],
+                [tr("Search with a picture"), tr("Drop a moodboard image and discover makers whose portfolio looks alike.")],
+                [tr("Talk directly to makers"), tr("Share plans and references in a dedicated project inbox — no middleman, no commission.")],
+              ],
+              cta: [tr("Start a project"), "/dashboard/projects/new"],
+            },
+            {
+              who: tr("I have the know-how, I'm looking for great projects"),
+              steps: [
+                [tr("Create your business profile"), tr("Skills, materials, production capacities, lead times and areas of operation.")],
+                [tr("Publish your portfolio"), tr("Every picture you upload becomes searchable by image and by description.")],
+                [tr("Receive qualified requests"), tr("Architects and designers reach you with a clear brief, budget and timeline.")],
+              ],
+              cta: [tr("Join as a maker"), "/join"],
+            },
+          ].map((col, idx) => (
+            <div key={col.who} className={idx ? "border-t border-line py-10 lg:border-l lg:border-t-0 lg:pl-12" : "py-10 lg:pr-12"}>
+              <h3 className="display text-4xl sm:text-[2.8rem]">{col.who}</h3>
+              <ol className="mt-8">
+                {col.steps.map(([t, d], i) => (
+                  <li key={t} className="grid grid-cols-[2.5rem_1fr] border-t border-line py-4">
+                    <span className="folio pt-1">{["i", "ii", "iii"][i]}</span>
+                    <div>
+                      <p className="text-[15.5px] font-medium">{t}</p>
+                      <p className="mt-1 text-[14px] leading-relaxed text-muted">{d}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <ButtonLink href={col.cta[1]!} variant="secondary" className="mt-6">
+                {col.cta[0]} <ArrowRight className="size-3.5" />
+              </ButtonLink>
+            </div>
+          ))}
+        </div>
         </div>
       </section>
     </>
