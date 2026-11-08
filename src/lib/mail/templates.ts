@@ -5,23 +5,36 @@ import { translatorFor } from "@/i18n/server";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-type Block = { heading: string; intro: string[]; cta?: { label: string; url: string }; outro?: string[]; quote?: string };
+type Block = { eyebrow?: string; heading: string; intro: string[]; cta?: { label: string; url: string }; outro?: string[]; quote?: string };
 
-function layout(tr: Translator, { heading, intro, cta, outro = [], quote }: Block) {
-  const p = (t: string) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3b342d">${esc(t)}</p>`;
-  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${esc(heading)}</title></head>
-<body style="margin:0;background:#f4efe8;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4efe8;padding:32px 12px"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fffdf9;border:1px solid #e6ddd1">
-<tr><td style="padding:28px 36px;border-bottom:1px solid #e6ddd1;font-family:Georgia,serif;font-size:22px;letter-spacing:.18em;color:#1c1714">SEFIKH</td></tr>
-<tr><td style="padding:36px">
-<h1 style="margin:0 0 20px;font-family:Georgia,serif;font-weight:400;font-size:26px;color:#1c1714">${esc(heading)}</h1>
+// Charte du site (src/app/globals.css) : fond blanc, encre noire, filets gris, accent terre cuite, angles droits.
+const C = { bg: "#ffffff", surface: "#f7f7f6", ink: "#111111", soft: "#373737", muted: "#757575", line: "#d9d9d9", accent: "#a2492a" };
+// Polices du site ; Gmail et Outlook ignorent les polices web et prennent les polices de repli.
+const SERIF = "'Cormorant Garamond',Georgia,'Times New Roman',serif";
+const SANS = "Jost,'Helvetica Neue',Helvetica,Arial,sans-serif";
+const FONTS = "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@400;500&display=swap";
+
+function layout(tr: Translator, { eyebrow, heading, intro, cta, outro = [], quote }: Block) {
+  const p = (t: string) => `<p style="margin:0 0 16px;font-family:${SANS};font-size:15px;line-height:1.65;color:${C.soft}">${esc(t)}</p>`;
+  const small = (t: string) => `<p style="margin:0 0 12px;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.muted}">${esc(t)}</p>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><title>${esc(heading)}</title>
+<link href="${FONTS}" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:${C.bg}">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.bg}"><tr><td align="center" style="padding:40px 16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
+<tr><td align="center" style="padding:0 0 28px;border-bottom:1px solid ${C.line}"><a href="${env.appUrl}" style="font-family:${SERIF};font-size:28px;letter-spacing:.1em;color:${C.ink};text-decoration:none">SEFIKH</a></td></tr>
+<tr><td style="padding:44px 0 8px">
+${eyebrow ? `<p style="margin:0 0 14px;font-family:${SANS};font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:${C.muted}">${esc(eyebrow)}</p>` : ""}
+<h1 style="margin:0 0 24px;font-family:${SERIF};font-weight:400;font-size:34px;line-height:1.1;letter-spacing:-.01em;color:${C.ink}">${esc(heading)}</h1>
 ${intro.map(p).join("")}
-${quote ? `<div style="margin:0 0 20px;padding:16px 18px;background:#f4efe8;border-left:3px solid #a8794a;font-size:14px;line-height:1.6;color:#3b342d;white-space:pre-wrap">${esc(quote)}</div>` : ""}
-${cta ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1c1714"><a href="${cta.url}" style="display:inline-block;padding:14px 26px;color:#fffdf9;text-decoration:none;font-size:14px;letter-spacing:.04em">${esc(cta.label)} →</a></td></tr></table>` : ""}
-${outro.map(p).join("")}
+${quote ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="padding:18px 20px;background:${C.surface};border-left:1px solid ${C.ink};font-family:${SERIF};font-style:italic;font-size:18px;line-height:1.5;color:${C.ink};white-space:pre-wrap">${esc(quote)}</td></tr></table>` : ""}
+${cta ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:12px 0 32px"><tr><td style="background:${C.ink}"><a href="${cta.url}" style="display:inline-block;padding:15px 28px;font-family:${SANS};font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:${C.bg};text-decoration:none">${esc(cta.label)} &rarr;</a></td></tr></table>` : ""}
+${outro.map(small).join("")}
 </td></tr>
-<tr><td style="padding:20px 36px;border-top:1px solid #e6ddd1;font-size:12px;color:#8a7f73">SEFIKH — Search Engine For Know-How<br>${esc(tr("You receive this e-mail because you have an account on SEFIKH."))} <a href="${env.appUrl}/dashboard/settings" style="color:#8a7f73">${esc(tr("Notification settings"))}</a></td></tr>
+<tr><td style="padding:28px 0 0;border-top:1px solid ${C.line};font-family:${SANS};font-size:11px;line-height:1.7;color:${C.muted}">
+<span style="letter-spacing:.08em;text-transform:uppercase">SEFIKH — Search Engine For Know-How</span><br>
+${esc(tr("You receive this e-mail because you have an account on SEFIKH."))} <a href="${env.appUrl}/dashboard/settings" style="color:${C.muted};text-decoration:underline">${esc(tr("Notification settings"))}</a>
+</td></tr>
 </table></td></tr></table></body></html>`;
   const text = [heading, "", ...intro, quote ? `\n"${quote}"\n` : "", cta ? `${cta.label}: ${cta.url}` : "", ...outro, "", "— SEFIKH"].join("\n");
   return { html, text };
@@ -62,7 +75,7 @@ export function passwordChangedTemplate(name: string, locale?: string | null) {
     ...layout(tr, {
       heading: tr("Password updated"),
       intro: [tr("Hello {name}, the password of your SEFIKH account has just been changed and other sessions have been signed out.", { name })],
-      outro: [tr("If this wasn't you, reset your password immediately and contact us at hello@sefikh.com.")],
+      outro: [tr("If this wasn't you, reset your password immediately and contact us at contact@sefikh.com.")],
       cta: { label: tr("Secure my account"), url: `${env.appUrl}/forgot-password` },
     }),
   };
