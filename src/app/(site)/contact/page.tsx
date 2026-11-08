@@ -18,7 +18,7 @@ export default async function ContactPage({ searchParams }: PageProps<"/contact"
         <p className="mt-4 max-w-md text-muted">{tr("A question about the platform, a partnership, press or a job application? Write to us — we answer within 2 business days.")}</p>
         <p className="mt-8 text-sm">
           {tr("contact@sefikh.com")}{" "}<br />
-          <span className="text-muted">{tr("Paris · Lyon · Nice")}</span>
+          <span className="text-muted">{tr("Caen, France")}</span>
         </p>
       </div>
       <ContactForm topic={typeof topic === "string" ? topic : undefined} />

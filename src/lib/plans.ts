@@ -144,7 +144,7 @@ export const PLANS: Record<PlanId, Plan> = {
     name: "Pro",
     tagline: "A complete professional presence",
     prices: { ANNUAL: 149, MONTHLY: 179 },
-    features: ["Professional profile with verified badge", "Unlimited projects & portfolio", "Visibility analytics"],
+    features: ["Professional profile with verified badge", "Portfolio of up to 60 pictures", "Visibility analytics"],
     limits: {
       freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
@@ -165,7 +165,7 @@ export const PLANS: Record<PlanId, Plan> = {
     tagline: "Be seen first",
     prices: { ANNUAL: 299, MONTHLY: 349 },
     highlight: true,
-    features: ["Everything in Pro", "Boosted ranking in search results", "Featured in the Content section", "Editorial features & dedicated content"],
+    features: ["Everything in Pro", "Portfolio of up to 120 pictures", "Boosted ranking in search results", "Featured in the Content section", "Editorial features & dedicated content"],
     limits: {
       freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
@@ -185,7 +185,7 @@ export const PLANS: Record<PlanId, Plan> = {
     name: "Intelligence",
     tagline: "Understand the demand",
     prices: { ANNUAL: 499, MONTHLY: 579 },
-    features: ["Everything in Visibility", "Advanced demand analysis", "Full market insights", "Quarterly demand reporting"],
+    features: ["Everything in Visibility", "Portfolio of up to 200 pictures", "Advanced demand analysis", "Full market insights", "Quarterly demand reporting"],
     limits: {
       freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
