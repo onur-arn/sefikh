@@ -7,7 +7,7 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
   const user = await requireUser("/dashboard");
   const plan = getPlan(user.plan);
   return (
-    <div className="container-x grid gap-8 py-8 lg:grid-cols-[230px_1fr] lg:gap-12 lg:py-12">
+    <div className="container-x grid grid-cols-1 gap-8 py-8 lg:grid-cols-[230px_1fr] lg:gap-12 lg:py-12">
       <DashboardNav role={user.role} planName={plan.name} insights={plan.limits.marketInsights} analytics={plan.limits.analytics} />
       <div className="min-w-0">
         {!user.emailVerifiedAt && <VerifyBanner email={user.email} />}
