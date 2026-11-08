@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
+import { mustConfirmEmail } from "@/lib/access";
 import { embedImage } from "@/lib/clip";
 import { UPLOAD_LIMITS } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -16,6 +17,7 @@ import { visitorId } from "@/lib/visitor";
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Please log in." }, { status: 401 });
+  if (mustConfirmEmail(user)) return NextResponse.json({ error: "Please confirm your e-mail address first.", code: "VERIFY" }, { status: 403 });
   const vid = await visitorId();
   const rl = rateLimit(`imgsearch:${user.id}`, 20, 10 * 60_000);
   if (!rl.ok) return NextResponse.json({ error: "Too many searches, please wait a moment." }, { status: 429 });

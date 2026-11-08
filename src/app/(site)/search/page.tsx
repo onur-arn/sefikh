@@ -14,7 +14,8 @@ import { SearchPanel } from "@/components/search/search-panel";
 import { MakerCard } from "@/components/makers/maker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/misc";
-import { anonymize, canSeeMakers } from "@/lib/access";
+import { anonymize, canSeeMakers, mustConfirmEmail } from "@/lib/access";
+import { VerifyGate } from "@/components/search/verify-gate";
 import { getT } from "@/i18n/server";
 import { translateText } from "@/lib/ai";
 
@@ -37,6 +38,8 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   if (!user) redirect("/register?reason=search");
   const who = { userId: user.id, visitorId: vid };
   const plan = getPlan(user.plan);
+  // Adresse e-mail à confirmer avant la première recherche.
+  if (mustConfirmEmail(user)) return <VerifyGate email={user.email} freeSearches={plan.limits.freeSearches} />;
 
   const q = one(sp.q)?.slice(0, 500);
   const imageId = one(sp.image);

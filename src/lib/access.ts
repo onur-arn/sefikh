@@ -12,6 +12,11 @@ export function canSeeMakers(user: Viewer) {
 /** Filtre Prisma : un maker n'apparaît que s'il est publié et abonné. */
 export const LISTED_COMPANY = { published: true, user: { plan: { in: LISTED_PLAN_IDS as string[] } } };
 
+/** Recherche (gratuite ou payante) réservée aux adresses e-mail confirmées. */
+export function mustConfirmEmail(user: { role: string; emailVerifiedAt: Date | null }) {
+  return !user.emailVerifiedAt && user.role !== "ADMIN";
+}
+
 export function hasListedPlan(plan: string) {
   return LISTED_PLAN_IDS.includes(plan as PlanId);
 }

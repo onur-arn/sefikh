@@ -11,7 +11,6 @@ import { passwordChangedTemplate, resetPasswordTemplate, verifyEmailTemplate } f
 import { defaultPlanFor } from "@/lib/plans";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { safeNext } from "@/lib/utils";
-import { env } from "@/lib/env";
 import { fieldErrors, loginSchema, registerSchema, resetSchema, emailSchema, type FormState } from "@/lib/validation";
 
 const TOO_MANY = (s: number) => ({ error: `Too many attempts. Please try again in ${Math.ceil(s / 60)} minute(s).` });
@@ -36,8 +35,6 @@ export async function registerAction(_: FormState, formData: FormData): Promise<
       plan: defaultPlanFor(role),
       locale: await getLocale(),
       passwordHash: await hashPassword(password),
-      // Site de recette sans SMTP : le lien de confirmation ne pourrait pas arriver.
-      ...(env.demoMode ? { emailVerifiedAt: new Date() } : {}),
       ...(role === "CLIENT" ? { clientProfile: { create: {} } } : {}),
     },
   });
