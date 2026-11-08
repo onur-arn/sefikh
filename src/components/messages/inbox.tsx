@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/misc";
 import { useRealtime, useRealtimeConnected } from "@/lib/realtime-client";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/client";
+import { CLIENT_TYPES } from "@/lib/constants";
 import { TranslateButton, useAutoTranslate } from "@/components/translate/auto-translate";
 
 type ListItem = {
@@ -38,6 +39,11 @@ const FILTERS = [
   { id: "unread", label: "Unread" },
   { id: "archived", label: "Archived" },
 ] as const;
+
+/** Sujet par défaut enregistré en anglais à la création (« Enquiry for … ») : traduit à l'affichage. */
+function subjectLabel(tr: ReturnType<typeof useT>, subject: string | null) {
+  return subject?.startsWith("Enquiry for ") ? tr("Enquiry for {name}", { name: subject.slice(12) }) : subject;
+}
 
 export function Inbox({ initialId, me }: { initialId: string | null; me: { id: string; name: string; verified: boolean; role: string } }) {
   const tr = useT();
@@ -81,7 +87,7 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
     <div className="flex h-[calc(100dvh-68px)] flex-col">
       <div className="flex items-center gap-6 border-b border-line px-4 sm:px-6">
         {(["inbox", "files"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={cn("relative py-3.5 text-[13.5px] font-medium capitalize", tab === t ? "text-ink" : "text-muted hover:text-ink")}>
+          <button key={t} onClick={() => setTab(t)} className={cn("relative py-3.5 text-[13.5px] font-medium", tab === t ? "text-ink" : "text-muted hover:text-ink")}>
             {t === "inbox" ? tr("Inbox") : tr("Shared files")}
             {tab === t && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-ink" />}
           </button>
@@ -355,7 +361,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14.5px] font-semibold">{detail.other.name}</p>
-                <p className="truncate text-[12px] text-muted">{typing ? <span className="text-brass-dark">{tr("typing…")}</span> : online ? <>{tr("Online ·")}{" "}{detail.project?.title ?? detail.subject}</> : detail.project?.title ?? detail.subject}</p>
+                <p className="truncate text-[12px] text-muted">{typing ? <span className="text-brass-dark">{tr("typing…")}</span> : online ? <>{tr("Online ·")}{" "}{detail.project?.title ?? subjectLabel(tr, detail.subject)}</> : detail.project?.title ?? subjectLabel(tr, detail.subject)}</p>
               </div>
               <button onClick={toggleArchive} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" title={detail.archived ? tr("Unarchive") : tr("Archive")} aria-label={detail.archived ? tr("Unarchive") : tr("Archive")}>
                 {detail.archived ? <ArchiveRestore className="size-[18px]" /> : <Archive className="size-[18px]" />}
@@ -441,7 +447,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
             <Avatar name={detail.other.name} imageKey={detail.other.avatarKey} size={72} />
             <p className="mt-3 font-semibold">{detail.other.name}</p>
             {detail.other.contactName && detail.other.contactName !== detail.other.name && <p className="text-[13px] text-muted">{detail.other.contactName}</p>}
-            <p className="mt-0.5 text-[12px] text-muted">{detail.other.role.replace("_", " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}</p>
+            <p className="mt-0.5 text-[12px] text-muted">{detail.other.role === "Maker" ? tr("Maker") : tr(CLIENT_TYPES.find((t) => t.value === detail.other.role)?.label ?? "Project owner")}</p>
             {detail.other.href && (
               <Link href={detail.other.href} className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-brass-dark hover:underline">
                 {tr("View profile")}{" "}<ExternalLink className="size-3.5" />
@@ -651,7 +657,7 @@ function FilesView({ onOpen }: { onOpen: (conversationId: string) => void }) {
                     {f.name}
                   </a>
                   <p className="text-[12px] text-muted">
-                    With {f.with} · {tr.bytes(f.size)} · {tr.relative(f.createdAt)}
+                    {tr("With {name}", { name: f.with })} · {tr.bytes(f.size)} · {tr.relative(f.createdAt)}
                   </p>
                 </div>
                 <button onClick={() => onOpen(f.conversationId)} className="text-[12.5px] font-medium text-brass-dark hover:underline">

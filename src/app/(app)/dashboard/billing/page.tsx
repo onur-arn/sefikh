@@ -42,7 +42,7 @@ export default async function BillingPage() {
               <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-3">
                 <div>
                   <dt className="text-muted">{tr("Price")}</dt>
-                  <dd className="mt-0.5 font-medium">{tr.money(sub.amount, sub.currency)} / month</dd>
+                  <dd className="mt-0.5 font-medium">{tr("{amount} / month", { amount: tr.money(sub.amount, sub.currency) })}</dd>
                 </div>
                 <div>
                   <dt className="text-muted">{tr("Term")}</dt>
@@ -55,7 +55,7 @@ export default async function BillingPage() {
                 {inCommitment && (
                   <div className="sm:col-span-3">
                     <dt className="text-muted">{tr("Commitment")}</dt>
-                    <dd className="mt-0.5">Until {tr.date(sub.commitmentEndsAt!)} — cancellation takes effect at that date.</dd>
+                    <dd className="mt-0.5">{tr("Until {date} — cancellation takes effect at that date.", { date: tr.date(sub.commitmentEndsAt!) })}</dd>
                   </div>
                 )}
               </dl>

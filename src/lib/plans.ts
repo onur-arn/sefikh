@@ -165,7 +165,7 @@ export const PLANS: Record<PlanId, Plan> = {
     tagline: "Be seen first",
     prices: { ANNUAL: 299, MONTHLY: 349 },
     highlight: true,
-    features: ["Everything in Pro", "Boosted ranking in search results", "Featured on the home page", "Editorial features & dedicated content"],
+    features: ["Everything in Pro", "Boosted ranking in search results", "Featured in the Content section", "Editorial features & dedicated content"],
     limits: {
       freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,

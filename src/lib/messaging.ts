@@ -91,7 +91,7 @@ export async function notifyNewMessage(opts: { conversationId: string; senderNam
     link,
   });
   // Pas d'e-mail si le destinataire a le site ouvert (flux temps réel actif).
-  const online = isOnline(opts.recipient.id);
+  const online = await isOnline(opts.recipient.id);
   if (opts.recipient.notifyByEmail && !online) {
     await sendEmail({
       to: opts.recipient.email,

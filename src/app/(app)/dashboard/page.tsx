@@ -24,10 +24,10 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const tr = await getT();
   const user = await requireUser("/dashboard");
   const sp = await searchParams;
-  const notice = sp.notice === "password-reset" ? "Your password has been updated." : sp.welcome ? "Welcome to SEFIKH — your profile is ready." : null;
+  const notice = sp.notice === "password-reset" ? tr("Your password has been updated.") : sp.welcome ? tr("Welcome to SEFIKH — your profile is ready.") : null;
   return (
     <>
-      {notice && <p className="mb-6 rounded-xl bg-success/10 px-4 py-3 text-sm text-success">{tr(notice)}</p>}
+      {notice && <p className="mb-6 rounded-xl bg-success/10 px-4 py-3 text-sm text-success">{notice}</p>}
       {user.role === "PRO" ? <ProOverview user={user} /> : <ClientOverview user={user} />}
     </>
   );

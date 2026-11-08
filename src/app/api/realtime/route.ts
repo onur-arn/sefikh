@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { subscribe, type RealtimeEvent } from "@/lib/realtime";
+import { createDbRelay, POLL_MS } from "@/lib/realtime-poll";
 
 const HEARTBEAT_MS = 25_000;
 
@@ -29,7 +30,29 @@ export async function GET(request: Request) {
           cleanup();
         }
       };
-      const unsubscribe = subscribe(me.id, (event: RealtimeEvent) => send(`data: ${JSON.stringify(event)}\n\n`));
+      const emit = (event: RealtimeEvent) => send(`data: ${JSON.stringify(event)}\n\n`);
+      const unsubscribe = subscribe(me.id, emit);
+
+      // Relais par la base : indispensable quand l'application tourne sur plusieurs instances (Vercel).
+      const relay = createDbRelay(me.id, emit);
+      let polling = false;
+      let lastSeen = Date.now();
+      const poller = setInterval(async () => {
+        if (polling || closed) return;
+        polling = true;
+        try {
+          await relay();
+          // Présence : « en ligne » tant que le flux est ouvert (lu par isOnline sur les autres instances).
+          if (Date.now() - lastSeen > 45_000) {
+            lastSeen = Date.now();
+            await db.user.update({ where: { id: me.id }, data: { lastSeenAt: new Date() } });
+          }
+        } catch {
+          // base momentanément indisponible : nouvel essai au tour suivant
+        } finally {
+          polling = false;
+        }
+      }, POLL_MS);
 
       // Battement : garde la connexion ouverte à travers les proxys et coupe le flux si la session a été révoquée.
       const heartbeat = setInterval(async () => {
@@ -45,6 +68,7 @@ export async function GET(request: Request) {
         if (closed) return;
         closed = true;
         clearInterval(heartbeat);
+        clearInterval(poller);
         unsubscribe();
         try {
           controller.close();

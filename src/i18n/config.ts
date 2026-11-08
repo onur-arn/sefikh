@@ -58,7 +58,8 @@ export function createTranslator(locale: Locale, catalog: Catalog): Translator {
   tr.relative = (d) => {
     const diff = (Date.now() - new Date(d).getTime()) / 1000;
     if (diff >= 86400 * 7) return tr.date(d);
-    if (diff < 60) return tr("just now");
+    // « à l'instant » dans chaque langue, sans passer par le catalogue (src/i18n n'est pas inventorié).
+    if (diff < 60) return new Intl.RelativeTimeFormat(tag, { numeric: "auto" }).format(0, "second");
     const rtf = new Intl.RelativeTimeFormat(tag, { numeric: "always", style: "short" });
     if (diff < 3600) return rtf.format(-Math.floor(diff / 60), "minute");
     if (diff < 86400) return rtf.format(-Math.floor(diff / 3600), "hour");

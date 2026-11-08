@@ -32,7 +32,7 @@ export default async function SimulateCheckoutPage({ searchParams }: PageProps<"
         <div className="mt-8 rounded-2xl border border-line bg-paper p-6">
           <div className="flex justify-between text-sm">
             <span>{p.name} — {t === "ANNUAL" ? tr("12-month commitment") : tr("no commitment")}</span>
-            <span className="font-semibold">{tr.money(price * 100)} / month</span>
+            <span className="font-semibold">{tr("{amount} / month", { amount: tr.money(price * 100) })}</span>
           </div>
           <div className="mt-3 flex justify-between border-t border-line pt-3 text-sm text-muted">
             <span>{tr("Billed today")}</span>

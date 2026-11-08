@@ -36,7 +36,7 @@ export function PasswordInput({ withStrength, className, ...props }: ComponentPr
               <span key={i} className={cn("h-1 flex-1 rounded-full transition-colors", i < s ? (s <= 1 ? "bg-danger" : s <= 2 ? "bg-brass" : "bg-success") : "bg-line")} />
             ))}
           </div>
-          <span className="w-16 text-right text-[11px] text-muted">{LABELS[s]}</span>
+          <span className="w-16 text-right text-[11px] text-muted">{tr(LABELS[s])}</span>
         </div>
       )}
     </div>

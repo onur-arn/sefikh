@@ -34,6 +34,7 @@ export async function registerAction(_: FormState, formData: FormData): Promise<
       email,
       role,
       plan: defaultPlanFor(role),
+      locale: await getLocale(),
       passwordHash: await hashPassword(password),
       // Site de recette sans SMTP : le lien de confirmation ne pourrait pas arriver.
       ...(env.demoMode ? { emailVerifiedAt: new Date() } : {}),
@@ -61,6 +62,9 @@ export async function loginAction(_: FormState, formData: FormData): Promise<For
   if (!user || !ok) return { error: "Incorrect e-mail or password." };
   if (user.suspendedAt) return { error: "This account has been suspended. Please contact us." };
 
+  // Langue de l'interface au moment de la connexion : sert aux notifications et aux e-mails.
+  const locale = await getLocale();
+  if (user.locale !== locale) await db.user.update({ where: { id: user.id }, data: { locale } });
   await createSession(user.id);
   redirect(safeNext(formData.get("next")));
 }

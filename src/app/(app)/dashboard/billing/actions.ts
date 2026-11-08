@@ -7,6 +7,7 @@ import { activateSubscription, BillingError, cancelSubscription, priceFor, resum
 import { db } from "@/lib/db";
 import { simulatedPayments } from "@/lib/env";
 import { PLANS, type PlanId, type Term } from "@/lib/plans";
+import { getT } from "@/i18n/server";
 
 export async function simulateCheckoutAction(planId: PlanId, term: Term) {
   if (!simulatedPayments) return { error: "Simulated payments are disabled." };
@@ -15,7 +16,8 @@ export async function simulateCheckoutAction(planId: PlanId, term: Term) {
   if (!plan || plan.audience !== (user.role === "PRO" ? "PRO" : "CLIENT")) return { error: "Invalid plan." };
   const amount = priceFor(planId, term);
   await activateSubscription({ userId: user.id, planId, term, provider: "simulated", currentPeriodEnd: new Date(Date.now() + 30 * 86400_000) });
-  await db.payment.create({ data: { userId: user.id, amount, status: "PAID", description: `SEFIKH ${plan.name} — first month (simulated)` } });
+  const tr = await getT();
+  await db.payment.create({ data: { userId: user.id, amount, status: "PAID", description: tr("SEFIKH {plan} — first month (simulated)", { plan: tr(plan.name) }) } });
   redirect("/checkout/success");
 }
 

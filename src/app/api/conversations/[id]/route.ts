@@ -46,7 +46,7 @@ export async function GET(request: Request, ctx: RouteContext<"/api/conversation
               : { userId: otherId, name: conv.client.clientProfile?.studioName || conv.client.name, contactName: conv.client.name, avatarKey: conv.client.avatarKey, href: null, location: [conv.client.clientProfile?.city, conv.client.clientProfile?.country].filter(Boolean).join(", "), email: conv.client.email, phone: null, role: conv.client.clientProfile?.clientType ?? "Creative" },
         },
     otherReadAt,
-    otherOnline: isOnline(otherId),
+    otherOnline: await isOnline(otherId),
     messages: messages.map((m) => ({
       id: m.id,
       body: m.body,

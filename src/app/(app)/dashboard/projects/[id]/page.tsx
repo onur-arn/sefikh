@@ -69,7 +69,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
           <h1 className="display mt-2 text-4xl sm:text-5xl">{tr(p.title)}</h1>
           <div className="mt-3 flex items-center gap-2">
             <Badge tone={p.status === "ACTIVE" ? "success" : "neutral"}>{p.status === "ACTIVE" ? tr("Active") : tr("Archived")}</Badge>
-            <span className="text-[12px] text-muted">Created {tr.date(p.createdAt)}</span>
+            <span className="text-[12px] text-muted">{tr("Created {date}", { date: tr.date(p.createdAt) })}</span>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">

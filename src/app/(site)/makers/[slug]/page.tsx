@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps<"/makers/[slug]">):
   if (!canSeeMakers(viewer) && c.userId !== viewer?.id) return { title: tr("Maker profile"), robots: { index: false } };
   const cover = c.portfolio[0];
   return {
-    title: `${c.name} — ${c.tagline ?? "Maker"}`,
+    title: `${c.name} — ${c.tagline ?? tr("Maker")}`,
     description: c.about?.slice(0, 160) ?? undefined,
     openGraph: { images: cover ? [{ url: fileUrl(cover.thumbKey ?? cover.key)!, width: cover.width, height: cover.height }] : undefined },
     alternates: { canonical: `/makers/${c.slug}` },
