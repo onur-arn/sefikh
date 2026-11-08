@@ -98,7 +98,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
         </Link>
 
         <div className="col-start-3 flex items-center justify-end gap-1.5">
-          <LocaleMenu tone={overlay ? "dark" : "light"} className="mr-2 hidden sm:block" />
+          <LocaleMenu tone={overlay ? "dark" : "light"} className="mr-2 hidden items-center sm:flex" />
           {user ? (
             <>
               <IconLink href="/messages" label={tr("Messages")} count={counts.messages}>
