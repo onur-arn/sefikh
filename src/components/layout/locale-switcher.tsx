@@ -59,7 +59,7 @@ export function LocaleMenu({ tone = "light", className }: { tone?: "light" | "da
                   if (l !== tr.locale) choose(l);
                 }}
                 aria-label={LOCALE_LABELS[l]}
-                className={cn("block w-full px-4 py-1.5 text-left font-mono text-[11.5px] tracking-[0.05em] transition-colors hover:text-brass", l === tr.locale && "text-brass")}
+                className={cn("block w-full px-4 py-1.5 text-left font-mono text-[11.5px] tracking-[0.05em] text-ink-soft transition-colors hover:text-ink", l === tr.locale && "font-semibold text-ink")}
               >
                 {CODES[l]}
               </button>
@@ -78,7 +78,7 @@ export function LocaleRow({ className }: { className?: string }) {
   return (
     <div role="group" aria-label={tr("Language")} className={cn("flex items-center gap-3 font-mono text-[11.5px] tracking-[0.05em]", pending && "opacity-50", className)}>
       {LOCALES.map((l) => (
-        <button key={l} type="button" aria-pressed={l === tr.locale} aria-label={LOCALE_LABELS[l]} onClick={() => l !== tr.locale && choose(l)} className={cn("border-b pb-px transition-colors", l === tr.locale ? "border-brass text-ink" : "border-transparent text-muted hover:text-ink")}>
+        <button key={l} type="button" aria-pressed={l === tr.locale} aria-label={LOCALE_LABELS[l]} onClick={() => l !== tr.locale && choose(l)} className={cn("transition-colors", l === tr.locale ? "font-semibold text-ink" : "text-muted hover:text-ink")}>
           {CODES[l]}
         </button>
       ))}
