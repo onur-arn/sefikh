@@ -9,7 +9,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { COMPANY_KINDS, TAG_KIND_LABEL, type TagKind } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
-import { fileUrl, parseList } from "@/lib/utils";
+import { cn, fileUrl, parseList } from "@/lib/utils";
 import { getT } from "@/i18n/server";
 
 const PREVIEW_PHOTOS = 4;
@@ -88,10 +88,18 @@ export default async function MakerPreviewPage({ params, searchParams }: PagePro
       </header>
 
       {company.portfolio.length > 0 && (
-        <section className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {company.portfolio.map((p) => (
-            <div key={p.id} className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-sand">
-              <Image src={fileUrl(p.thumbKey ?? p.key)!} alt="" fill sizes="(min-width:1024px) 25vw, 50vw" className="object-cover" />
+        // Les photos remplissent toujours la largeur, quel que soit leur nombre (1 à 4) : pas de case vide.
+        <section className={cn("mt-8 grid grid-cols-2 gap-3", ["lg:grid-cols-1", "lg:grid-cols-2", "lg:grid-cols-3", "lg:grid-cols-4"][company.portfolio.length - 1])}>
+          {company.portfolio.map((p, i) => (
+            <div
+              key={p.id}
+              className={cn(
+                "relative h-64 overflow-hidden bg-sand sm:h-80 lg:h-[380px]",
+                // Nombre impair sur mobile : la première photo prend toute la largeur.
+                company.portfolio.length % 2 === 1 && i === 0 && "col-span-2 lg:col-span-1",
+              )}
+            >
+              <Image src={fileUrl(p.thumbKey ?? p.key)!} alt="" fill sizes={`(min-width:1024px) ${Math.round(100 / company.portfolio.length)}vw, ${company.portfolio.length % 2 === 1 && i === 0 ? 100 : 50}vw`} className="object-cover" />
             </div>
           ))}
         </section>
