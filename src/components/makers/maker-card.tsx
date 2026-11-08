@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BadgeCheck, ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { COMPANY_KINDS } from "@/lib/constants";
 import { cn, fileUrl } from "@/lib/utils";
@@ -49,8 +49,34 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
   // Photos de la carte : la couverture puis les autres réalisations, à faire défiler.
   const photos = maker.image ? [maker.image.key, ...(maker.gallery ?? []).filter((k) => k !== maker.image!.key)] : [];
   const [index, setIndex] = useState(0);
+  // Photos montées (chargées en arrière-plan) et photos prêtes à l'affichage.
+  const [mounted, setMounted] = useState<Set<number>>(() => new Set([0]));
+  const [loaded, setLoaded] = useState<Set<number>>(() => new Set());
+  const [shown, setShown] = useState(0);
+  const frame = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
-  const go = (step: number) => setIndex((i) => (i + step + photos.length) % photos.length);
+  const mount = (ids: number[]) => setMounted((m) => (ids.every((i) => m.has(i)) ? m : new Set([...m, ...ids])));
+  // Au survol, au toucher ou au clavier : toutes les photos de la carte se chargent, avant même le clic.
+  const warmAll = () => photos.length > 1 && mount(photos.map((_, i) => i));
+  // On n'affiche une photo qu'une fois prête : la précédente reste visible entre-temps (jamais de gris).
+  const go = (step: number) => {
+    warmAll();
+    const next = (index + step + photos.length) % photos.length;
+    setIndex(next);
+    if (loaded.has(next)) setShown(next);
+  };
+  // Carte visible à l'écran : la photo suivante se charge déjà.
+  useEffect(() => {
+    if (photos.length < 2 || !frame.current) return;
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        mount([1]);
+        io.disconnect();
+      }
+    }, { rootMargin: "200px" });
+    io.observe(frame.current);
+    return () => io.disconnect();
+  }, [photos.length]);
   const arrow = (step: number) => (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -60,8 +86,14 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
   return (
     <div className={cn("group relative", className)}>
       <div
+        ref={frame}
         className="relative aspect-[4/5] overflow-hidden bg-sand"
-        onTouchStart={(e) => (touchX.current = e.touches[0]!.clientX)}
+        onMouseEnter={warmAll}
+        onFocus={warmAll}
+        onTouchStart={(e) => {
+          warmAll();
+          touchX.current = e.touches[0]!.clientX;
+        }}
         onTouchEnd={(e) => {
           if (touchX.current == null || photos.length < 2) return;
           const dx = e.changedTouches[0]!.clientX - touchX.current;
@@ -70,15 +102,24 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
         }}
       >
         {maker.image ? (
-          <Image
-            key={photos[index]}
-            src={fileUrl(photos[index]!)!}
-            alt={maker.anonymous ? "" : (index === 0 && maker.image.title ? maker.image.title : tr("Work by {name}", { name: maker.name }))}
-            fill
-            priority={priority && index === 0}
-            sizes="(min-width: 1024px) 33vw, 50vw"
-            className="animate-fade-in object-cover transition duration-[900ms] ease-out group-hover:scale-[1.03]"
-          />
+          photos.map((key, i) =>
+            mounted.has(i) ? (
+              <Image
+                key={key}
+                src={fileUrl(key)!}
+                alt={i !== shown ? "" : maker.anonymous ? "" : i === 0 && maker.image!.title ? maker.image!.title : tr("Work by {name}", { name: maker.name })}
+                aria-hidden={i !== shown}
+                fill
+                priority={priority && i === 0}
+                sizes="(min-width: 1024px) 33vw, 50vw"
+                onLoad={() => {
+                  setLoaded((l) => (l.has(i) ? l : new Set([...l, i])));
+                  if (i === index) setShown(i);
+                }}
+                className={cn("object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]", i === shown ? "opacity-100" : "opacity-0")}
+              />
+            ) : null,
+          )
         ) : (
           <div className="flex size-full items-center justify-center font-display text-5xl text-muted">{maker.name[0]}</div>
         )}
