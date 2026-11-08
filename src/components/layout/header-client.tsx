@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, ChevronDown, LayoutGrid, LogOut, Menu, MessageCircle, Settings, CreditCard, User, X, Store, ShieldCheck } from "lucide-react";
+import { Bell, ChevronDown, LayoutGrid, LogOut, Menu, MessageCircle, Search, Settings, CreditCard, User, X, Store, ShieldCheck } from "lucide-react";
 import { Avatar, Logo } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -93,11 +93,21 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
           })}
         </nav>
 
-        <Link href="/search" aria-label={tr("SEFIKH — search engine")} className="col-start-2 shrink-0">
+        <Link href="/" aria-label={tr("SEFIKH — home")} className="col-start-2 shrink-0">
           <Logo light={overlay} />
         </Link>
 
         <div className="col-start-3 flex items-center justify-end gap-1.5">
+          {/* Accès au moteur de recherche, sur toutes les pages (icône seule sur mobile). */}
+          <Link
+            href="/search"
+            aria-label={tr("Search")}
+            aria-current={pathname.startsWith("/search") ? "page" : undefined}
+            className={cn("mr-2 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink", pathname.startsWith("/search") && "font-semibold text-ink")}
+          >
+            <Search className="size-[17px] sm:size-3.5" strokeWidth={1.6} />
+            <span className="hidden sm:inline">{tr("Search")}</span>
+          </Link>
           <LocaleMenu tone={overlay ? "dark" : "light"} className="mr-2 hidden items-center sm:flex" />
           {user ? (
             <>

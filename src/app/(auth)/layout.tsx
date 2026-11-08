@@ -8,7 +8,7 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1fr_1.05fr]">
       <div className="flex flex-col px-4 py-6 sm:px-10 lg:px-16">
-        <Link href="/search" aria-label={tr("SEFIKH — search engine")} className="w-fit">
+        <Link href="/" aria-label={tr("SEFIKH — home")} className="w-fit">
           <Logo />
         </Link>
         <main className="flex flex-1 items-center py-10">
