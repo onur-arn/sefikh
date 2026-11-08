@@ -93,7 +93,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
           })}
         </nav>
 
-        <Link href="/" aria-label={tr("SEFIKH — home")} className="col-start-2 shrink-0">
+        <Link href="/search" aria-label={tr("SEFIKH — search engine")} className="col-start-2 shrink-0">
           <Logo light={overlay} />
         </Link>
 

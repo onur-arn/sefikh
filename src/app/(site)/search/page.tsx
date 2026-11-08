@@ -16,6 +16,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/misc";
 import { anonymize, canSeeMakers, mustConfirmEmail } from "@/lib/access";
 import { VerifyGate } from "@/components/search/verify-gate";
+import { SearchHome } from "@/components/search/search-home";
 import { getT } from "@/i18n/server";
 import { translateText } from "@/lib/ai";
 
@@ -34,8 +35,12 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const tr = await getT();
   const sp = await searchParams;
   const [user, vid] = await Promise.all([getCurrentUser(), visitorId()]);
-  // La recherche est réservée aux comptes : 3 recherches gratuites par compte.
-  if (!user) redirect("/register?reason=search");
+  // Page du moteur ouverte à tous ; lancer une recherche est réservé aux comptes (3 recherches gratuites).
+  const asked = ["q", "image", "skills", "materials", "techniques", "sectors", "near"].some((k) => !!sp[k]);
+  if (!user) {
+    if (asked) redirect("/register?reason=search");
+    return <SearchHome />;
+  }
   const who = { userId: user.id, visitorId: vid };
   const plan = getPlan(user.plan);
   // Adresse e-mail à confirmer avant la première recherche.
@@ -115,7 +120,8 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
 
   return (
     <div className="container-x pb-24 pt-8">
-      <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+      {!hasCriteria && <SearchHome embedded />}
+      <div className={hasCriteria ? "grid gap-8 lg:grid-cols-12 lg:items-end" : "hidden"}>
         <div className="lg:col-span-7">
           <p className="folio flex flex-wrap items-center gap-3">
             {imageSearch ? tr("Visual search") : q ? tr("Project search") : tr("Explore expertise")}
@@ -147,6 +153,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
       </div>
 
       <div className="mt-10">
+        {!hasCriteria && <h2 className="display mb-6 text-3xl sm:text-4xl">{tr("{length} makers, workshops and manufacturers", { length: results.length })}</h2>}
         <FilterBar locked={!access} />
         <div className="flex justify-end pt-3">
           <SortSelect />

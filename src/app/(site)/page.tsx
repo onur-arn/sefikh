@@ -4,7 +4,6 @@ import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { db } from "@/lib/db";
 import { fileUrl } from "@/lib/utils";
 import { IntroSlideshow } from "@/components/layout/intro-slideshow";
-import { SearchPanel } from "@/components/search/search-panel";
 import { ButtonLink } from "@/components/ui/button";
 import { LISTED_COMPANY } from "@/lib/access";
 import { getT } from "@/i18n/server";
@@ -48,29 +47,21 @@ export default async function HomePage() {
         </a>
       </section>
 
-      {/* ── Recherche ──────────────────────────────────────── */}
-      <section id="site" className="container-x scroll-mt-[68px] py-16 sm:py-24">
-        <div className="grid gap-8 lg:grid-cols-12">
-          <p className="folio lg:col-span-3">{tr("Search")}</p>
-          <div className="lg:col-span-9">
-            <h2 className="display text-5xl sm:text-[5.2rem]">{tr("What are you looking for?")}</h2>
-            <div className="mt-10">
-              <SearchPanel />
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ── Manifeste ──────────────────────────────────────── */}
-      <section className="container-x border-t border-line py-20 sm:py-28">
+      <section id="site" className="container-x scroll-mt-[68px] py-20 sm:py-28">
         <div className="grid gap-8 lg:grid-cols-12">
           <p className="folio lg:col-span-3">{tr("Manifesto")}</p>
           <div className="lg:col-span-9">
             <p className="display text-[2.3rem] sm:text-6xl lg:text-[4.6rem]">{tr("An interior cannot be bought. It is built, by hand, by people you have not met yet.")}</p>
             <p className="mt-8 max-w-xl text-[16px] leading-relaxed text-ink-soft">{tr("SEFIKH brings together the cabinetmakers, metalworkers, stone carvers and weavers that architects keep to themselves. Describe an idea, show an image: we look for who can make it.")}</p>
-            <ButtonLink href="/about" variant="secondary" className="mt-8">
-              {tr("About us")} <ArrowRight className="size-3.5" />
-            </ButtonLink>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <ButtonLink href="/search" size="lg">
+                {tr("Find a maker")} <ArrowRight className="size-3.5" />
+              </ButtonLink>
+              <ButtonLink href="/about" variant="secondary" size="lg">
+                {tr("About us")}
+              </ButtonLink>
+            </div>
           </div>
         </div>
       </section>
