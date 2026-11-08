@@ -97,7 +97,7 @@ export function PlanPicker({ audience, currentPlan, currentTerm, loggedInRole, f
                   <button
                     onClick={() => choose(id)}
                     disabled={!!busy || isCurrent || !!wrongAudience}
-                    className={cn("inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-sm px-6 font-mono text-[12px] uppercase tracking-[0.06em] transition disabled:opacity-50", plan.highlight ? "bg-ink text-paper hover:bg-brass" : "border border-ink/70 hover:border-brass hover:text-brass")}
+                    className={cn("inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-sm px-6 font-mono text-[12px] uppercase tracking-[0.06em] transition", isCurrent ? "cursor-default border border-line text-muted" : "bg-ink text-paper hover:bg-brass disabled:opacity-50")}
                   >
                     {busy === id && <span className="size-3.5 animate-spin rounded-full border border-current border-r-transparent" />}
                     {isCurrent ? tr("Your current plan") : price === 0 ? (loggedInRole ? tr("Continue for free") : tr("Start for free")) : tr("Choose {name}", { name: tr(plan.name) })}

@@ -32,6 +32,7 @@ type Anonymizable = {
   verified: boolean;
   featured?: boolean;
   image: { key: string; width: number; height: number; title?: string | null } | null;
+  gallery?: string[];
   match?: number;
   reasons?: string[];
   distance?: number | null;
@@ -55,7 +56,7 @@ export function anonymize(m: Anonymizable, index: number) {
     verified: m.verified,
     featured: m.featured,
     image: m.image ? { key: m.image.key, width: m.image.width, height: m.image.height, title: null } : null,
-    gallery: [] as string[],
+    gallery: m.gallery ?? [],
     match: m.match,
     reasons: m.reasons,
     distance: m.distance,

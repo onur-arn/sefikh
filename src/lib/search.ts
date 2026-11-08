@@ -235,7 +235,7 @@ export async function runSearch(input: SearchInput) {
       leadTimeMin: c.leadTimeMin,
       leadTimeMax: c.leadTimeMax,
       image: cover ? { key: cover.thumbKey ?? cover.key, width: cover.width, height: cover.height, title: cover.title } : null,
-      gallery: c.portfolio.filter((p) => p.id !== cover?.id).slice(0, 3).map((p) => p.thumbKey ?? p.key),
+      gallery: c.portfolio.filter((p) => p.id !== cover?.id).slice(0, 5).map((p) => p.thumbKey ?? p.key),
     });
   }
 

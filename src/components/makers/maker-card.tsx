@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, Lock } from "lucide-react";
+import { useRef, useState } from "react";
+import { BadgeCheck, ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { COMPANY_KINDS } from "@/lib/constants";
 import { cn, fileUrl } from "@/lib/utils";
 import { useT } from "@/i18n/client";
@@ -45,23 +46,66 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
   const translation = useAutoTranslate("company", maker.id ?? "");
   const tagline = translation.translated?.tagline ?? maker.tagline;
   const canTranslate = !maker.anonymous && !!maker.id && !!maker.tagline;
+  // Photos de la carte : la couverture puis les autres réalisations, à faire défiler.
+  const photos = maker.image ? [maker.image.key, ...(maker.gallery ?? []).filter((k) => k !== maker.image!.key)] : [];
+  const [index, setIndex] = useState(0);
+  const touchX = useRef<number | null>(null);
+  const go = (step: number) => setIndex((i) => (i + step + photos.length) % photos.length);
+  const arrow = (step: number) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    go(step);
+  };
   // Lien étiré sur toute la carte : le bouton de traduction reste cliquable par-dessus.
   return (
     <div className={cn("group relative", className)}>
-      <div className="relative aspect-[4/5] overflow-hidden bg-sand">
+      <div
+        className="relative aspect-[4/5] overflow-hidden bg-sand"
+        onTouchStart={(e) => (touchX.current = e.touches[0]!.clientX)}
+        onTouchEnd={(e) => {
+          if (touchX.current == null || photos.length < 2) return;
+          const dx = e.changedTouches[0]!.clientX - touchX.current;
+          touchX.current = null;
+          if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+        }}
+      >
         {maker.image ? (
           <Image
-            src={fileUrl(maker.image.key)!}
-            alt={maker.anonymous ? "" : (maker.image.title ?? tr("Work by {name}", { name: maker.name }))}
+            key={photos[index]}
+            src={fileUrl(photos[index]!)!}
+            alt={maker.anonymous ? "" : (index === 0 && maker.image.title ? maker.image.title : tr("Work by {name}", { name: maker.name }))}
             fill
-            priority={priority}
+            priority={priority && index === 0}
             sizes="(min-width: 1024px) 33vw, 50vw"
-            className="object-cover transition duration-[900ms] ease-out group-hover:scale-[1.03]"
+            className="animate-fade-in object-cover transition duration-[900ms] ease-out group-hover:scale-[1.03]"
           />
         ) : (
           <div className="flex size-full items-center justify-center font-display text-5xl text-muted">{maker.name[0]}</div>
         )}
         {maker.match != null && maker.match > 0 && <span className="absolute left-0 top-0 bg-ivory px-2 py-1 font-mono text-[11px]">{tr("{match}% match", { match: maker.match })}</span>}
+        {photos.length > 1 && (
+          <>
+            {[-1, 1].map((step) => (
+              <button
+                key={step}
+                type="button"
+                onClick={arrow(step)}
+                aria-label={tr(step < 0 ? "Previous image" : "Next image")}
+                className={cn(
+                  "absolute top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center bg-ivory/90 text-ink transition hover:bg-ivory md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100",
+                  step < 0 ? "left-2" : "right-2",
+                )}
+              >
+                {step < 0 ? <ChevronLeft className="size-4" strokeWidth={1.5} /> : <ChevronRight className="size-4" strokeWidth={1.5} />}
+              </button>
+            ))}
+            <div className="pointer-events-none absolute inset-x-0 bottom-2.5 z-10 flex justify-center gap-1" aria-hidden>
+              {photos.map((k, i) => (
+                <span key={k} className={cn("h-0.5 w-4 transition-colors", i === index ? "bg-ivory" : "bg-ivory/45")} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
       <div className="mt-3 border-t border-ink/70 pt-2.5">
         <div className="flex items-baseline justify-between gap-3">
