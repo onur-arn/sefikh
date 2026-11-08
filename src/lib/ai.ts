@@ -6,10 +6,32 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { LOCALE_LABELS, type Locale } from "@/i18n/config";
 
-// Accès à Claude pour la traduction automatique.
+// Traduction automatique : DeepL si DEEPL_API_KEY est définie, sinon Claude.
 // `fallbacks: "default"` relance côté serveur une requête refusée par les filtres de sécurité.
 
 export const aiEnabled = () => !!env.anthropicApiKey;
+
+// Codes de langue DeepL pour les langues de l'interface.
+const DEEPL_TARGET: Record<Locale, string> = { en: "EN-GB", fr: "FR", it: "IT", es: "ES", zh: "ZH-HANS" };
+
+async function translateWithDeepl(text: string, target: Locale) {
+  const key = env.deeplApiKey!;
+  const host = key.endsWith(":fx") ? "api-free.deepl.com" : "api.deepl.com";
+  const res = await fetch(`https://${host}/v2/translate`, {
+    method: "POST",
+    headers: { Authorization: `DeepL-Auth-Key ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ text: [text], target_lang: DEEPL_TARGET[target], preserve_formatting: true }),
+    signal: AbortSignal.timeout(15_000),
+  }).catch(() => null);
+  if (!res?.ok) {
+    if (res) console.error("[translate] DeepL", res.status, await res.text().catch(() => ""));
+    throw new TranslationUnavailable();
+  }
+  const data = (await res.json()) as { translations?: { text: string }[] };
+  const out = data.translations?.[0]?.text;
+  if (!out) throw new TranslationUnavailable();
+  return out;
+}
 
 let client: Anthropic | null = null;
 export function ai() {
@@ -34,6 +56,12 @@ export async function translateText(text: string, target: Locale) {
   const sourceHash = sha256(source);
   const cached = await db.translation.findUnique({ where: { sourceHash_target: { sourceHash, target } } });
   if (cached) return cached.text;
+  const translated = env.deeplApiKey ? await translateWithDeepl(source, target) : await translateWithClaude(source, target);
+  await db.translation.upsert({ where: { sourceHash_target: { sourceHash, target } }, create: { sourceHash, target, text: translated }, update: { text: translated } });
+  return translated;
+}
+
+async function translateWithClaude(source: string, target: Locale) {
   if (!aiEnabled()) throw new TranslationUnavailable();
 
   const response = await ai().beta.messages.create({
@@ -51,7 +79,5 @@ export async function translateText(text: string, target: Locale) {
   const parsed = Result.safeParse(block?.type === "text" ? JSON.parse(block.text) : null);
   if (!parsed.success) throw new TranslationUnavailable();
 
-  const translated = parsed.data.translation;
-  await db.translation.upsert({ where: { sourceHash_target: { sourceHash, target } }, create: { sourceHash, target, text: translated }, update: { text: translated } });
-  return translated;
+  return parsed.data.translation;
 }

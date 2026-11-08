@@ -24,6 +24,8 @@ export const env = {
   clipEnabled: read("CLIP_MODE", "on") !== "off",
   /** Clé du lien privé de l'interface de choix du visuel (/visuel/<clé>). */
   visuelKey: read("VISUEL_KEY", process.env.NODE_ENV === "production" ? "" : "demo"),
+  /** Traduction automatique : DeepL en priorité (clé « …:fx » = offre gratuite), sinon Claude. */
+  deeplApiKey: read("DEEPL_API_KEY"),
   anthropicApiKey: read("ANTHROPIC_API_KEY"),
   aiModel: read("AI_MODEL", "claude-opus-5-5"),
 };
