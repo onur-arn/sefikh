@@ -77,6 +77,9 @@
   h1, h2, h3 {
     text-wrap: balance;
   }
+  .font-display {
+    font-variant-numeric: lining-nums;
+  }
   p {
     text-wrap: pretty;
   }
@@ -115,6 +118,8 @@
   .display {
     font-family: var(--font-display);
     font-weight: 400;
+    /* Chiffres alignés : Cormorant dessine par défaut des chiffres elzéviriens (0 tout petit à côté de 39). */
+    font-variant-numeric: lining-nums;
     letter-spacing: -0.012em;
     line-height: 1.03;
   }
