@@ -108,8 +108,8 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
               <AccountMenu user={user} />
             </>
           ) : (
-            <Link href="/login" className="hidden px-1 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink sm:inline">
-              {tr("Log in")}
+            <Link href="/account" className="hidden px-1 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink sm:inline">
+              {tr("Account")}
             </Link>
           )}
           <button className="ml-1 inline-flex size-10 items-center justify-center rounded-full hover:bg-sand hover:text-ink lg:hidden" onClick={() => setMobileOpen((o) => !o)} aria-label={tr("Menu")} aria-expanded={mobileOpen}>

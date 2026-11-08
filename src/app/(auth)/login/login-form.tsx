@@ -8,7 +8,7 @@ import { PasswordInput } from "@/components/forms/password-input";
 import { loginAction } from "../actions";
 import { useT } from "@/i18n/client";
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, showSignup = true }: { next: string; showSignup?: boolean }) {
   const tr = useT();
   const [state, onSubmit, pending] = useFormAction(loginAction);
   return (
@@ -31,11 +31,13 @@ export function LoginForm({ next }: { next: string }) {
       </Field>
       <Button type="submit" loading={pending} className="w-full" size="lg">
         {tr("Log in")}</Button>
-      <p className="text-center text-sm text-muted">
-        {tr("New to SEFIKH?")}{" "}
-        <Link href="/register" className="font-medium text-ink underline-offset-4 hover:underline">
-          {tr("Create an account")}</Link>
-      </p>
+      {showSignup && (
+        <p className="text-center text-sm text-muted">
+          {tr("New to SEFIKH?")}{" "}
+          <Link href="/register" className="font-medium text-ink underline-offset-4 hover:underline">
+            {tr("Create an account")}</Link>
+        </p>
+      )}
     </form>
   );
 }
