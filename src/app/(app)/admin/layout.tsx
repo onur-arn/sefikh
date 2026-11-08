@@ -10,6 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     ["/admin/users", tr("Users")],
     ["/admin/makers", tr("Makers")],
     ["/admin/requests", tr("Contact requests")],
+    ["/admin/connexions", "Connexions"],
     ["/admin/visuel", "Choix du visuel"],
   ] as const;
   return (

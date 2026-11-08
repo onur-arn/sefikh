@@ -29,3 +29,12 @@ export async function deleteContactRequest(formData: FormData) {
   await db.contactRequest.deleteMany({ where: { id: String(formData.get("id")) } });
   revalidatePath("/admin/requests");
 }
+
+/** Ferme une session (déconnecte l'appareil concerné), sauf celle de l'admin qui agit. */
+export async function revokeSession(formData: FormData) {
+  const admin = await requireAdmin();
+  const id = String(formData.get("id"));
+  if (id === admin.sessionId) return;
+  await db.session.deleteMany({ where: { id } });
+  revalidatePath("/admin/connexions");
+}
