@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Archive, ArchiveRestore, ArrowLeft, Camera, Check, CheckCheck, ExternalLink, FileText, FolderOpen, Inbox as InboxIcon, Info, Mail, MapPin, Paperclip, Phone, Search, Send, X } from "lucide-react";
 import { Avatar } from "@/components/ui/misc";
 import { useRealtime, useRealtimeConnected } from "@/lib/realtime-client";
@@ -10,6 +10,24 @@ import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/client";
 import { CLIENT_TYPES } from "@/lib/constants";
 import { TranslateButton, useAutoTranslate } from "@/components/translate/auto-translate";
+
+const DETAILS_KEY = "sefikh-message-details";
+const DETAILS_EVENT = "sefikh-message-details";
+const WIDE = "(min-width: 1280px)";
+let detailsPref: string | null = null;   // fallback when storage is blocked (private browsing)
+function readDetailsPref() {
+  try { return localStorage.getItem(DETAILS_KEY) ?? detailsPref; } catch { return detailsPref; }
+}
+function writeDetailsPref(v: "0" | "1") {
+  detailsPref = v;
+  try { localStorage.setItem(DETAILS_KEY, v); } catch {}
+  window.dispatchEvent(new Event(DETAILS_EVENT));
+}
+function subscribeDetails(cb: () => void) {
+  window.addEventListener(DETAILS_EVENT, cb);
+  window.addEventListener("storage", cb);
+  return () => { window.removeEventListener(DETAILS_EVENT, cb); window.removeEventListener("storage", cb); };
+}
 
 type ListItem = {
   id: string;
@@ -53,7 +71,21 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<ListItem[] | null>(null);
   const [activeId, setActiveId] = useState<string | null>(initialId);
-  const [showDetails, setShowDetails] = useState(false);
+  // Profile panel: a column on wide screens (open by default, choice remembered),
+  // a drawer over the conversation below 1280 px (closed by default).
+  const wideOpen = useSyncExternalStore(subscribeDetails, () => readDetailsPref() !== "0", () => true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDrawerOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawerOpen]);
+  function toggleDetails() {
+    if (window.matchMedia(WIDE).matches) writeDetailsPref(wideOpen ? "0" : "1");
+    else setDrawerOpen((open) => !open);
+  }
+
 
   const loadList = useCallback(async () => {
     const res = await fetch(`/api/conversations?filter=${filter}&q=${encodeURIComponent(query)}`, { cache: "no-store" });
@@ -97,7 +129,7 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
       {tab === "files" ? (
         <FilesView onOpen={(id) => { setTab("inbox"); open(id); }} />
       ) : (
-        <div className="grid min-h-0 flex-1 lg:grid-cols-[340px_1fr] xl:grid-cols-[340px_1fr_300px]">
+        <div className={cn("grid min-h-0 flex-1 lg:grid-cols-[340px_1fr]", activeId && wideOpen && "xl:grid-cols-[340px_1fr_300px]")}>
           {/* Liste */}
           <section className={cn("flex min-h-0 flex-col border-r border-line", activeId && "hidden lg:flex")} aria-label={tr("Conversations")}>
             <div className="space-y-3 border-b border-line p-4">
@@ -165,8 +197,9 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
               key={activeId}
               id={activeId}
               me={me}
-              showDetails={showDetails}
-              onToggleDetails={() => setShowDetails((s) => !s)}
+              wideOpen={wideOpen}
+              drawerOpen={drawerOpen}
+              onToggleDetails={toggleDetails}
               onBack={() => {
                 setActiveId(null);
                 router.replace("/messages", { scroll: false });
@@ -174,7 +207,7 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
               onChanged={loadList}
             />
           ) : (
-            <div className="hidden flex-col items-center justify-center text-center text-muted lg:flex xl:col-span-2">
+            <div className="hidden flex-col items-center justify-center text-center text-muted lg:flex">
               <InboxIcon className="size-10 text-line" strokeWidth={1.2} />
               <p className="mt-3 text-sm">{tr("Select a conversation")}</p>
             </div>
@@ -185,7 +218,7 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
   );
 }
 
-function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { id: string; me: { id: string; verified: boolean }; showDetails: boolean; onToggleDetails: () => void; onBack: () => void; onChanged: () => void }) {
+function Thread({ id, me, wideOpen, drawerOpen, onToggleDetails, onBack, onChanged }: { id: string; me: { id: string; verified: boolean }; wideOpen: boolean; drawerOpen: boolean; onToggleDetails: () => void; onBack: () => void; onChanged: () => void }) {
   const tr = useT();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -366,7 +399,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
               <button onClick={toggleArchive} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" title={detail.archived ? tr("Unarchive") : tr("Archive")} aria-label={detail.archived ? tr("Unarchive") : tr("Archive")}>
                 {detail.archived ? <ArchiveRestore className="size-[18px]" /> : <Archive className="size-[18px]" />}
               </button>
-              <button onClick={onToggleDetails} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink xl:hidden" aria-label={tr("Details")}>
+              <button onClick={onToggleDetails} className={cn("flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink", drawerOpen && "max-xl:bg-sand max-xl:text-ink", wideOpen && "xl:bg-sand xl:text-ink")} aria-label={tr("Details")} title={tr("Details")}>
                 <Info className="size-[18px]" />
               </button>
             </>
@@ -437,9 +470,12 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
       </section>
 
       {/* Détails */}
-      {detail && (
-        <aside className={cn("scrollbar-thin min-h-0 overflow-y-auto border-l border-line bg-paper/50 p-6", showDetails ? "fixed inset-y-0 right-0 z-40 w-[min(90vw,320px)] bg-ivory shadow-2xl xl:static xl:w-auto xl:shadow-none" : "hidden xl:block")}>
-          <button onClick={onToggleDetails} className="mb-4 ml-auto flex size-8 items-center justify-center rounded-full hover:bg-sand xl:hidden" aria-label={tr("Close details")}>
+      {detail && (drawerOpen || wideOpen) && (
+        <>
+        {/* below 1280 px the panel is a drawer: dim the conversation behind it, click to close */}
+        {drawerOpen && <button type="button" onClick={onToggleDetails} className="fixed inset-0 z-30 bg-ink/30 xl:hidden" aria-label={tr("Close details")} tabIndex={-1} />}
+        <aside className={cn("scrollbar-thin fixed inset-y-0 right-0 z-40 min-h-0 w-[min(90vw,320px)] overflow-y-auto border-l border-line bg-ivory p-6 shadow-2xl xl:static xl:w-auto xl:bg-paper xl:shadow-none", drawerOpen ? "max-xl:block" : "max-xl:hidden", wideOpen ? "xl:block" : "xl:hidden")}>
+          <button onClick={onToggleDetails} className="mb-4 ml-auto flex size-8 items-center justify-center rounded-full hover:bg-sand" aria-label={tr("Close details")}>
             <X className="size-4" />
           </button>
           <p className="text-sm font-semibold">{tr("Details")}</p>
@@ -514,6 +550,7 @@ function Thread({ id, me, showDetails, onToggleDetails, onBack, onChanged }: { i
             )}
           </div>
         </aside>
+        </>
       )}
     </>
   );
