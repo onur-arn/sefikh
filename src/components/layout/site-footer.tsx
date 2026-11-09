@@ -5,7 +5,7 @@ import { getT } from "@/i18n/server";
 const COLUMNS = [
   { title: "Platform", links: [["Trends & Insights", "/insights"], ["Journal", "/journal"], ["Subscription", "/subscription"]] },
   { title: "For makers", links: [["Join as a maker", "/join"], ["Business plans", "/subscription?for=pro"]] },
-  { title: "Company", links: [["About us", "/about"], ["Join our team", "/contact?topic=Careers"], ["Contact us", "/contact"]] },
+  { title: "Company", links: [["About us", "/about"], ["Contact us", "/contact"]] },
   { title: "Resources", links: [["Terms and conditions", "/legal/terms"], ["Privacy policy", "/legal/privacy"], ["Cookie policy", "/legal/cookies"]] },
 ] as const;
 

@@ -6,7 +6,7 @@ import { Field, FormMessage, Input, Select, Textarea } from "@/components/ui/fie
 import { contactAction } from "../actions";
 import { useT } from "@/i18n/client";
 
-const TOPICS = ["General question", "I am a maker", "Partnership", "Press", "Careers", "Billing", "Report a problem"];
+const TOPICS = ["General question", "I am a maker", "Partnership", "Press", "Billing", "Report a problem"];
 
 export function ContactForm({ topic }: { topic?: string }) {
   const tr = useT();

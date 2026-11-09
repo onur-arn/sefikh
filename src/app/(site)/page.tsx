@@ -74,11 +74,10 @@ export default async function HomePage() {
             <h2 className="display text-4xl sm:text-5xl lg:col-span-9">{tr("Know-how, organised.")}</h2>
           </div>
           <ul className="mt-12 border-t border-ink/70">
-            {crafts.map((c, i) => (
+            {crafts.map((c) => (
               <li key={c.label} className="border-b border-line">
-                <Link href={`/search?${c.param}=${encodeURIComponent(c.tag)}`} className="group grid items-center gap-x-6 gap-y-1 py-5 lg:grid-cols-12">
-                  <span className="folio lg:col-span-1">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="display text-3xl transition-colors group-hover:text-brass sm:text-[2.7rem] lg:col-span-5">{tr(c.label)}</span>
+                <Link href={`/search?${c.param}=${encodeURIComponent(c.tag)}`} className="group grid items-center gap-x-6 gap-y-1 py-4 lg:grid-cols-12">
+                  <span className="display text-2xl transition-colors group-hover:text-brass sm:text-[2rem] lg:col-span-6">{tr(c.label)}</span>
                   <span className="text-[14px] text-muted lg:col-span-4">{tr(c.copy)}</span>
                   <span className="relative hidden h-16 overflow-hidden lg:col-span-2 lg:block">
                     {c.image && <Image src={fileUrl(c.image)!} alt="" fill sizes="16vw" className="object-cover opacity-0 transition duration-500 group-hover:opacity-100" />}

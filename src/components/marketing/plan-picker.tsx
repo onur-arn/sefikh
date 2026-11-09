@@ -73,7 +73,7 @@ export function PlanPicker({ audience, currentPlan, currentTerm, loggedInRole, f
                 <div className="lg:col-span-3">
                   <p className="display flex items-baseline gap-3 text-5xl">
                     {tr(plan.name)}
-                    {plan.highlight && <span className="font-mono text-[11px] uppercase tracking-[0.05em] text-brass">{tr("Most popular")}</span>}
+                    {plan.highlight && <span className="font-mono text-[11px] uppercase tracking-[0.05em] text-brass">{tr("Our recommendation")}</span>}
                   </p>
                   <p className="folio mt-2">{tr(plan.tagline)}</p>
                 </div>
