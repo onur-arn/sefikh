@@ -472,9 +472,10 @@ function Thread({ id, me, wideOpen, drawerOpen, onToggleDetails, onBack, onChang
       {/* Détails */}
       {detail && (drawerOpen || wideOpen) && (
         <>
-        {/* below 1280 px the panel is a drawer: dim the conversation behind it, click to close */}
-        {drawerOpen && <button type="button" onClick={onToggleDetails} className="fixed inset-0 z-30 bg-ink/30 xl:hidden" aria-label={tr("Close details")} tabIndex={-1} />}
-        <aside className={cn("scrollbar-thin fixed inset-y-0 right-0 z-40 min-h-0 w-[min(90vw,320px)] overflow-y-auto border-l border-line bg-ivory p-6 shadow-2xl xl:static xl:w-auto xl:bg-paper xl:shadow-none", drawerOpen ? "max-xl:block" : "max-xl:hidden", wideOpen ? "xl:block" : "xl:hidden")}>
+        {/* below 1280 px the panel is a drawer under the site header (z-40), so the header and its
+            account menu stay on top: dim the conversation behind it, click to close */}
+        {drawerOpen && <button type="button" onClick={onToggleDetails} className="fixed inset-x-0 bottom-0 top-[68px] z-20 bg-ink/30 xl:hidden" aria-label={tr("Close details")} tabIndex={-1} />}
+        <aside className={cn("scrollbar-thin fixed bottom-0 right-0 top-[68px] z-30 min-h-0 w-[min(90vw,320px)] overflow-y-auto border-l border-line bg-ivory p-6 shadow-2xl xl:static xl:w-auto xl:bg-paper xl:shadow-none", drawerOpen ? "max-xl:block" : "max-xl:hidden", wideOpen ? "xl:block" : "xl:hidden")}>
           <button onClick={onToggleDetails} className="mb-4 ml-auto flex size-8 items-center justify-center rounded-full hover:bg-sand" aria-label={tr("Close details")}>
             <X className="size-4" />
           </button>
