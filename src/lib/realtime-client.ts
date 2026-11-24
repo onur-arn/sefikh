@@ -3,7 +3,9 @@
 import { useEffect, useEffectEvent, useSyncExternalStore } from "react";
 import type { RealtimeEvent, WireMessage } from "@/lib/realtime";
 
-// Connexion temps réel unique par onglet (EventSource sur /api/realtime), partagée par l'en-tête et la messagerie.
+// Connexion temps réel unique par onglet (EventSource sur /api/realtime), utilisée par la messagerie.
+// Sur Vercel, une connexion ouverte est facturée tout le temps qu'elle dure : on la ferme dès que l'onglet est caché
+// ou que l'utilisateur est inactif, et on la rouvre (avec resynchronisation) à son retour.
 
 export type ClientMessage = Omit<WireMessage, "createdAt"> & { createdAt: string; nonce?: string };
 export type ClientRealtimeEvent =
@@ -21,6 +23,14 @@ let everConnected = false;
 let retryDelay = 5_000;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 let closeTimer: ReturnType<typeof setTimeout> | null = null;
+let pauseTimer: ReturnType<typeof setTimeout> | null = null;
+let idleTimer: ReturnType<typeof setTimeout> | null = null;
+let paused = false;
+let watching = false;
+
+const HIDDEN_GRACE_MS = 15_000; // onglet caché : fermeture après ce délai
+const IDLE_MS = 10 * 60_000; // aucune activité (souris, clavier, toucher, défilement) : fermeture
+const ACTIVITY_EVENTS = ["pointerdown", "pointermove", "keydown", "wheel", "touchstart", "scroll"] as const;
 
 function setConnected(value: boolean) {
   if (connected === value) return;
@@ -32,8 +42,69 @@ function emit(event: ClientRealtimeEvent) {
   handlers.forEach((fn) => fn(event));
 }
 
+function close() {
+  source?.close();
+  source = null;
+  if (retryTimer) clearTimeout(retryTimer);
+  retryTimer = null;
+  setConnected(false);
+}
+
+function pause() {
+  if (paused) return;
+  paused = true;
+  close();
+}
+
+function resume() {
+  if (!paused) return;
+  paused = false;
+  if (handlers.size) open();
+}
+
+function armIdle() {
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = setTimeout(pause, IDLE_MS);
+}
+
+let lastActivity = 0;
+function onActivity() {
+  const now = Date.now();
+  if (now - lastActivity < 5_000 && !paused) return; // limite le travail sur pointermove / scroll
+  lastActivity = now;
+  armIdle();
+  if (!document.hidden) resume();
+}
+
+function onVisibility() {
+  if (pauseTimer) clearTimeout(pauseTimer);
+  pauseTimer = null;
+  if (document.hidden) pauseTimer = setTimeout(pause, HIDDEN_GRACE_MS);
+  else onActivity();
+}
+
+function startWatching() {
+  if (watching || typeof document === "undefined") return;
+  watching = true;
+  document.addEventListener("visibilitychange", onVisibility);
+  ACTIVITY_EVENTS.forEach((e) => window.addEventListener(e, onActivity, { passive: true }));
+  armIdle();
+  if (document.hidden) onVisibility();
+}
+
+function stopWatching() {
+  if (!watching) return;
+  watching = false;
+  document.removeEventListener("visibilitychange", onVisibility);
+  ACTIVITY_EVENTS.forEach((e) => window.removeEventListener(e, onActivity));
+  if (pauseTimer) clearTimeout(pauseTimer);
+  if (idleTimer) clearTimeout(idleTimer);
+  pauseTimer = idleTimer = null;
+  paused = false;
+}
+
 function open() {
-  if (source || retryTimer || typeof EventSource === "undefined") return;
+  if (paused || source || retryTimer || typeof EventSource === "undefined") return;
   const es = new EventSource("/api/realtime");
   source = es;
   es.onopen = () => {
@@ -62,7 +133,7 @@ function open() {
       source = null;
       retryTimer = setTimeout(() => {
         retryTimer = null;
-        if (handlers.size) open();
+        if (handlers.size && !paused) open();
       }, retryDelay);
       retryDelay = Math.min(retryDelay * 2, 60_000);
     }
@@ -73,6 +144,7 @@ function subscribe(fn: Handler) {
   handlers.add(fn);
   if (closeTimer) clearTimeout(closeTimer);
   closeTimer = null;
+  startWatching();
   open();
   return () => {
     handlers.delete(fn);
@@ -80,9 +152,8 @@ function subscribe(fn: Handler) {
     // Fermeture différée : évite de couper / rouvrir la connexion lors d'un simple remontage de composant.
     closeTimer = setTimeout(() => {
       if (handlers.size) return;
-      source?.close();
-      source = null;
-      setConnected(false);
+      close();
+      stopWatching();
     }, 2_000);
   };
 }
@@ -96,7 +167,7 @@ export function useRealtime(handler: Handler, enabled = true) {
   }, [enabled]);
 }
 
-/** true tant que la connexion temps réel est active (sinon les composants repassent en interrogation périodique). */
+/** true tant que la connexion temps réel est active (sinon les composants repassent en interrogation périodique, onglet visible uniquement). */
 export function useRealtimeConnected() {
   return useSyncExternalStore(
     (fn) => {

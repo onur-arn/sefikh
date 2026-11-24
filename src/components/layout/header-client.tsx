@@ -52,20 +52,26 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Compteurs (messagerie / notifications) : mis à jour en direct, interrogation périodique seulement hors connexion temps réel.
+  // Compteurs (messagerie / notifications) : interrogation courte, onglet visible uniquement, et au retour sur l'onglet.
+  // Pas de connexion temps réel ici : ouverte sur toutes les pages, elle tournait en continu sur Vercel (facturé à la durée).
   const refreshCounts = async () => {
     const res = await fetch("/api/me/counts", { cache: "no-store" }).catch(() => null);
     if (res?.ok) setCounts(await res.json());
   };
   useRealtime((event) => {
     if (event.type === "counts" || event.type === "reconnected" || (event.type === "message" && !event.message.mine)) void refreshCounts();
-  }, !!user);
+  }, !!user && pathname.startsWith("/messages"));
   useEffect(() => {
     if (!user) return;
     const id = setInterval(() => {
       if (!document.hidden && !isRealtimeConnected()) void refreshCounts();
-    }, 20_000);
-    return () => clearInterval(id);
+    }, 30_000);
+    const onVisible = () => !document.hidden && void refreshCounts();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [user]);
 
   // Le panneau de recherche se referme en changeant de page ou avec Échap.
