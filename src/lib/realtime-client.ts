@@ -20,6 +20,10 @@ const statusListeners = new Set<() => void>();
 let source: EventSource | null = null;
 let connected = false;
 let everConnected = false;
+let lastOpenAt = 0;
+// Le serveur répond puis ferme à chaque interrogation (toutes les ~4 s) : ce n'est pas une coupure.
+// Au-delà de ce délai sans réponse, on considère qu'il y a eu une vraie interruption et on resynchronise.
+const GAP_MS = 20_000;
 let retryDelay = 5_000;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 let closeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -110,8 +114,9 @@ function open() {
   es.onopen = () => {
     retryDelay = 5_000;
     setConnected(true);
-    if (everConnected) emit({ type: "reconnected" });
+    if (everConnected && Date.now() - lastOpenAt > GAP_MS) emit({ type: "reconnected" });
     everConnected = true;
+    lastOpenAt = Date.now();
   };
   es.onmessage = (m) => {
     try {
@@ -127,6 +132,8 @@ function open() {
     setConnected(false);
   });
   es.onerror = () => {
+    // Fermeture normale après une réponse : EventSource se reconnecte seul (état CONNECTING).
+    if (es.readyState === EventSource.CONNECTING && Date.now() - lastOpenAt < GAP_MS) return;
     setConnected(false);
     // Coupure réseau : EventSource se reconnecte seul. Réponse en erreur (CLOSED) : nouvel essai espacé.
     if (es.readyState === EventSource.CLOSED) {

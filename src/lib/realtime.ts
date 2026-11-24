@@ -3,8 +3,8 @@ import { db } from "@/lib/db";
 
 // Bus d'événements temps réel (Server-Sent Events, /api/realtime).
 // En mémoire, dans le processus : immédiat quand l'expéditeur et le destinataire sont sur la même instance.
-// Sur plusieurs instances (Vercel), /api/realtime relit aussi la base (src/lib/realtime-poll.ts) :
-// messages, lectures et notifications arrivent en 2 s environ ; « en train d'écrire » reste local.
+// Sur Vercel, /api/realtime fonctionne par interrogations courtes (src/lib/realtime-poll.ts) :
+// messages, lectures et notifications arrivent en 4 s environ ; ce bus ne sert plus qu'en local.
 
 export type WireAttachment = { id: string; name: string; mime: string; size: number; url: string; width: number | null; height: number | null };
 export type WireMessage = { id: string; body: string; createdAt: Date | string; mine: boolean; senderName: string; attachments: WireAttachment[]; nonce?: string };
