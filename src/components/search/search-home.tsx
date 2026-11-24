@@ -15,7 +15,7 @@ export async function SearchHome({ embedded = false }: { embedded?: boolean }) {
       <div className="grid gap-8 lg:grid-cols-12">
         <p className="folio lg:col-span-3">{tr("Search engine")}</p>
         <div className="lg:col-span-9">
-          <h1 className="display text-5xl sm:text-[5.2rem]">{tr("What are you looking for?")}</h1>
+          <h1 className="display text-5xl sm:text-[3rem]">{tr("What are you looking for?")}</h1>
           <p className="mt-5 max-w-xl text-[16px] leading-relaxed text-ink-soft">{tr("Describe your project, add an image or choose a category.")}</p>
           <div className="mt-10">
             <SearchPanel />

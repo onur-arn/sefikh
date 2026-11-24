@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Bookmark, Check, Eye, FolderKanban, MessageCircle, Plus, Search, Sparkles } from "lucide-react";
 import { requireUser, type CurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { getPlan, formatLimit } from "@/lib/plans";
+import { getPlan, formatLimit, planName } from "@/lib/plans";
 import { runSearch, searchesUsed } from "@/lib/search";
 import { companyStats } from "@/lib/stats";
 import { parseList } from "@/lib/utils";
@@ -194,7 +194,7 @@ async function ProOverview({ user }: { user: CurrentUser }) {
 
   const checklist = [
     { done: !!company.about && company.about.length > 80, label: tr("Describe your company"), href: "/dashboard/profile" },
-    { done: company._count.tags >= 3, label: tr("Add skills, materials & techniques"), href: "/dashboard/profile" },
+    { done: company._count.tags >= 3, label: tr("Choose your areas of expertise"), href: "/dashboard/profile" },
     { done: company._count.portfolio >= 3, label: tr("Publish at least 3 portfolio pictures"), href: "/dashboard/portfolio" },
     { done: parseList(company.availability).length > 0, label: tr("Share your production availability"), href: "/dashboard/profile" },
     { done: company.published, label: tr("Publish your profile"), href: "/dashboard/profile" },
@@ -209,7 +209,7 @@ async function ProOverview({ user }: { user: CurrentUser }) {
           <h1 className="display mt-1 text-4xl sm:text-5xl">{company.name}</h1>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge tone={company.published ? "success" : "neutral"}>{company.published ? tr("Published") : tr("Draft")}</Badge>
-            <Badge tone="brass">{tr(plan.name)}</Badge>
+            <Badge tone="brass">{planName(plan, tr)}</Badge>
             {company.verified && <Badge tone="dark">{tr("Verified")}</Badge>}
           </div>
         </div>
@@ -220,10 +220,18 @@ async function ProOverview({ user }: { user: CurrentUser }) {
             <ButtonLink href="/upgrade">{tr("Choose a plan to appear on SEFIKH")}</ButtonLink>
           )}
           <ButtonLink href={`/makers/${company.slug}`} variant="secondary">
-            {tr(hasListedPlan(user.plan) ? "View public page" : "Preview my profile")}{" "}<ArrowUpRight className="size-4" />
+            {tr("View page preview")}{" "}<ArrowUpRight className="size-4" />
           </ButtonLink>
         </div>
       </header>
+
+      {company.reviewStatus !== "APPROVED" && (
+        <p className={company.reviewStatus === "REJECTED" ? "border border-danger/40 bg-paper px-4 py-3 text-[13.5px] text-danger" : "border border-line bg-paper px-4 py-3 text-[13.5px]"}>
+          {company.reviewStatus === "REJECTED"
+            ? `${tr("Your profile was not approved.")}${company.reviewNote ? ` ${company.reviewNote}` : ""} ${tr("Update it and contact us at contact@sefikh.com.")}`
+            : tr("Your profile is being reviewed by our team. It goes online within 72 hours, once approved.")}
+        </p>
+      )}
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <Stat icon={Eye} label={tr("Profile views · 30 days")} value={stats.views} hint={tr("{v}{viewsDelta}% vs previous period", { v: stats.viewsDelta >= 0 ? "+" : "", viewsDelta: stats.viewsDelta })} href={plan.limits.analytics ? "/dashboard/analytics" : undefined} />

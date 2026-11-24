@@ -21,7 +21,7 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/dashbo
   const items = await db.portfolioImage.findMany({
     where: { companyId: user.company.id },
     orderBy: { position: "asc" },
-    select: { id: true, key: true, thumbKey: true, width: true, height: true, title: true, description: true, projectName: true, location: true, year: true, position: true },
+    select: { id: true, key: true, thumbKey: true, width: true, height: true, title: true, description: true, projectName: true, location: true, year: true, position: true, status: true, reviewNote: true },
   });
   const limit = getPlan(user.plan).limits.portfolioImages;
   return (

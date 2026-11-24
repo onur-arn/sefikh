@@ -8,7 +8,7 @@ import { ArrowDown, ArrowUp, Check, ImagePlus, Star, Trash2 } from "lucide-react
 import { cn, fileUrl } from "@/lib/utils";
 import { useT } from "@/i18n/client";
 
-type Item = { id: string; key: string; thumbKey: string | null; width: number; height: number; title: string | null; description: string | null; projectName: string | null; location: string | null; year: number | null; position: number };
+type Item = { id: string; key: string; thumbKey: string | null; width: number; height: number; title: string | null; description: string | null; projectName: string | null; location: string | null; year: number | null; position: number; status?: string; reviewNote?: string | null };
 type Upload = { name: string; status: "uploading" | "error"; error?: string };
 
 export function PortfolioManager({ initialItems, limit }: { initialItems: Item[]; limit: number }) {
@@ -72,6 +72,7 @@ export function PortfolioManager({ initialItems, limit }: { initialItems: Item[]
         <ImagePlus className="size-9 text-brass" strokeWidth={1.3} />
         <p className="mt-3 font-medium">{tr("Drop your pictures here")}</p>
         <p className="mt-1 text-sm text-muted">{tr("JPG, PNG, WebP or HEIC — up to 10 MB each. Your best picture should come first.")}</p>
+        <p className="mt-1 text-[12.5px] text-muted">{tr("Each new picture is reviewed by our team before it appears on SEFIKH, within 72 hours.")}</p>
         <button onClick={() => inputRef.current?.click()} disabled={items.length >= limit} className="mt-5 rounded-sm bg-ink px-5 py-2.5 text-sm font-medium text-paper hover:bg-ink-soft disabled:opacity-40">
           {tr("Choose pictures")}</button>
         <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { uploadFiles(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
@@ -130,6 +131,11 @@ function PortfolioItem({ item, index, total, onMove, onRemove }: { item: Item; i
         {index === 0 && (
           <span className="absolute left-3 top-3 flex items-center gap-1 rounded-sm bg-ink/80 px-2.5 py-1 text-[11px] font-medium text-paper">
             <Star className="size-3" /> {" "}{tr("Cover")}</span>
+        )}
+        {item.status && item.status !== "APPROVED" && (
+          <span className={cn("absolute bottom-3 left-3 max-w-[85%] px-2.5 py-1 text-[11px] font-medium", item.status === "REJECTED" ? "bg-danger text-paper" : "bg-paper/95 text-ink")}>
+            {item.status === "REJECTED" ? `${tr("Not approved")}${item.reviewNote ? ` — ${item.reviewNote}` : ""}` : tr("Awaiting review (within 72 h)")}
+          </span>
         )}
         <div className="absolute right-3 top-3 flex gap-1">
           {index > 0 && (

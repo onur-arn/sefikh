@@ -7,7 +7,8 @@ import { continentOf, detectLocation, distanceKm, findCity, findCountry, type Ci
 import { cosine, fromBytes } from "@/lib/images";
 import { getPlan } from "@/lib/plans";
 import { parseList } from "@/lib/utils";
-import { LISTED_COMPANY } from "@/lib/access";
+import { APPROVED_PHOTO, LISTED_COMPANY } from "@/lib/access";
+import { legacyAreas } from "@/lib/expertise";
 
 // ───────────────────────── Analyse de la requête ─────────────────────────
 
@@ -45,6 +46,7 @@ export function parseQuery(text: string) {
 
 export type SearchInput = {
   q?: string;
+  areas?: string[];
   skills?: string[];
   materials?: string[];
   techniques?: string[];
@@ -89,6 +91,7 @@ async function loadCandidates() {
       user: { select: { plan: true } },
       tags: { include: { tag: true } },
       portfolio: {
+        where: APPROVED_PHOTO,
         orderBy: { position: "asc" },
         select: { id: true, key: true, thumbKey: true, width: true, height: true, title: true, description: true, embedding: true, colorVector: true },
       },
@@ -109,6 +112,7 @@ export async function runSearch(input: SearchInput) {
   for (const t of parsed.tags) requested.set(`${t.kind}:${t.name}`, t);
 
   const hardFilters: [TagKind, string[]][] = [
+    ["AREA", input.areas ?? []],
     ["SKILL", input.skills ?? []],
     ["MATERIAL", input.materials ?? []],
     ["TECHNIQUE", input.techniques ?? []],
@@ -136,7 +140,9 @@ export async function runSearch(input: SearchInput) {
   for (const c of candidates) {
     const plan = getPlan(c.user.plan);
     const companyTags = c.tags.map((t) => ({ kind: t.tag.kind, name: t.tag.name }));
-    const has = (kind: string, name: string) => companyTags.some((t) => t.kind === kind && t.name === name);
+    // Profils d'avant la v2 : domaines déduits de leurs anciennes compétences / matériaux.
+    const derivedAreas = legacyAreas(companyTags.map((t) => t.name));
+    const has = (kind: string, name: string) => companyTags.some((t) => t.kind === kind && t.name === name) || (kind === "AREA" && derivedAreas.includes(name));
 
     // Filtres stricts (cases cochées) : au moins une valeur par groupe.
     if (hardFilters.some(([kind, values]) => values.length > 0 && !values.some((v) => has(kind, v)))) continue;
@@ -158,7 +164,7 @@ export async function runSearch(input: SearchInput) {
       let hit = 0;
       for (const t of requested.values()) {
         if (has(t.kind, t.name)) {
-          hit += t.kind === "SECTOR" ? 0.7 : 1;
+          hit += t.kind === "SECTOR" ? 0.7 : t.kind === "AREA" ? 0.85 : 1;
           if (reasons.length < 3) reasons.push(tr(t.name));
         }
       }

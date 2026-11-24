@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { APPROVED_PHOTO } from "@/lib/access";
 import { Bookmark, Lock } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -21,7 +22,7 @@ export default async function LibraryPage() {
   const saved = await db.savedCompany.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
-    include: { company: { include: { portfolio: { orderBy: { position: "asc" }, take: 3, select: { key: true, thumbKey: true, width: true, height: true, title: true } } } } },
+    include: { company: { include: { portfolio: { where: APPROVED_PHOTO, orderBy: { position: "asc" }, take: 3, select: { key: true, thumbKey: true, width: true, height: true, title: true } } } } },
   });
   return (
     <>

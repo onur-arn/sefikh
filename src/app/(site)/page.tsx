@@ -5,33 +5,29 @@ import { db } from "@/lib/db";
 import { fileUrl } from "@/lib/utils";
 import { IntroSlideshow } from "@/components/layout/intro-slideshow";
 import { ButtonLink } from "@/components/ui/button";
-import { LISTED_COMPANY } from "@/lib/access";
+import { APPROVED_PHOTO, LISTED_COMPANY } from "@/lib/access";
+import { AREAS, legacyAreas } from "@/lib/expertise";
 import { getT } from "@/i18n/server";
 
-const CRAFTS = [
-  { tag: "Metalwork", param: "skills", label: "Metal & Brass", copy: "Patinated brass, bronze casting, forged steel" },
-  { tag: "Cabinetmaking", param: "skills", label: "Cabinetmaking", copy: "Burl veneers, joinery, bespoke furniture" },
-  { tag: "Leather", param: "materials", label: "Leather", copy: "Wall panels, tufting, saddlery" },
-  { tag: "Natural stone", param: "materials", label: "Stone & Marble", copy: "Onyx, travertine, sculpted marble" },
-  { tag: "Upholstery", param: "skills", label: "Upholstery", copy: "Velvet, bouclé, custom seating" },
-  { tag: "Ceramics", param: "skills", label: "Ceramics & Tiles", copy: "Zellige, glazed tiles, terracotta" },
-];
-
-async function getCrafts() {
+/** Une photo par domaine, prise chez un atelier du domaine (tags v2, ou anciens tags pour les profils d'avant). */
+async function getAreas() {
   const companies = await db.company.findMany({
     where: LISTED_COMPANY,
-    select: { tags: { select: { tag: { select: { name: true } } } }, portfolio: { orderBy: { position: "asc" }, take: 1, select: { key: true, thumbKey: true } } },
+    select: { tags: { select: { tag: { select: { kind: true, name: true } } } }, portfolio: { where: APPROVED_PHOTO, orderBy: { position: "asc" }, take: 1, select: { key: true, thumbKey: true } } },
   });
-  return CRAFTS.map((c) => {
-    const withTag = companies.filter((co) => co.tags.some((t) => t.tag.name === c.tag) && co.portfolio.length);
-    const img = withTag[0]?.portfolio[0];
-    return { ...c, image: img ? img.thumbKey ?? img.key : null };
+  return AREAS.map((a) => {
+    const match = companies.find((c) => {
+      const names = c.tags.map((t) => t.tag.name);
+      return c.portfolio.length && (c.tags.some((t) => t.tag.kind === "AREA" && t.tag.name === a.name) || legacyAreas(names).includes(a.name));
+    });
+    const img = match?.portfolio[0];
+    return { ...a, image: img ? img.thumbKey ?? img.key : null };
   });
 }
 
 export default async function HomePage() {
   const tr = await getT();
-  const crafts = await getCrafts();
+  const areas = await getAreas();
 
   return (
     <>
@@ -40,48 +36,47 @@ export default async function HomePage() {
         <IntroSlideshow />
         <div className="container-x absolute inset-x-0 bottom-16 z-10 text-paper sm:bottom-10">
           <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-paper/80">{tr("Search Engine For Know-How")}</p>
-          <h1 className="display mt-3 max-w-3xl text-[3.2rem] sm:text-7xl lg:text-[6.2rem]">{tr("Find the right hands.")}</h1>
+          <h1 className="display mt-3 max-w-3xl text-[2.2rem] sm:text-6xl lg:text-[3.4rem]">{tr("Where Ideas Take Shape")}</h1>
         </div>
         <a href="#site" aria-label={tr("Explore")} className="absolute bottom-14 right-4 z-10 text-paper sm:right-7 lg:right-10">
           <ChevronDown className="size-5 animate-bounce" strokeWidth={1.2} aria-hidden />
         </a>
       </section>
 
-      {/* ── Manifeste ──────────────────────────────────────── */}
-      <section id="site" className="container-x scroll-mt-[68px] py-20 sm:py-28">
+      {/* ── Trouver l'expertise ────────────────────────────── */}
+      <section id="site" className="container-x scroll-mt-[68px] py-20 sm:py-24">
         <div className="grid gap-8 lg:grid-cols-12">
-          <p className="folio lg:col-span-3">{tr("Manifesto")}</p>
+          <p className="folio lg:col-span-3">{tr("Find the right expertise")}</p>
           <div className="lg:col-span-9">
-            <p className="display text-[2.3rem] sm:text-6xl lg:text-[4.6rem]">{tr("An interior cannot be bought. It is built, by hand, by people you have not met yet.")}</p>
-            <p className="mt-8 max-w-xl text-[16px] leading-relaxed text-ink-soft">{tr("SEFIKH brings together the cabinetmakers, metalworkers, stone carvers and weavers that architects keep to themselves. Describe an idea, show an image: we look for who can make it.")}</p>
-            <div className="mt-10 flex flex-wrap gap-3">
+            <h2 className="display text-3xl sm:text-4xl">{tr("The right skills make all the difference.")}</h2>
+            <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-soft">
+              {tr("Every project requires the right skills. Share your vision and tell us what you're looking for. We'll help you find the artisans and workshops best suited to your needs.")}
+            </p>
+            <div className="mt-9">
               <ButtonLink href="/search" size="lg">
-                {tr("Find a maker")} <ArrowRight className="size-3.5" />
-              </ButtonLink>
-              <ButtonLink href="/about" variant="secondary" size="lg">
-                {tr("About us")}
+                {tr("Explore the craft")} <ArrowRight className="size-3.5" />
               </ButtonLink>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Index des métiers ──────────────────────────────── */}
+      {/* ── Domaines d'expertise ───────────────────────────── */}
       <section className="border-t border-line">
         <div className="container-x py-16 sm:py-20">
           <div className="grid gap-4 lg:grid-cols-12">
-            <p className="folio lg:col-span-3">{tr("Index of crafts")}</p>
-            <h2 className="display text-4xl sm:text-5xl lg:col-span-9">{tr("Know-how, organised.")}</h2>
+            <p className="folio lg:col-span-3">{tr("Areas of expertise")}</p>
+            <p className="max-w-xl text-[15px] leading-relaxed text-ink-soft lg:col-span-9">{tr("Explore a diverse range of skills, techniques and specialities across creative and artisanal fields.")}</p>
           </div>
-          <ul className="mt-12 border-t border-ink/70">
-            {crafts.map((c) => (
-              <li key={c.label} className="border-b border-line">
-                <Link href={`/search?${c.param}=${encodeURIComponent(c.tag)}`} className="group grid items-center gap-x-6 gap-y-1 py-4 lg:grid-cols-12">
-                  <span className="display text-2xl transition-colors group-hover:text-brass sm:text-[2rem] lg:col-span-6">{tr(c.label)}</span>
-                  <span className="text-[14px] text-muted lg:col-span-4">{tr(c.copy)}</span>
-                  <span className="relative hidden h-16 overflow-hidden lg:col-span-2 lg:block">
-                    {c.image && <Image src={fileUrl(c.image)!} alt="" fill sizes="16vw" className="object-cover opacity-0 transition duration-500 group-hover:opacity-100" />}
-                    <ArrowUpRight className="absolute right-0 top-1/2 size-5 -translate-y-1/2 text-muted transition group-hover:opacity-0" strokeWidth={1.2} />
+          <ul className="mt-10 border-t border-ink/70">
+            {areas.map((a) => (
+              <li key={a.name} className="border-b border-line">
+                <Link href={`/search?areas=${encodeURIComponent(a.name)}`} className="group grid items-center gap-x-6 gap-y-1 py-3.5 lg:grid-cols-12">
+                  <span className="display text-xl transition-colors group-hover:text-brass sm:text-[1.35rem] lg:col-span-5">{tr(a.name)}</span>
+                  <span className="text-[13px] text-muted lg:col-span-5">{tr(a.copy)}</span>
+                  <span className="relative hidden h-14 overflow-hidden lg:col-span-2 lg:block">
+                    {a.image && <Image src={fileUrl(a.image)!} alt="" fill sizes="16vw" className="object-cover opacity-0 transition duration-500 group-hover:opacity-100" />}
+                    <ArrowUpRight className="absolute right-0 top-1/2 size-4 -translate-y-1/2 text-muted transition group-hover:opacity-0" strokeWidth={1.2} />
                   </span>
                 </Link>
               </li>
@@ -92,19 +87,19 @@ export default async function HomePage() {
 
       {/* ── Rejoindre ──────────────────────────────────────── */}
       <section className="grid lg:grid-cols-2">
-        <div className="relative min-h-[60vh]">
+        <div className="relative min-h-[55vh]">
           <Image src="/images/join-1.webp" alt={tr("A cabinetmaker's hands planing wood")} fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
         </div>
         <div className="flex flex-col justify-center bg-paper px-4 py-14 sm:px-10 lg:px-16">
-          <p className="folio">{tr("Workshops")}</p>
-          <h2 className="display mt-4 text-4xl sm:text-[3.4rem]">{tr("Showcase your craft. Get discovered.")}</h2>
-          <p className="mt-5 max-w-md leading-relaxed text-ink-soft">{tr("Join SEFIKH and connect with architects, designers and creative professionals looking for unique skills, materials and expertise.")}</p>
+          <p className="folio">{tr("Join SEFIKH")}</p>
+          <h2 className="display mt-4 text-3xl sm:text-4xl">{tr("Bring your expertise into the spotlight.")}</h2>
+          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink-soft">{tr("Showcase your work and connect with architects, designers and creative professionals seeking exceptional craftsmanship.")}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/register?role=pro">
               {tr("Join SEFIKH")} <ArrowRight className="size-3.5" />
             </ButtonLink>
             <ButtonLink href="/subscription?for=pro" variant="secondary">
-              {tr("Business plans")}
+              {tr("Business solutions")}
             </ButtonLink>
           </div>
         </div>

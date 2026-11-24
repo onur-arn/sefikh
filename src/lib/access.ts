@@ -9,8 +9,11 @@ export function canSeeMakers(user: Viewer) {
   return !!user && (user.role === "ADMIN" || getPlan(user.plan).limits.seeMakers);
 }
 
-/** Filtre Prisma : un maker n'apparaît que s'il est publié et abonné. */
-export const LISTED_COMPANY = { published: true, user: { plan: { in: LISTED_PLAN_IDS as string[] } } };
+/** Filtre Prisma : un maker n'apparaît que s'il est publié, validé par l'équipe et abonné. */
+export const LISTED_COMPANY = { published: true, reviewStatus: "APPROVED", user: { plan: { in: LISTED_PLAN_IDS as string[] } } };
+
+/** Filtre Prisma : seules les photos validées par l'équipe sont montrées au public. */
+export const APPROVED_PHOTO = { status: "APPROVED" };
 
 /** Recherche (gratuite ou payante) réservée aux adresses e-mail confirmées. */
 export function mustConfirmEmail(user: { role: string; emailVerifiedAt: Date | null }) {

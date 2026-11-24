@@ -3,21 +3,26 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
-import { activateSubscription, BillingError, cancelSubscription, priceFor, resumeSubscription } from "@/lib/billing";
+import { activateSubscription, BillingError, cancelSubscription, isIndependent, priceFor, resumeSubscription } from "@/lib/billing";
 import { db } from "@/lib/db";
 import { simulatedPayments } from "@/lib/env";
-import { PLANS, type PlanId, type Term } from "@/lib/plans";
+import { LAUNCH_DISCOUNT, planName, PLANS, type PlanId, type Term } from "@/lib/plans";
 import { getT } from "@/i18n/server";
 
 export async function simulateCheckoutAction(planId: PlanId, term: Term) {
   if (!simulatedPayments) return { error: "Simulated payments are disabled." };
   const user = await requireUser();
   const plan = PLANS[planId];
-  if (!plan || plan.audience !== (user.role === "PRO" ? "PRO" : "CLIENT")) return { error: "Invalid plan." };
-  const amount = priceFor(planId, term);
-  await activateSubscription({ userId: user.id, planId, term, provider: "simulated", currentPeriodEnd: new Date(Date.now() + 30 * 86400_000) });
+  if (!plan || plan.hidden || plan.audience !== (user.role === "PRO" ? "PRO" : "CLIENT")) return { error: "Invalid plan." };
+  const full = priceFor(planId, term, plan.audience === "PRO" && (await isIndependent(user.id)));
+  const end = new Date();
+  end.setMonth(end.getMonth() + (term === "ANNUAL" ? 12 : 1));
+  await activateSubscription({ userId: user.id, planId, term, provider: "simulated", currentPeriodEnd: end });
   const tr = await getT();
-  await db.payment.create({ data: { userId: user.id, amount, status: "PAID", description: tr("SEFIKH {plan} — first month (simulated)", { plan: tr(plan.name) }) } });
+  // Offre de lancement : −20 % sur le premier mois d'un abonnement mensuel (le 2e est remisé au renouvellement).
+  const amount = term === "MONTHLY" ? Math.round((full * (100 - LAUNCH_DISCOUNT.percent)) / 100) : full;
+  const description = term === "ANNUAL" ? tr("SEFIKH {plan} — first year (simulated)", { plan: planName(plan, tr) }) : tr("SEFIKH {plan} — first month, launch offer −20% (simulated)", { plan: planName(plan, tr) });
+  await db.payment.create({ data: { userId: user.id, amount, status: "PAID", description } });
   redirect("/checkout/success");
 }
 

@@ -6,11 +6,13 @@ import { useState, useTransition } from "react";
 import { ChevronDown, Lock, X } from "lucide-react";
 import { useT } from "@/i18n/client";
 import { COMPANY_KINDS, MATERIALS, SECTORS, SKILLS, TECHNIQUES } from "@/lib/constants";
+import { AREA_NAMES } from "@/lib/expertise";
 import { cn } from "@/lib/utils";
 
 type Option = { value: string; label: string };
 
 const LIST_GROUPS: { key: string; label: string; options: Option[] }[] = [
+  { key: "areas", label: "Areas of expertise", options: AREA_NAMES.map((n) => ({ value: n, label: n })) },
   { key: "skills", label: "Skills", options: SKILLS.map((s) => ({ value: s.name, label: s.name })) },
   { key: "materials", label: "Materials", options: MATERIALS.map((s) => ({ value: s.name, label: s.name })) },
   { key: "techniques", label: "Techniques", options: TECHNIQUES.map((s) => ({ value: s.name, label: s.name })) },
@@ -22,7 +24,7 @@ const EXTRA_TABS = [
   { key: "lead", label: "Lead time" },
   { key: "radius", label: "Distance" },
 ];
-const ALL_KEYS = ["kind", "skills", "materials", "techniques", "sectors", "months", "lead", "radius"];
+const ALL_KEYS = ["kind", "areas", "skills", "materials", "techniques", "sectors", "months", "lead", "radius"];
 
 /** Filtres en bandeau : chaque critère déplie un panneau pleine largeur sous la barre. */
 export function FilterBar({ locked = false }: { locked?: boolean }) {

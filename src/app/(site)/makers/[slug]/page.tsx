@@ -19,7 +19,7 @@ import { PortfolioGallery } from "@/components/makers/portfolio-gallery";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/misc";
 import { AutoTranslate } from "@/components/translate/auto-translate";
-import { canSeeMakers, hasListedPlan, LISTED_COMPANY } from "@/lib/access";
+import { APPROVED_PHOTO, canSeeMakers, hasListedPlan, LISTED_COMPANY } from "@/lib/access";
 import { getT } from "@/i18n/server";
 
 async function getCompany(slug: string) {
@@ -28,7 +28,7 @@ async function getCompany(slug: string) {
     include: {
       user: { select: { plan: true, id: true } },
       tags: { include: { tag: true } },
-      portfolio: { orderBy: { position: "asc" } },
+      portfolio: { where: APPROVED_PHOTO, orderBy: { position: "asc" } },
     },
   });
 }
@@ -53,7 +53,7 @@ async function similarMakers(company: NonNullable<Awaited<ReturnType<typeof getC
   const mine = company.portfolio.map((p) => fromBytes(p.embedding)).filter(Boolean) as Float32Array[];
   const others = await db.company.findMany({
     where: { ...LISTED_COMPANY, NOT: { id: company.id } },
-    include: { portfolio: { orderBy: { position: "asc" }, select: { key: true, thumbKey: true, width: true, height: true, title: true, embedding: true } } },
+    include: { portfolio: { where: APPROVED_PHOTO, orderBy: { position: "asc" }, select: { key: true, thumbKey: true, width: true, height: true, title: true, embedding: true } } },
   });
   return others
     .map((o) => {
@@ -93,7 +93,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
   const company = await getCompany(slug);
   const user = await getCurrentUser();
   const isOwner = !!user && company?.userId === user.id;
-  const listed = !!company?.published && hasListedPlan(company.user.plan);
+  const listed = !!company?.published && company.reviewStatus === "APPROVED" && hasListedPlan(company.user.plan);
   if (!company || (!listed && !isOwner)) notFound();
   if (!isOwner && !canSeeMakers(user)) {
     if (user) redirect(`/makers/preview/${company.id}`);
@@ -163,7 +163,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
               )}
               {plan.id === "PRO_FOUNDING" && <Badge tone="dark">{tr("Founding Partner")}</Badge>}
             </div>
-            <h1 className="display mt-4 text-5xl sm:text-7xl lg:text-[6rem]">{company.name}</h1>
+            <h1 className="display mt-4 text-5xl sm:text-6xl lg:text-[3.4rem]">{company.name}</h1>
             {company.tagline && <AutoTranslate kind="company" id={company.id} field="tagline" text={company.tagline} className="mt-3 font-display text-2xl italic text-muted" />}
             <div className="folio mt-5 flex flex-wrap gap-x-6 gap-y-2">
               <span className="flex items-center gap-1.5">
@@ -186,11 +186,14 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
           </div>
           <div className="flex items-center gap-2">
             {isOwner ? (
-              <ButtonLink href="/dashboard/profile" size="lg" variant="secondary">
-                {tr("Edit my profile")}</ButtonLink>
+              <>
+                {listed && <ShareButton name={company.name} slug={company.slug} label />}
+                <ButtonLink href="/dashboard/profile" size="lg" variant="secondary">
+                  {tr("Edit my profile")}</ButtonLink>
+              </>
             ) : (
               <>
-                <ShareButton name={company.name} />
+                <ShareButton name={company.name} slug={company.slug} />
                 <SaveButton companyId={company.id} initialSaved={!!saved} viewer={viewer} />
                 <ContactButton company={{ id: company.id, name: company.name, slug: company.slug }} viewer={viewer} projects={projects} />
               </>

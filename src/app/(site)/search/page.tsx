@@ -36,7 +36,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const sp = await searchParams;
   const [user, vid] = await Promise.all([getCurrentUser(), visitorId()]);
   // Page du moteur ouverte à tous ; lancer une recherche est réservé aux comptes (3 recherches gratuites).
-  const asked = ["q", "image", "skills", "materials", "techniques", "sectors", "near"].some((k) => !!sp[k]);
+  const asked = ["q", "image", "areas", "skills", "materials", "techniques", "sectors", "near"].some((k) => !!sp[k]);
   if (!user) {
     if (asked) redirect("/register?reason=search");
     return <SearchHome />;
@@ -51,6 +51,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const input: SearchInput = {
     q,
     near: one(sp.near),
+    areas: list(sp.areas),
     skills: list(sp.skills),
     materials: list(sp.materials),
     techniques: list(sp.techniques),
@@ -74,9 +75,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   }
 
   // Quota mensuel, tous modes confondus (offre gratuite et visiteurs). Une recherche par image est décomptée au dépôt.
-  const hasCriteria = !!(q || imageSearch || input.skills?.length || input.materials?.length || input.techniques?.length || input.sectors?.length || input.near);
+  const hasCriteria = !!(q || imageSearch || input.areas?.length || input.skills?.length || input.materials?.length || input.techniques?.length || input.sectors?.length || input.near);
   const mode: SearchMode = imageSearch ? "IMAGE" : q ? "TEXT" : "FILTER";
-  const logKey = mode === "TEXT" ? q! : JSON.stringify([q, input.near, input.skills, input.materials, input.techniques, input.sectors]);
+  const logKey = mode === "TEXT" ? q! : JSON.stringify([q, input.near, input.areas, input.skills, input.materials, input.techniques, input.sectors]);
   let limited = false;
   if (hasCriteria && !imageSearch && Number.isFinite(plan.limits.freeSearches)) {
     const already = await findRecentSearch(who, mode, logKey);
@@ -92,6 +93,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   if (!limited && hasCriteria) {
     const terms = [
       ...detected.tags.map((t) => `${t.kind}:${t.name}`),
+      ...input.areas!.map((v) => `AREA:${v}`),
       ...input.skills!.map((v) => `SKILL:${v}`),
       ...input.materials!.map((v) => `MATERIAL:${v}`),
       ...input.techniques!.map((v) => `TECHNIQUE:${v}`),
@@ -127,7 +129,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
             {imageSearch ? tr("Visual search") : q ? tr("Project search") : tr("Explore expertise")}
             {usedVisualAI && <span className="text-brass">{tr("AI visual matching")}</span>}
           </p>
-          <h1 className="display mt-3 text-4xl sm:text-[3.4rem]">
+          <h1 className="display mt-3 text-4xl sm:text-[2.2rem]">
             {limited
               ? tr("You've used your free searches")
               : hasCriteria

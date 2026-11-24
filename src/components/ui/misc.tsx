@@ -44,7 +44,7 @@ export function SectionTitle({ eyebrow, title, children, className }: { eyebrow?
   return (
     <div className={cn("max-w-2xl", className)}>
       {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
-      <h2 className="display text-4xl sm:text-[3.4rem]">{title}</h2>
+      <h2 className="display text-4xl sm:text-[2.2rem]">{title}</h2>
       {children && <p className="mt-4 text-[15px] leading-relaxed text-muted">{children}</p>}
     </div>
   );

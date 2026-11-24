@@ -88,3 +88,39 @@ export function MonthPicker({ name, defaultValue = [] }: { name: string; default
     </div>
   );
 }
+
+/** Domaines d'expertise (plusieurs) et, pour chacun, ses spécialités (plusieurs). */
+export function AreaPicker({ areas, defaultAreas = [], defaultSpecialties = [] }: { areas: { name: string; specialties: string[] }[]; defaultAreas?: string[]; defaultSpecialties?: string[] }) {
+  const tr = useT();
+  const [picked, setPicked] = useState<string[]>(defaultAreas);
+  const [specs, setSpecs] = useState<string[]>(defaultSpecialties);
+  const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+  return (
+    <div className="divide-y divide-line border-y border-line">
+      {areas.map((a) => {
+        const on = picked.includes(a.name);
+        return (
+          <div key={a.name} className="py-3">
+            <label className="flex cursor-pointer items-center gap-3 text-[14px]">
+              <input type="checkbox" name="areas" value={a.name} checked={on} onChange={() => setPicked((p) => toggle(p, a.name))} className="size-4 accent-ink" />
+              <span className={cn(on && "font-medium")}>{tr(a.name)}</span>
+            </label>
+            {on && (
+              <div className="mt-2.5 flex flex-wrap gap-1.5 pl-7">
+                {a.specialties.map((s) => {
+                  const sOn = specs.includes(s);
+                  return (
+                    <label key={s} className={cn("cursor-pointer select-none rounded-sm border px-2.5 py-1 text-[12px] transition", sOn ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40")}>
+                      <input type="checkbox" name="specialties" value={s} checked={sOn} onChange={() => setSpecs((p) => toggle(p, s))} className="sr-only" />
+                      {tr(s)}
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { BadgeCheck, Globe, Lock, MapPin } from "lucide-react";
 import { AvailabilityCalendar } from "@/components/makers/availability";
 import { ButtonLink } from "@/components/ui/button";
-import { canSeeMakers, LISTED_COMPANY, mustConfirmEmail } from "@/lib/access";
+import { APPROVED_PHOTO, canSeeMakers, LISTED_COMPANY, mustConfirmEmail } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth/session";
 import { COMPANY_KINDS, TAG_KIND_LABEL, type TagKind } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -46,7 +46,7 @@ export default async function MakerPreviewPage({ params, searchParams }: PagePro
       leadTimeMin: true,
       leadTimeMax: true,
       tags: { select: { tag: { select: { kind: true, name: true } } } },
-      portfolio: { orderBy: { position: "asc" }, take: PREVIEW_PHOTOS, select: { id: true, key: true, thumbKey: true } },
+      portfolio: { where: APPROVED_PHOTO, orderBy: { position: "asc" }, take: PREVIEW_PHOTOS, select: { id: true, key: true, thumbKey: true } },
     },
   });
   if (!company) notFound();

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/session";
-import { activeSubscription, foundingSeatsLeft } from "@/lib/billing";
+import { activeSubscription } from "@/lib/billing";
+import { db } from "@/lib/db";
 import { PlanPicker } from "@/components/marketing/plan-picker";
 import { getT } from "@/i18n/server";
 
@@ -13,13 +14,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function UpgradePage() {
   const tr = await getT();
   const user = await requireRole("PRO", "/upgrade");
-  const [sub, seats] = await Promise.all([activeSubscription(user.id), foundingSeatsLeft()]);
+  const [sub, company] = await Promise.all([activeSubscription(user.id), db.company.findUnique({ where: { userId: user.id }, select: { independent: true } })]);
   return (
     <div className="container-x py-14">
       <header className="mx-auto max-w-3xl text-center">
         <p className="eyebrow">{tr("Your profile is ready")}</p>
-        <h1 className="display mt-3 text-5xl sm:text-6xl">{tr("Choose a plan to appear on SEFIKH")}</h1>
-        <p className="mt-4 text-muted">{tr("Your profile stays hidden until you subscribe. Once your plan is active, it appears in search results.")}</p>
+        <h1 className="display mt-3 text-5xl">{tr("Choose a plan to appear on SEFIKH")}</h1>
+        <p className="mt-4 text-muted">{tr("Your profile stays hidden until you subscribe and our team has approved it (within 72 hours). It then appears in search results.")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm">
           <Link href="/dashboard" className="rounded-sm border border-line bg-paper px-5 py-2.5 hover:border-ink/40">
             {tr("Not now, keep my profile hidden")}</Link>
@@ -28,7 +29,7 @@ export default async function UpgradePage() {
         </div>
       </header>
       <div id="plans" className="mt-16 scroll-mt-24">
-        <PlanPicker audience="PRO" currentPlan={user.plan} currentTerm={sub?.term ?? null} loggedInRole={user.role} foundingSeatsLeft={seats} />
+        <PlanPicker audience="PRO" currentPlan={user.plan} currentTerm={sub?.term ?? null} loggedInRole={user.role} independent={!!company?.independent} />
       </div>
     </div>
   );

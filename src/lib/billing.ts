@@ -6,7 +6,7 @@ import { env, simulatedPayments } from "@/lib/env";
 import { sendEmail } from "@/lib/mail";
 import { paymentFailedTemplate, subscriptionTemplate } from "@/lib/mail/templates";
 import { notify } from "@/lib/notifications";
-import { defaultPlanFor, getPlan, PLANS, type PlanId, type Term } from "@/lib/plans";
+import { defaultPlanFor, getPlan, LAUNCH_DISCOUNT, planName, planPrice, PLANS, type PlanId, type Term } from "@/lib/plans";
 import { hasListedPlan } from "@/lib/access";
 
 let stripe: Stripe | null = null;
@@ -18,18 +18,40 @@ export function getStripe() {
 
 export class BillingError extends Error {}
 
-const TERM_LABEL: Record<Term, string> = { ANNUAL: "12-month commitment", MONTHLY: "no commitment" };
+const TERM_LABEL: Record<Term, string> = { ANNUAL: "annual billing", MONTHLY: "monthly billing" };
 
-export function priceFor(planId: PlanId, term: Term) {
-  const euros = PLANS[planId].prices[term];
+/** Montant TTC en centimes pour une période de facturation (un mois ou un an). */
+export function priceFor(planId: PlanId, term: Term, independent = false) {
+  const euros = planPrice(PLANS[planId], term, independent);
   if (euros == null) throw new BillingError("This plan is not available for this billing term.");
   return euros * 100;
 }
 
+/** Les artisans indépendants paient le tarif réduit de leur offre. */
+export async function isIndependent(userId: string) {
+  const c = await db.company.findUnique({ where: { userId }, select: { independent: true } });
+  return !!c?.independent;
+}
+
+/** Montant affiché avec sa période (« 149 € / mois », « 1 490 € / an »). */
+export function amountWithPeriod(tr: ReturnType<typeof translatorFor>, cents: number, term: Term) {
+  return `${tr.money(cents)} / ${term === "ANNUAL" ? tr("year") : tr("month")}`;
+}
+
+/** Coupon Stripe de l'offre de lancement (−20 % sur les 2 premiers mois), créé à la volée. */
+async function ensureLaunchCoupon(s: Stripe) {
+  const id = `sefikh_launch_${LAUNCH_DISCOUNT.percent}_${LAUNCH_DISCOUNT.months}m`;
+  try {
+    return (await s.coupons.retrieve(id)).id;
+  } catch {
+    return (await s.coupons.create({ id, percent_off: LAUNCH_DISCOUNT.percent, duration: "repeating", duration_in_months: LAUNCH_DISCOUNT.months, name: "SEFIKH — launch offer" })).id;
+  }
+}
+
 /** Les produits/prix Stripe sont créés à la volée (lookup_key stable) : aucune config manuelle du dashboard. */
 const priceCache = new Map<string, string>();
-async function ensureStripePrice(s: Stripe, planId: PlanId, term: Term) {
-  const lookup = `sefikh_${planId}_${term}_v1`.toLowerCase();
+async function ensureStripePrice(s: Stripe, planId: PlanId, term: Term, independent: boolean) {
+  const lookup = `sefikh_${planId}_${term}_${independent ? "independent" : "standard"}_v2`.toLowerCase();
   const cached = priceCache.get(lookup);
   if (cached) return cached;
   const existing = await s.prices.list({ lookup_keys: [lookup], active: true, limit: 1 });
@@ -38,8 +60,8 @@ async function ensureStripePrice(s: Stripe, planId: PlanId, term: Term) {
     const plan = PLANS[planId];
     const created = await s.prices.create({
       currency: "eur",
-      unit_amount: priceFor(planId, term),
-      recurring: { interval: "month" },
+      unit_amount: priceFor(planId, term, independent),
+      recurring: { interval: term === "ANNUAL" ? "year" : "month" },
       lookup_key: lookup,
       product_data: { name: `SEFIKH ${plan.audience === "PRO" ? "Business" : "Creative"} — ${plan.name} (${TERM_LABEL[term]})`, metadata: { planId, term } },
       metadata: { planId, term },
@@ -78,8 +100,10 @@ export async function startCheckout(
   const plan = PLANS[planId];
   if (!plan) throw new BillingError("Unknown plan.");
   if (plan.audience !== (user.role === "PRO" ? "PRO" : "CLIENT")) throw new BillingError("This plan is not available for your account type.");
-  const amount = priceFor(planId, term);
+  const independent = plan.audience === "PRO" && (await isIndependent(user.id));
+  const amount = priceFor(planId, term, independent);
   if (amount === 0) throw new BillingError("This plan is free — no payment needed.");
+  if (plan.hidden) throw new BillingError("This plan is no longer available.");
   if (planId === "PRO_FOUNDING" && (await foundingSeatsLeft()) === 0) throw new BillingError("The Founding Partner programme is full.");
 
   const current = await activeSubscription(user.id);
@@ -91,7 +115,7 @@ export async function startCheckout(
     return `/checkout/simulate?plan=${planId}&term=${term}`;
   }
 
-  const priceId = await ensureStripePrice(s, planId, term);
+  const priceId = await ensureStripePrice(s, planId, term, independent);
 
   // Changement d'offre sur un abonnement Stripe existant : mise à jour avec prorata.
   if (current?.stripeSubscriptionId && current.provider === "stripe") {
@@ -107,12 +131,14 @@ export async function startCheckout(
   }
 
   const customer = await ensureCustomer(s, user);
+  // Offre de lancement sur les abonnements mensuels (Stripe n'accepte pas remise + codes promo ensemble).
+  const launch = term === "MONTHLY" ? await ensureLaunchCoupon(s) : null;
   const session = await s.checkout.sessions.create({
     mode: "subscription",
     customer,
     client_reference_id: user.id,
     line_items: [{ price: priceId, quantity: 1 }],
-    allow_promotion_codes: true,
+    ...(launch ? { discounts: [{ coupon: launch }] } : { allow_promotion_codes: true }),
     billing_address_collection: "auto",
     customer_update: { address: "auto", name: "auto" },
     // Les moyens de paiement proposés (CB, SEPA, Bancontact, iDEAL…) s'adaptent au pays du client
@@ -135,7 +161,7 @@ async function applyPlanChange(subscriptionId: string, userId: string, planId: P
   });
   const user = await db.user.update({ where: { id: userId }, data: { plan: planId } });
   const tr = translatorFor(user.locale);
-  await notify(userId, { type: "BILLING", title: tr("You are now on {planName}", { planName: tr(PLANS[planId].name) }), link: "/dashboard/billing" });
+  await notify(userId, { type: "BILLING", title: tr("You are now on {planName}", { planName: planName(PLANS[planId], tr) }), link: "/dashboard/billing" });
 }
 
 function addMonths(d: Date, n: number) {
@@ -154,7 +180,7 @@ export async function activateSubscription(opts: {
   stripeCheckoutId?: string;
   currentPeriodEnd: Date;
 }) {
-  const amount = priceFor(opts.planId, opts.term);
+  const amount = priceFor(opts.planId, opts.term, PLANS[opts.planId].audience === "PRO" && (await isIndependent(opts.userId)));
   // Clôture d'un éventuel autre abonnement actif (un seul à la fois).
   const others = await db.subscription.findMany({
     where: { userId: opts.userId, status: { in: ["ACTIVE", "PAST_DUE"] }, NOT: opts.stripeSubscriptionId ? { stripeSubscriptionId: opts.stripeSubscriptionId } : undefined },
@@ -187,10 +213,10 @@ export async function activateSubscription(opts: {
     await db.company.updateMany({ where: { userId: opts.userId }, data: { verified: true } });
   }
   // Le paiement rend la fiche visible dès qu'elle a au moins une photo.
-  if (hasListedPlan(opts.planId)) await db.company.updateMany({ where: { userId: opts.userId, portfolio: { some: {} } }, data: { published: true } });
+  if (hasListedPlan(opts.planId)) await db.company.updateMany({ where: { userId: opts.userId, portfolio: { some: { status: "APPROVED" } } }, data: { published: true } });
   const tr = translatorFor(user.locale);
-  await notify(opts.userId, { type: "BILLING", title: tr("Welcome to {planName}", { planName: tr(plan.name) }), body: tr("Your subscription is active."), link: "/dashboard/billing" });
-  const tpl = subscriptionTemplate({ name: user.name, planName: tr(plan.name), amount: tr.money(amount), term: tr(TERM_LABEL[opts.term]) }, user.locale);
+  await notify(opts.userId, { type: "BILLING", title: tr("Welcome to {planName}", { planName: planName(plan, tr) }), body: tr("Your subscription is active."), link: "/dashboard/billing" });
+  const tpl = subscriptionTemplate({ name: user.name, planName: planName(plan, tr), amount: amountWithPeriod(tr, amount, opts.term), term: tr(TERM_LABEL[opts.term]) }, user.locale);
   await sendEmail({ to: user.email, ...tpl });
   return sub;
 }
@@ -246,7 +272,7 @@ export async function expireSimulated(userId: string) {
       await downgrade(userId);
     } else {
       // Renouvellement simulé
-      await db.subscription.update({ where: { id: sub.id }, data: { currentPeriodEnd: addMonths(sub.currentPeriodEnd!, 1) } });
+      await db.subscription.update({ where: { id: sub.id }, data: { currentPeriodEnd: addMonths(sub.currentPeriodEnd!, sub.term === "ANNUAL" ? 12 : 1) } });
       await db.payment.create({ data: { userId, amount: sub.amount, status: "PAID", description: `${getPlan(sub.plan).name} — renewal (simulated)` } });
     }
   }

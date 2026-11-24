@@ -150,7 +150,7 @@ export function MakerCard({ maker, priority, source, className }: { maker: Maker
       </div>
       <div className="mt-3 border-t border-ink/70 pt-2.5">
         <div className="flex items-baseline justify-between gap-3">
-          <h3 className="display truncate text-[1.65rem] transition-colors group-hover:text-brass">
+          <h3 className="display truncate text-[1.3rem] transition-colors group-hover:text-brass">
             <Link href={href} className="after:absolute after:inset-0 after:content-['']">{maker.anonymous ? tr(kind) : maker.name}</Link>
           </h3>
           <span className="flex shrink-0 items-center gap-1.5 text-muted">

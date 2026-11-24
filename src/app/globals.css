@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ── Identité SEFIKH : galerie blanche, encre noire, accent terre cuite (choix de la cliente, 06/11/2026) ── */
+/* ── Identité SEFIKH : galerie blanche, encre noire, accent bordeaux (24/11/2026, remplace la terre cuite) ── */
 @theme {
   --color-ivory: #ffffff;
   --color-paper: #f7f7f6;
@@ -9,13 +9,25 @@
   --color-ink: #111111;
   --color-ink-soft: #373737;
   --color-muted: #757575;
-  --color-brass: #a2492a;
-  --color-brass-dark: #773823;
-  --color-brass-light: #eeded9;
+  --color-brass: #481c17;
+  --color-brass-dark: #2e100c;
+  --color-brass-light: #ecdedb;
   --color-espresso: #141414;
-  --color-wine: #693421;
+  --color-wine: #5a231c;
   --color-success: #4c6b4f;
   --color-danger: #a33a2f;
+
+  /* Échelle typographique resserrée (v2) : titres 2 à 3 crans plus petits qu'avant. */
+  --text-xl: 1.125rem;
+  --text-2xl: 1.32rem;
+  --text-3xl: 1.6rem;
+  --text-4xl: 1.9rem;
+  --text-5xl: 2.3rem;
+  --text-5xl--line-height: 1.05;
+  --text-6xl: 2.75rem;
+  --text-6xl--line-height: 1.04;
+  --text-7xl: 3.2rem;
+  --text-7xl--line-height: 1.03;
 
   --font-sans: var(--font-text), ui-sans-serif, system-ui, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --font-display: var(--font-serif), ui-serif, Georgia, "Songti SC", "Noto Serif SC", serif;
@@ -54,7 +66,7 @@
     background: var(--color-ivory);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-size: 15.5px;
+    font-size: 14.5px;
   }
   ::selection {
     background: var(--color-brass-light);
@@ -66,6 +78,7 @@
   }
   /* Bandeaux sombres : clair sur sombre, encre inversée pour les boutons. */
   [class*="bg-espresso"] {
+    --color-brass: #c9a39d; /* le bordeaux disparaîtrait sur fond sombre */
     --color-paper: #f7f7f6;
     --color-ivory: #f7f7f6;
     --color-ink: #141414;

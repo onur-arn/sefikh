@@ -38,8 +38,9 @@ export async function POST(request: Request) {
         embedding: embedding ? new Uint8Array(toBytes(embedding)) : null,
         colorVector: JSON.stringify(colors),
         position: count,
+        status: "PENDING", // visible après validation par l'équipe (sous 72 h)
       },
-      select: { id: true, key: true, thumbKey: true, width: true, height: true, title: true, description: true, projectName: true, location: true, year: true, position: true },
+      select: { id: true, key: true, thumbKey: true, width: true, height: true, title: true, description: true, projectName: true, location: true, year: true, position: true, status: true, reviewNote: true },
     });
     return NextResponse.json({ item }, { status: 201 });
   } catch (e) {

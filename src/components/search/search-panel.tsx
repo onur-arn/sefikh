@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { ArrowRight, ChevronDown, ImagePlus, MapPin, X } from "lucide-react";
 import { useT } from "@/i18n/client";
-import { MATERIALS, SKILLS, TECHNIQUES } from "@/lib/constants";
+import { AREA_VOCAB, MATERIALS, TECHNIQUES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const GROUPS = [
-  ["skills", "Skills", SKILLS],
+  ["areas", "Know-how", AREA_VOCAB],
   ["materials", "Materials", MATERIALS],
   ["techniques", "Techniques", TECHNIQUES],
 ] as const;
@@ -21,7 +21,7 @@ export function SearchPanel({ compact = false, initial }: { compact?: boolean; i
   const router = useRouter();
   const [q, setQ] = useState(initial?.q ?? "");
   const [near, setNear] = useState(initial?.near ?? "");
-  const [picked, setPicked] = useState<Record<string, string[]>>({ skills: [], materials: [], techniques: [] });
+  const [picked, setPicked] = useState<Record<string, string[]>>({ areas: [], materials: [], techniques: [] });
   const [showCategories, setShowCategories] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);

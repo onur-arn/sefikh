@@ -1,13 +1,9 @@
 import type { MetadataRoute } from "next";
-import { ARTICLES } from "@/lib/journal";
 
 export const dynamic = "force-dynamic";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.APP_URL ?? "http://localhost:3000";
-  const pages = ["", "/content", "/insights", "/journal", "/about", "/join", "/subscription", "/contact", "/legal/terms", "/legal/privacy", "/legal/cookies"];
-  return [
-    ...pages.map((p) => ({ url: `${base}${p}`, changeFrequency: "weekly" as const, priority: p === "" ? 1 : 0.7 })),
-    ...ARTICLES.map((a) => ({ url: `${base}/journal/${a.slug}`, lastModified: new Date(a.date), priority: 0.6 })),
-  ];
+  const pages = ["", "/insights", "/journal", "/about", "/join", "/subscription", "/faq", "/contact", "/legal/terms", "/legal/privacy", "/legal/cookies"];
+  return pages.map((p) => ({ url: `${base}${p}`, changeFrequency: "weekly" as const, priority: p === "" ? 1 : 0.7 }));
 }

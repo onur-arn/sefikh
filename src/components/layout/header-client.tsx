@@ -18,9 +18,9 @@ type Notif = { id: string; title: string; body: string | null; link: string | nu
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About us" },
-  { href: "/content", label: "Content" },
+  { href: "/journal", label: "Journal" },
   { href: "/insights", label: "Trends & Insights" },
-  { href: "/subscription", label: "Subscription" },
+  { href: "/subscription", label: "Memberships" },
 ];
 
 export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null; initialCounts: { messages: number; notifications: number } }) {
@@ -125,7 +125,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
             </>
           ) : (
             <Link href="/account" className="hidden px-1 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink sm:inline">
-              {tr("Account")}
+              {tr("Log in")}
             </Link>
           )}
           <button className="ml-1 inline-flex size-10 items-center justify-center rounded-full hover:bg-sand hover:text-ink lg:hidden" onClick={() => setMobileOpen((o) => !o)} aria-label={tr("Menu")} aria-expanded={mobileOpen}>
@@ -250,7 +250,7 @@ function AccountMenu({ user }: { user: HeaderUser }) {
   const links = [
     { href: "/dashboard", label: tr("Dashboard"), icon: LayoutGrid },
     { href: "/dashboard/profile", label: user.role === "PRO" ? "Business profile" : "My profile", icon: User },
-    ...(user.companySlug ? [{ href: `/makers/${user.companySlug}`, label: tr("View public page"), icon: Store }] : []),
+    ...(user.companySlug ? [{ href: `/makers/${user.companySlug}`, label: tr("View page preview"), icon: Store }] : []),
     { href: "/dashboard/billing", label: tr("Plan & billing"), icon: CreditCard },
     { href: "/dashboard/settings", label: tr("Settings"), icon: Settings },
     ...(user.role === "ADMIN" ? [{ href: "/admin", label: tr("Administration"), icon: ShieldCheck }] : []),
@@ -258,7 +258,8 @@ function AccountMenu({ user }: { user: HeaderUser }) {
   return (
     <div className="relative" ref={ref}>
       <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={tr("Account menu")} className="ml-1 flex items-center gap-1.5 rounded-sm p-1 pr-2 hover:bg-sand">
-        <Avatar name={user.name} imageKey={user.avatarKey} size={32} />
+        <Avatar name={user.name} imageKey={user.avatarKey} size={28} />
+        <span className="hidden font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft sm:inline">{tr("Account")}</span>
         <ChevronDown className="hidden size-3.5 text-muted sm:block" />
       </button>
       {open && (

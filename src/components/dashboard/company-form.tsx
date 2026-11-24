@@ -4,10 +4,11 @@ import { useFormAction } from "@/components/forms/use-form-action";
 import { saveCompanyProfile } from "@/app/(app)/dashboard/actions";
 import { Button } from "@/components/ui/button";
 import { Field, FormMessage, Input, Select, Textarea } from "@/components/ui/field";
-import { ChipGroup, MonthPicker, TagInput } from "@/components/forms/chips";
+import { AreaPicker, ChipGroup, MonthPicker, TagInput } from "@/components/forms/chips";
 import { PhoneInput } from "@/components/forms/phone-input";
 import { COMPANY_KINDS, CONTINENTS, MATERIALS, SECTORS, SKILLS, TECHNIQUES } from "@/lib/constants";
 import { COUNTRIES } from "@/lib/geo";
+import { AREAS } from "@/lib/expertise";
 import { parseList } from "@/lib/utils";
 import { Section } from "./client-profile-form";
 import { useT } from "@/i18n/client";
@@ -35,6 +36,8 @@ export type CompanyFormData = {
   foundedYear?: number | null;
   teamSize?: string | null;
   published?: boolean;
+  independent?: boolean;
+  reviewStatus?: string;
   tags?: { kind: string; name: string }[];
 };
 
@@ -66,14 +69,20 @@ export function CompanyForm({ company, onboarding, accountEmail, listed }: { com
               ))}
             </Select>
           </Field>
-          <Field label={tr("Sector")} hint={tr("e.g. Architectural metalwork, upholstery…")} error={e.sector}>
-            <Input name="sector" defaultValue={company.sector ?? ""} />
+          <Field label={tr("Legal structure")} required hint={tr("Independent artisans benefit from reduced plan prices.")}>
+            <Select name="independent" defaultValue={company.independent ? "1" : "0"}>
+              <option value="0">{tr("Company")}</option>
+              <option value="1">{tr("Independent artisan")}</option>
+            </Select>
           </Field>
-          <Field label={tr("Tagline")} hint={tr("One line that sums up your craft.")} error={e.tagline}>
-            <Input name="tagline" defaultValue={company.tagline ?? ""} maxLength={140} placeholder={tr("Hand-patinated brass, bronze & copper surfaces")} />
+          <Field label={tr("Sector")} required hint={tr("e.g. Architectural metalwork, upholstery…")} error={e.sector}>
+            <Input name="sector" defaultValue={company.sector ?? ""} required />
           </Field>
-          <Field label={tr("About you")} hint={tr("Describe your company, your skills and your materials.")} className="sm:col-span-2" error={e.about}>
-            <Textarea name="about" defaultValue={company.about ?? ""} rows={6} maxLength={5000} />
+          <Field label={tr("Tagline")} required hint={tr("One line that sums up your craft.")} error={e.tagline} className="sm:col-span-2">
+            <Input name="tagline" defaultValue={company.tagline ?? ""} maxLength={140} required placeholder={tr("Hand-patinated brass, bronze & copper surfaces")} />
+          </Field>
+          <Field label={tr("About you")} required hint={tr("Describe your company, your skills and your materials.")} className="sm:col-span-2" error={e.about}>
+            <Textarea name="about" defaultValue={company.about ?? ""} rows={6} maxLength={5000} required />
           </Field>
           <Field label={tr("Founded in")}>
             <Input name="foundedYear" type="number" min={1700} max={new Date().getFullYear()} defaultValue={company.foundedYear ?? ""} />
@@ -91,8 +100,8 @@ export function CompanyForm({ company, onboarding, accountEmail, listed }: { com
 
       <Section title={tr("Address & contact")} text={tr("Your address is used to match you with nearby projects.")}>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label={tr("Street address")} className="sm:col-span-2">
-            <Input name="street" defaultValue={company.street ?? ""} autoComplete="address-line1" />
+          <Field label={tr("Street address")} required className="sm:col-span-2" error={e.street}>
+            <Input name="street" defaultValue={company.street ?? ""} autoComplete="address-line1" required />
           </Field>
           <Field label={tr("Address line 2 (optional)")} className="sm:col-span-2">
             <Input name="street2" defaultValue={company.street2 ?? ""} autoComplete="address-line2" />
@@ -106,10 +115,10 @@ export function CompanyForm({ company, onboarding, accountEmail, listed }: { com
           <Field label={tr("Country")} required error={e.country}>
             <Input name="country" defaultValue={company.country ?? ""} list="countries" required autoComplete="country-name" />
           </Field>
-          <Field label={tr("Public e-mail")} hint={tr("Shown to Pro creatives. Account e-mail: {accountEmail}", { accountEmail })} error={e.publicEmail}>
-            <Input name="publicEmail" type="email" defaultValue={company.publicEmail ?? ""} />
+          <Field label={tr("Public e-mail")} required hint={tr("Shown to Pro creatives. Account e-mail: {accountEmail}", { accountEmail })} error={e.publicEmail}>
+            <Input name="publicEmail" type="email" defaultValue={company.publicEmail ?? accountEmail} required />
           </Field>
-          <Field label={tr("Contact phone")}>
+          <Field label={tr("Contact phone")} required error={e.phone}>
             <PhoneInput name="phone" defaultValue={company.phone} />
           </Field>
           <Field label={tr("Website")} error={e.website}>
@@ -123,8 +132,14 @@ export function CompanyForm({ company, onboarding, accountEmail, listed }: { com
         </datalist>
       </Section>
 
-      <Section title={tr("Areas of operation")} text={tr("Where can you deliver and install?")}>
+      <Section title={<>{tr("Areas of operation")}<span className="text-brass"> *</span></>} text={tr("Where can you deliver and install?")}>
+        {e.operationAreas && <p className="mb-3 text-xs text-danger">{tr(e.operationAreas[0]!)}</p>}
         <ChipGroup name="operationAreas" options={[...CONTINENTS]} defaultValue={parseList(company.operationAreas)} />
+      </Section>
+
+      <Section title={<>{tr("Areas of expertise")}<span className="text-brass"> *</span></>} text={tr("Choose one or more areas, then your specialities within each.")}>
+        {e.areas && <p className="mb-3 text-xs text-danger">{tr(e.areas[0]!)}</p>}
+        <AreaPicker areas={AREAS} defaultAreas={tagsOf("AREA")} defaultSpecialties={tagsOf("SPECIALTY")} />
       </Section>
 
       <Section title={tr("Skills, materials & techniques")} text={tr("These power search results. Choose everything that applies.")}>
@@ -149,8 +164,8 @@ export function CompanyForm({ company, onboarding, accountEmail, listed }: { com
 
       <Section title={tr("Production capabilities")} text={tr("Capacity, lead times and availability help creatives plan with you.")}>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label={tr("Production capacities (optional)")} className="sm:col-span-2">
-            <Textarea name="productionCapacity" defaultValue={company.productionCapacity ?? ""} rows={3} maxLength={600} placeholder={tr("e.g. up to 300 m² per month, sheets up to 3 × 1.5 m, small series up to 200 pieces…")} />
+          <Field label={tr("Production capacities")} required className="sm:col-span-2" error={e.productionCapacity}>
+            <Textarea name="productionCapacity" defaultValue={company.productionCapacity ?? ""} rows={3} maxLength={600} required placeholder={tr("e.g. up to 300 m² per month, sheets up to 3 × 1.5 m, small series up to 200 pieces…")} />
           </Field>
           <Field label={tr("My lead times — from (months)")}>
             <Select name="leadTimeMin" defaultValue={company.leadTimeMin ?? ""}>
@@ -172,7 +187,7 @@ export function CompanyForm({ company, onboarding, accountEmail, listed }: { com
               ))}
             </Select>
           </Field>
-          <Field label={tr("Months with production availability")} className="sm:col-span-2">
+          <Field label={tr("Months with production availability")} required className="sm:col-span-2" error={e.availability}>
             <MonthPicker name="availability" defaultValue={parseList<number>(company.availability).map(Number)} />
           </Field>
         </div>

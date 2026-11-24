@@ -8,7 +8,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const nav = [
     ["/admin", tr("Overview")],
     ["/admin/users", tr("Users")],
+    ["/admin/moderation", tr("Moderation")],
     ["/admin/makers", tr("Makers")],
+    ["/admin/emails", "E-mails"],
     ["/admin/requests", tr("Contact requests")],
     ["/admin/connexions", "Connexions"],
     ["/admin/visuel", "Choix du visuel"],

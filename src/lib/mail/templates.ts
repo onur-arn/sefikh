@@ -5,16 +5,21 @@ import { translatorFor } from "@/i18n/server";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-type Block = { eyebrow?: string; heading: string; intro: string[]; cta?: { label: string; url: string }; outro?: string[]; quote?: string };
+type Block = { eyebrow?: string; heading: string; intro: string[]; cta?: { label: string; url: string }; outro?: string[]; quote?: string; signature?: string };
 
-// Charte du site (src/app/globals.css) : fond blanc, encre noire, filets gris, accent terre cuite, angles droits.
-const C = { bg: "#ffffff", surface: "#f7f7f6", ink: "#111111", soft: "#373737", muted: "#757575", line: "#d9d9d9", accent: "#a2492a" };
+/** Nom de la fondatrice, pour le mail de remerciement envoyé après la confirmation du compte. */
+const FOUNDER_NAME = process.env.FOUNDER_NAME || "Sule Atalay";
+
+// Charte du site (src/app/globals.css) : fond blanc, encre noire, filets gris, accent bordeaux, angles droits.
+const C = { bg: "#ffffff", surface: "#f7f7f6", ink: "#111111", soft: "#373737", muted: "#757575", line: "#d9d9d9", accent: "#481c17" };
 // Polices du site ; Gmail et Outlook ignorent les polices web et prennent les polices de repli.
 const SERIF = "'Cormorant Garamond',Georgia,'Times New Roman',serif";
 const SANS = "Jost,'Helvetica Neue',Helvetica,Arial,sans-serif";
 const FONTS = "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@400;500&display=swap";
 
-function layout(tr: Translator, { eyebrow, heading, intro, cta, outro = [], quote }: Block) {
+function layout(tr: Translator, { eyebrow, heading, intro, cta, outro = [], quote, signature }: Block) {
+  // Tous les e-mails sont signés par l'équipe (sauf le remerciement personnel de la fondatrice).
+  const sign = signature ?? tr("The SEFIKH team");
   const p = (t: string) => `<p style="margin:0 0 16px;font-family:${SANS};font-size:15px;line-height:1.65;color:${C.soft}">${esc(t)}</p>`;
   const small = (t: string) => `<p style="margin:0 0 12px;font-family:${SANS};font-size:13px;line-height:1.6;color:${C.muted}">${esc(t)}</p>`;
   const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><title>${esc(heading)}</title>
@@ -30,13 +35,14 @@ ${intro.map(p).join("")}
 ${quote ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="padding:18px 20px;background:${C.surface};border-left:1px solid ${C.ink};font-family:${SERIF};font-style:italic;font-size:18px;line-height:1.5;color:${C.ink};white-space:pre-wrap">${esc(quote)}</td></tr></table>` : ""}
 ${cta ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:12px 0 32px"><tr><td style="background:${C.ink}"><a href="${cta.url}" style="display:inline-block;padding:15px 28px;font-family:${SANS};font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:${C.bg};text-decoration:none">${esc(cta.label)} &rarr;</a></td></tr></table>` : ""}
 ${outro.map(small).join("")}
+<p style="margin:24px 0 0;font-family:${SERIF};font-size:18px;line-height:1.4;color:${C.ink};white-space:pre-line">${esc(sign)}</p>
 </td></tr>
 <tr><td style="padding:28px 0 0;border-top:1px solid ${C.line};font-family:${SANS};font-size:11px;line-height:1.7;color:${C.muted}">
 <span style="letter-spacing:.08em;text-transform:uppercase">SEFIKH — Search Engine For Know-How</span><br>
 ${esc(tr("You receive this e-mail because you have an account on SEFIKH."))} <a href="${env.appUrl}/dashboard/settings" style="color:${C.muted};text-decoration:underline">${esc(tr("Notification settings"))}</a>
 </td></tr>
 </table></td></tr></table></body></html>`;
-  const text = [heading, "", ...intro, quote ? `\n"${quote}"\n` : "", cta ? `${cta.label}: ${cta.url}` : "", ...outro, "", "— SEFIKH"].join("\n");
+  const text = [heading, "", ...intro, quote ? `\n"${quote}"\n` : "", cta ? `${cta.label}: ${cta.url}` : "", ...outro, "", `— ${sign}`].join("\n");
   return { html, text };
 }
 
@@ -50,6 +56,26 @@ export function verifyEmailTemplate(name: string, token: string, locale?: string
       intro: [tr("Please confirm your e-mail address to activate your account and start connecting with makers, workshops and creative professionals.")],
       cta: { label: tr("Confirm my e-mail"), url },
       outro: [tr("This link is valid for 48 hours. If you did not create an account, you can safely ignore this e-mail.")],
+    }),
+  };
+}
+
+/** Remerciement personnel de la fondatrice, envoyé une fois le compte confirmé. */
+export function founderThanksTemplate(name: string, role: string, locale?: string | null) {
+  const tr = translatorFor(locale);
+  return {
+    subject: tr("Thank you for joining SEFIKH"),
+    ...layout(tr, {
+      heading: tr("Thank you, {name}", { name }),
+      intro: [
+        tr("I wanted to thank you personally for joining SEFIKH."),
+        role === "PRO"
+          ? tr("SEFIKH was born from a simple wish: to give independent artisans and workshops the visibility their know-how deserves, and to connect them with the creative professionals who need it.")
+          : tr("SEFIKH was born from a simple wish: to make it easier for an idea to meet the hands able to bring it to life."),
+        tr("If you have a question, a suggestion or simply want to share your project, just reply to this e-mail: I read every message."),
+      ],
+      cta: { label: tr("Open my dashboard"), url: `${env.appUrl}/dashboard` },
+      signature: `${FOUNDER_NAME}\n${tr("Founder of SEFIKH")}`,
     }),
   };
 }
@@ -100,7 +126,7 @@ export function subscriptionTemplate(opts: { name: string; planName: string; amo
     subject: tr("Your {planName} subscription is active", { planName: opts.planName }),
     ...layout(tr, {
       heading: tr("Welcome to {planName}", { planName: opts.planName }),
-      intro: [tr("Thank you {name}! Your subscription is now active: {planName} — {amount} / month ({term}).", { name: opts.name, planName: opts.planName, amount: opts.amount, term: opts.term }), tr("Your invoices are available at any time in your billing space.")],
+      intro: [tr("Thank you {name}! Your subscription is now active: {planName} — {amount} ({term}).", { name: opts.name, planName: opts.planName, amount: opts.amount, term: opts.term }), tr("Your invoices are available at any time in your billing space.")],
       cta: { label: tr("Open my dashboard"), url: `${env.appUrl}/dashboard/billing` },
     }),
   };

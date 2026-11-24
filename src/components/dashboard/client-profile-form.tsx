@@ -29,8 +29,8 @@ export function ClientProfileForm({ profile, onboarding }: { profile: Profile; o
           <Field label={tr("Studio / company name")} error={e.studioName}>
             <Input name="studioName" defaultValue={profile.studioName ?? ""} placeholder={tr("e.g. Studio Laurent Architecture")} />
           </Field>
-          <Field label={tr("Who are you?")} error={e.clientType}>
-            <Select name="clientType" defaultValue={profile.clientType ?? ""}>
+          <Field label={tr("Who are you?")} required error={e.clientType}>
+            <Select name="clientType" defaultValue={profile.clientType ?? ""} required>
               <option value="">{tr("Select…")}</option>
               {CLIENT_TYPES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -47,26 +47,26 @@ export function ClientProfileForm({ profile, onboarding }: { profile: Profile; o
 
       <Section title={tr("Contact & address")}>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label={tr("E-mail")} hint={tr("Change it in Settings.")}>
+          <Field label={tr("E-mail")} required hint={tr("Change it in Settings.")}>
             <Input value={profile.email} disabled readOnly />
           </Field>
-          <Field label={tr("Phone")} error={e.phone}>
+          <Field label={tr("Phone")} required error={e.phone}>
             <PhoneInput name="phone" defaultValue={profile.phone} />
           </Field>
-          <Field label={tr("Street address")} className="sm:col-span-2">
-            <Input name="street" defaultValue={profile.street ?? ""} autoComplete="address-line1" />
+          <Field label={tr("Street address")} required className="sm:col-span-2" error={e.street}>
+            <Input name="street" defaultValue={profile.street ?? ""} autoComplete="address-line1" required />
           </Field>
           <Field label={tr("Address line 2 (optional)")} className="sm:col-span-2">
             <Input name="street2" defaultValue={profile.street2 ?? ""} autoComplete="address-line2" />
           </Field>
-          <Field label={tr("City")}>
-            <Input name="city" defaultValue={profile.city ?? ""} autoComplete="address-level2" />
+          <Field label={tr("City")} required error={e.city}>
+            <Input name="city" defaultValue={profile.city ?? ""} autoComplete="address-level2" required />
           </Field>
           <Field label={tr("State / region")}>
             <Input name="region" defaultValue={profile.region ?? ""} autoComplete="address-level1" />
           </Field>
-          <Field label={tr("Country")}>
-            <Input name="country" defaultValue={profile.country ?? ""} list="countries" autoComplete="country-name" />
+          <Field label={tr("Country")} required error={e.country}>
+            <Input name="country" defaultValue={profile.country ?? ""} list="countries" autoComplete="country-name" required />
           </Field>
           <Field label={tr("Website")} error={e.website}>
             <Input name="website" defaultValue={profile.website ?? ""} placeholder={tr("www.yourstudio.com")} />
@@ -80,11 +80,11 @@ export function ClientProfileForm({ profile, onboarding }: { profile: Profile; o
       </Section>
 
       <Section title={tr("About your practice")} text={tr("Helps makers understand your projects. Add keywords such as hotels, restaurants, residences…")}>
-        <Field label={tr("Short presentation")}>
-          <Textarea name="bio" defaultValue={profile.bio ?? ""} rows={4} maxLength={2000} />
+        <Field label={tr("Short presentation")} required error={e.bio}>
+          <Textarea name="bio" defaultValue={profile.bio ?? ""} rows={4} maxLength={2000} required />
         </Field>
         <div className="mt-5">
-          <Field label={tr("Typical projects (keywords)")}>
+          <Field label={tr("Typical projects (keywords)")} required error={e.keywords}>
             <TagInput name="keywords" defaultValue={parseList(profile.keywords)} placeholder={tr("hotels, restaurants, residences…")} />
           </Field>
         </div>
@@ -99,7 +99,7 @@ export function ClientProfileForm({ profile, onboarding }: { profile: Profile; o
   );
 }
 
-export function Section({ title, text, children }: { title: string; text?: string; children: React.ReactNode }) {
+export function Section({ title, text, children }: { title: React.ReactNode; text?: string; children: React.ReactNode }) {
   return (
     <section className="grid gap-6 lg:grid-cols-[240px_1fr]">
       <div>

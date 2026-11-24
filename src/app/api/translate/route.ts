@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   if (kind === "company" && visible) {
     fields = await db.company.findFirst({ where: { id, ...visible }, select: { tagline: true, about: true, productionCapacity: true } });
   } else if (kind === "portfolio" && visible) {
-    fields = await db.portfolioImage.findFirst({ where: { id, company: visible }, select: { title: true, description: true } });
+    fields = await db.portfolioImage.findFirst({ where: { id, status: "APPROVED", company: visible }, select: { title: true, description: true } });
   }
   if (kind === "message" && me) {
     const m = await db.message.findUnique({ where: { id }, select: { body: true, conversationId: true } });

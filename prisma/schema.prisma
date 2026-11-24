@@ -131,6 +131,11 @@ model Company {
   logoKey            String?
   verified           Boolean   @default(false)
   published          Boolean   @default(false)
+  independent        Boolean   @default(false) // artisan indépendant (tarifs réduits) ou entreprise
+  // Modération (v2) : un nouveau profil reste PENDING jusqu'à validation par l'équipe (sous 72 h).
+  reviewStatus       String    @default("APPROVED") // PENDING | APPROVED | REJECTED
+  reviewNote         String?
+  reviewedAt         DateTime?
   featuredUntil      DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -184,6 +189,9 @@ model PortfolioImage {
   embedding   Bytes? // Float32Array CLIP (512) normalisé
   colorVector String? // JSON number[] — histogramme couleur (repli sans CLIP)
   position    Int      @default(0)
+  // Modération : chaque photo publiée est validée par l'équipe avant d'être visible.
+  status      String   @default("APPROVED") // PENDING | APPROVED | REJECTED
+  reviewNote  String?
   createdAt   DateTime @default(now())
 
   @@index([companyId])

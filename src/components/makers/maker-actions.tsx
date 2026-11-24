@@ -47,25 +47,27 @@ export function SaveButton({ companyId, initialSaved, viewer }: { companyId: str
   );
 }
 
-export function ShareButton({ name }: { name: string }) {
+/** Partage la présentation publique de l'atelier (/p/slug), lisible même sans compte. */
+export function ShareButton({ name, slug, label = false }: { name: string; slug: string; label?: boolean }) {
   const tr = useT();
   const [copied, setCopied] = useState(false);
   return (
     <button
       onClick={async () => {
-        const url = location.href.split("?")[0]!;
-        if (navigator.share) await navigator.share({ title: `${name} on SEFIKH`, url }).catch(() => {});
+        const url = `${location.origin}/p/${slug}`;
+        if (navigator.share) await navigator.share({ title: tr("{name} on SEFIKH", { name }), url }).catch(() => {});
         else {
           await navigator.clipboard.writeText(url);
           setCopied(true);
           setTimeout(() => setCopied(false), 1800);
         }
       }}
-      className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-paper hover:border-ink/50"
-      aria-label={tr("Share this profile")}
+      className={label ? "inline-flex h-10 items-center gap-2 border border-ink/70 px-4 text-[13px] hover:bg-ink hover:text-paper" : "inline-flex size-11 items-center justify-center rounded-full border border-line bg-paper hover:border-ink/50"}
+      aria-label={tr("Share this page")}
       title={copied ? tr("Link copied") : tr("Share")}
     >
       <Share2 className="size-4" />
+      {label && (copied ? tr("Link copied") : tr("Share this page"))}
     </button>
   );
 }

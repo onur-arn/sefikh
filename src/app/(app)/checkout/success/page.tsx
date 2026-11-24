@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CheckCircle2, Clock } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { activateSubscription, getStripe } from "@/lib/billing";
-import { getPlan, type PlanId, type Term } from "@/lib/plans";
+import { getPlan, planName, type PlanId, type Term } from "@/lib/plans";
 import { ButtonLink } from "@/components/ui/button";
 import { daysFromNow } from "@/lib/utils";
 import { getT } from "@/i18n/server";
@@ -40,7 +40,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps<"/
       <h1 className="display mt-6 text-5xl">{confirmed ? tr("Thank you!") : tr("Payment processing")}</h1>
       <p className="mt-4 text-muted">
         {confirmed
-          ? tr("Your {name} plan is now active. A confirmation e-mail and your invoice are on their way.", { name: plan.name })
+          ? tr("Your {name} plan is now active. A confirmation e-mail and your invoice are on their way.", { name: planName(plan, tr) })
           : tr("Your payment is being confirmed by your bank. Your plan will be activated within a few minutes — you'll receive an e-mail.")}
       </p>
       <div className="mt-8 flex gap-3">

@@ -1,6 +1,8 @@
 // Vocabulaire métier partagé (client + serveur).
 
-export type TagKind = "SKILL" | "MATERIAL" | "TECHNIQUE" | "SECTOR";
+import { AREAS } from "@/lib/expertise";
+
+export type TagKind = "AREA" | "SPECIALTY" | "SKILL" | "MATERIAL" | "TECHNIQUE" | "SECTOR";
 export type Role = "CLIENT" | "PRO" | "ADMIN";
 
 type Vocab = { name: string; synonyms?: string[] };
@@ -61,7 +63,12 @@ export const SECTORS: Vocab[] = [
   { name: "Art projects", synonyms: ["art", "gallery", "galerie", "museum", "installation"] },
 ];
 
+export const AREA_VOCAB: Vocab[] = AREAS.map((a) => ({ name: a.name, synonyms: a.synonyms }));
+export const SPECIALTY_VOCAB: Vocab[] = AREAS.flatMap((a) => a.specialties.map((name) => ({ name })));
+
 export const VOCABULARY: Record<TagKind, Vocab[]> = {
+  AREA: AREA_VOCAB,
+  SPECIALTY: SPECIALTY_VOCAB,
   SKILL: SKILLS,
   MATERIAL: MATERIALS,
   TECHNIQUE: TECHNIQUES,
@@ -69,6 +76,8 @@ export const VOCABULARY: Record<TagKind, Vocab[]> = {
 };
 
 export const TAG_KIND_LABEL: Record<TagKind, string> = {
+  AREA: "Areas of expertise",
+  SPECIALTY: "Specialities",
   SKILL: "Skills",
   MATERIAL: "Materials",
   TECHNIQUE: "Techniques",

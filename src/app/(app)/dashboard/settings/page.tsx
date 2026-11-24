@@ -65,9 +65,15 @@ export default async function SettingsPage() {
         </Card>
         <Card className="p-6 sm:p-8">
           <h2 className="display text-2xl">{tr("Your data")}</h2>
-          <p className="mt-1 text-sm text-muted">{tr("Download a copy of your personal data (GDPR), in JSON format.")}</p>
-          <a href="/api/me/export" className="mt-4 inline-flex h-10 items-center rounded-sm border border-ink/70 px-5 text-sm hover:bg-ink hover:text-paper">
-            {tr("Download my data")}</a>
+          <p className="mt-1 text-sm text-muted">{tr("See everything SEFIKH keeps about you, laid out clearly, and save it as a PDF (GDPR).")}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <a href="/dashboard/settings/data" className="inline-flex h-10 items-center rounded-sm border border-ink/70 px-5 text-sm hover:bg-ink hover:text-paper">
+              {tr("View and download my data")}
+            </a>
+            <a href="/api/me/export" className="folio underline underline-offset-4 hover:text-ink">
+              {tr("Technical file (JSON)")}
+            </a>
+          </div>
         </Card>
         <Card className="border-danger/30 p-6 sm:p-8">
           <h2 className="display text-2xl text-danger">{tr("Delete my account")}</h2>

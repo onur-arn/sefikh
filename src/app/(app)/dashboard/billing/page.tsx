@@ -3,7 +3,7 @@ import { ExternalLink, Receipt } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { activeSubscription, expireSimulated } from "@/lib/billing";
 import { db } from "@/lib/db";
-import { getPlan } from "@/lib/plans";
+import { getPlan, planName } from "@/lib/plans";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge, Card } from "@/components/ui/misc";
 import { BillingControls } from "@/components/dashboard/billing-controls";
@@ -34,7 +34,7 @@ export default async function BillingPage() {
           <div className="flex-1">
             <p className="eyebrow">{tr("Current plan")}</p>
             <div className="mt-2 flex flex-wrap items-center gap-3">
-              <h2 className="display text-4xl">{tr(plan.name)}</h2>
+              <h2 className="display text-4xl">{planName(plan, tr)}</h2>
               {sub && <Badge tone={sub.status === "ACTIVE" ? (sub.cancelAtPeriodEnd ? "neutral" : "success") : "danger"}>{sub.status === "PAST_DUE" ? tr("Payment due") : sub.cancelAtPeriodEnd ? tr("Ends soon") : tr("Active")}</Badge>}
             </div>
             <p className="mt-1 text-sm text-muted">{tr(plan.tagline)}</p>
@@ -42,11 +42,11 @@ export default async function BillingPage() {
               <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-3">
                 <div>
                   <dt className="text-muted">{tr("Price")}</dt>
-                  <dd className="mt-0.5 font-medium">{tr("{amount} / month", { amount: tr.money(sub.amount, sub.currency) })}</dd>
+                  <dd className="mt-0.5 font-medium">{sub.term === "ANNUAL" ? tr("{amount} / year", { amount: tr.money(sub.amount, sub.currency) }) : tr("{amount} / month", { amount: tr.money(sub.amount, sub.currency) })}</dd>
                 </div>
                 <div>
                   <dt className="text-muted">{tr("Term")}</dt>
-                  <dd className="mt-0.5 font-medium">{sub.term === "ANNUAL" ? tr("12-month commitment") : tr("No commitment")}</dd>
+                  <dd className="mt-0.5 font-medium">{sub.term === "ANNUAL" ? tr("Annual billing") : tr("Monthly billing")}</dd>
                 </div>
                 <div>
                   <dt className="text-muted">{sub.cancelAtPeriodEnd ? tr("Ends on") : tr("Next payment")}</dt>
@@ -60,7 +60,7 @@ export default async function BillingPage() {
                 )}
               </dl>
             ) : (
-              <p className="mt-6 text-sm">{tr("You are on the free plan. Upgrade at any time and cancel whenever you like on the no-commitment option.")}</p>
+              <p className="mt-6 text-sm">{tr("You are on the free plan. Upgrade at any time; monthly plans can be cancelled whenever you like.")}</p>
             )}
           </div>
           <div className="flex flex-col gap-2 sm:w-56">

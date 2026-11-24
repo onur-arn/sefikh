@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/prisma-postgres.mjs && npx prisma generate --schema prisma/postgres/schema.prisma && npm run build",
+  "buildCommand": "node scripts/prisma-postgres.mjs && DATABASE_URL=\"${DATABASE_URL_UNPOOLED:-$DATABASE_URL}\" npx prisma db push --schema prisma/postgres/schema.prisma --skip-generate && npx prisma generate --schema prisma/postgres/schema.prisma && npm run build",
   "regions": ["fra1"]
 }

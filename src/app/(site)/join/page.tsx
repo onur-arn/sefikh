@@ -16,7 +16,7 @@ export default async function JoinPage() {
       <section className="container-x grid items-center gap-12 py-16 lg:grid-cols-[1fr_1fr] lg:py-24">
         <div>
           <p className="folio">{tr("Showcase your craft. Get discovered.")}</p>
-          <h1 className="display mt-4 text-5xl sm:text-[5rem]">{tr("Create your business profile.")}</h1>
+          <h1 className="display mt-4 text-5xl sm:text-[3rem]">{tr("Create your business profile.")}</h1>
           <p className="mt-6 max-w-lg text-[16px] leading-relaxed text-muted">
             {tr("Join SEFIKH and connect with architects, designers and creative professionals looking for unique skills, materials and expertise. Tell us about your skills, materials and capabilities — it only takes a few minutes.")}</p>
           <div className="mt-9 flex flex-wrap gap-3">

@@ -1,5 +1,6 @@
 // Catalogue des abonnements SEFIKH (source unique pour l'UI, les contrôles d'accès et Stripe).
-// Prix en euros TTC par mois. « ANNUAL » = engagement 12 mois facturé mensuellement.
+// Prix TTC en euros (v2, 24/11/2026) : MONTHLY = prix par mois, ANNUAL = prix par an payé en une fois (2 mois offerts).
+// Offre de lancement : −20 % sur les 2 premiers mois d'un abonnement mensuel (LAUNCH_DISCOUNT).
 
 export type PlanId =
   | "CLIENT_FREE"
@@ -18,8 +19,11 @@ export type Plan = {
   id: PlanId;
   audience: Audience;
   name: string;
+  frName?: string; // nom affiché en français (offres créatifs : Essentiel / Atelier / Premium)
   tagline: string;
-  prices: Partial<Record<Term, number>>; // € / mois ; absent = non proposé sur cette durée
+  prices: Partial<Record<Term, number>>; // € TTC : MONTHLY par mois, ANNUAL par an ; absent = non proposé
+  independentPrices?: Partial<Record<Term, number>>; // artisans indépendants (sinon même prix)
+  hidden?: boolean; // offre retirée du catalogue (abonnés existants conservés)
   features: string[];
   highlight?: boolean;
   limits: {
@@ -44,6 +48,7 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "CLIENT_FREE",
     audience: "CLIENT",
     name: "Free",
+    frName: "Essentiel",
     tagline: "Explore · Search · Discover",
     prices: { ANNUAL: 0, MONTHLY: 0 },
     features: [
@@ -68,16 +73,15 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "CLIENT_PRO",
     audience: "CLIENT",
     name: "Pro",
+    frName: "Atelier",
     tagline: "Identify · Source · Save · Connect",
-    prices: { ANNUAL: 39, MONTHLY: 49 },
+    prices: { MONTHLY: 149, ANNUAL: 1490 },
     highlight: true,
     features: [
       "Unlimited AI-powered searches",
-      "Unlimited image searches",
       "Full company profiles with contact details",
-      "Unlimited direct messaging",
+      "Unlimited direct messaging with automatic translation",
       "Supplier library & saved makers",
-      "Personalised suggestions",
     ],
     limits: {
       freeSearches: UNLIMITED,
@@ -96,14 +100,14 @@ export const PLANS: Record<PlanId, Plan> = {
     id: "CLIENT_STUDIO",
     audience: "CLIENT",
     name: "Studio",
+    frName: "Premium",
     tagline: "Collaborate at studio scale",
-    prices: { ANNUAL: 79, MONTHLY: 95 },
+    prices: { MONTHLY: 299, ANNUAL: 2990 },
     features: [
       "Everything included in Pro",
       "Cloud documents for every project",
       "Full Trends & Insights market data",
-      "Quarterly demand reporting",
-      "Priority support",
+      "3 user accesses included, then €89 / month per additional access",
     ],
     limits: {
       freeSearches: UNLIMITED,
@@ -143,8 +147,9 @@ export const PLANS: Record<PlanId, Plan> = {
     audience: "PRO",
     name: "Pro",
     tagline: "A complete professional presence",
-    prices: { ANNUAL: 149, MONTHLY: 179 },
-    features: ["Professional profile with verified badge", "Portfolio of up to 60 pictures", "Visibility analytics"],
+    prices: { MONTHLY: 149, ANNUAL: 1490 },
+    independentPrices: { MONTHLY: 99, ANNUAL: 990 },
+    features: ["Create your professional profile", "Portfolio of up to 60 pictures", "Visibility analytics"],
     limits: {
       freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
@@ -163,9 +168,10 @@ export const PLANS: Record<PlanId, Plan> = {
     audience: "PRO",
     name: "Visibility",
     tagline: "Be seen first",
-    prices: { ANNUAL: 299, MONTHLY: 349 },
+    prices: { MONTHLY: 299, ANNUAL: 2990 },
+    independentPrices: { MONTHLY: 179, ANNUAL: 1790 },
     highlight: true,
-    features: ["Everything in Pro", "Portfolio of up to 120 pictures", "Boosted ranking in search results", "Featured in the Content section", "Editorial features & dedicated content"],
+    features: ["Everything in Pro", "Portfolio of up to 120 pictures", "Boosted ranking in search results", "Editorial features & dedicated content for special projects realised through SEFIKH"],
     limits: {
       freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
@@ -184,8 +190,13 @@ export const PLANS: Record<PlanId, Plan> = {
     audience: "PRO",
     name: "Intelligence",
     tagline: "Understand the demand",
-    prices: { ANNUAL: 499, MONTHLY: 579 },
-    features: ["Everything in Visibility", "Portfolio of up to 200 pictures", "Advanced demand analysis", "Full market insights", "Quarterly demand reporting"],
+    prices: { MONTHLY: 399, ANNUAL: 3990 },
+    features: [
+      "Everything in Visibility",
+      "Portfolio of up to 200 pictures",
+      "Advanced demand analysis: appearances in searches, profile clicks, saves and average match score",
+      "Full market insights",
+    ],
     limits: {
       freeSearches: UNLIMITED,
       newConversationsPerMonth: 0,
@@ -204,7 +215,8 @@ export const PLANS: Record<PlanId, Plan> = {
     audience: "PRO",
     name: "Founding Partner",
     tagline: "Launch-phase programme — limited places",
-    prices: { ANNUAL: 149 },
+    hidden: true, // remplacé en v2 par l'offre de lancement (−20 % les 2 premiers mois)
+    prices: { ANNUAL: 1490 },
     features: ["Full Intelligence package", "12-month partnership for launch-phase supporters", "Founding Partner badge", "Price locked for 12 months"],
     seatsLimit: 50,
     limits: {
@@ -239,6 +251,19 @@ export function defaultPlanFor(role: string): PlanId {
 export function isPaid(id: string) {
   const p = getPlan(id);
   return (p.prices.ANNUAL ?? 0) > 0 || (p.prices.MONTHLY ?? 0) > 0;
+}
+
+/** Offre de lancement : remise sur les premiers mois d'un abonnement mensuel. */
+export const LAUNCH_DISCOUNT = { percent: 20, months: 2 } as const;
+
+/** Prix TTC en euros pour une durée, selon le statut (indépendant ou entreprise). */
+export function planPrice(plan: Plan, term: Term, independent = false): number | undefined {
+  return (independent ? plan.independentPrices?.[term] : undefined) ?? plan.prices[term];
+}
+
+/** Nom affiché d'une offre (les offres créatifs ont un nom propre en français). */
+export function planName(plan: Plan, tr: ((key: string) => string) & { locale: string }) {
+  return tr.locale === "fr" && plan.frName ? plan.frName : tr(plan.name);
 }
 
 export function formatLimit(n: number) {

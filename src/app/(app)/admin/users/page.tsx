@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
-import { getPlan } from "@/lib/plans";
+import { getPlan, planName } from "@/lib/plans";
 import { getT } from "@/i18n/server";
 import { setUserSuspended } from "../actions";
 
@@ -42,7 +42,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/admin
                 <td className="px-4 py-3">{u.name}</td>
                 <td className="px-4 py-3 text-ink-soft">{u.email}</td>
                 <td className="px-4 py-3">{tr(u.role === "PRO" ? "Maker" : u.role === "ADMIN" ? "Administrator" : "Project owner")}</td>
-                <td className="px-4 py-3">{tr(getPlan(u.plan).name)}</td>
+                <td className="px-4 py-3">{planName(getPlan(u.plan), tr)}</td>
                 <td className="px-4 py-3 text-ink-soft">{tr.date(u.createdAt)}</td>
                 <td className="px-4 py-3 text-right">
                   {u.role !== "ADMIN" && (
