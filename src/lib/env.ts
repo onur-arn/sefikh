@@ -18,6 +18,8 @@ export const env = {
   },
   mailFrom: read("MAIL_FROM", "SEFIKH <contact@sefikh.com>"),
   contactInbox: read("CONTACT_INBOX", "contact@sefikh.com"),
+  // Adresses qui reçoivent automatiquement les droits d'administration (séparées par des virgules).
+  adminEmails: read("ADMIN_EMAILS").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean),
   stripeSecretKey: read("STRIPE_SECRET_KEY"),
   stripeWebhookSecret: read("STRIPE_WEBHOOK_SECRET"),
   storageDir: read("STORAGE_DIR", "./storage"),

@@ -44,6 +44,12 @@ export const getCurrentUser = cache(async () => {
   });
   if (!session || session.expiresAt < new Date() || session.user.suspendedAt) return null;
 
+  // Droits d'administration accordés par la variable ADMIN_EMAILS (aucun accès direct à la base nécessaire).
+  if (session.user.role !== "ADMIN" && env.adminEmails.includes(session.user.email.toLowerCase())) {
+    await db.user.update({ where: { id: session.user.id }, data: { role: "ADMIN", emailVerifiedAt: session.user.emailVerifiedAt ?? new Date() } });
+    session.user.role = "ADMIN";
+  }
+
   // Prolongation glissante + présence (au plus une écriture par jour / par minute).
   const now = Date.now();
   if (now - session.lastUsedAt.getTime() > REFRESH_AFTER_DAYS * 86400_000) {

@@ -11,6 +11,7 @@ import { continentOf, findCountry, geocode } from "@/lib/geo";
 import { slugify, toList } from "@/lib/utils";
 import { fieldErrors, formToObject, type FormState } from "@/lib/validation";
 import { hasListedPlan } from "@/lib/access";
+import { alertModeration } from "@/lib/moderation";
 
 const opt = (max = 200) => z.string().trim().max(max).optional().transform((v) => v || null);
 const req = (max: number, message = "This field is required.") => z.string().trim().min(1, message).max(max);
@@ -160,6 +161,7 @@ export async function saveCompanyProfile(_: FormState, formData: FormData): Prom
   } else {
     // Nouveau profil : en attente de validation par l'équipe (sous 72 h).
     await db.company.create({ data: { ...data, userId: user.id, slug: await uniqueSlug(d.name), published: false, reviewStatus: "PENDING", tags: { create: tags.map((t) => ({ tagId: t.id })) } } });
+    await alertModeration();
   }
   revalidatePath("/dashboard", "layout");
   revalidatePath("/search");

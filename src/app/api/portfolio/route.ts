@@ -6,6 +6,7 @@ import { UPLOAD_LIMITS } from "@/lib/constants";
 import { colorVector, processImage, toBytes, UploadError } from "@/lib/images";
 import { formatLimit, getPlan } from "@/lib/plans";
 import { rateLimit } from "@/lib/rate-limit";
+import { alertModeration } from "@/lib/moderation";
 
 /** Ajout d'une photo au portfolio : optimisation, vignette, empreintes CLIP + couleur. */
 export async function POST(request: Request) {
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
       },
       select: { id: true, key: true, thumbKey: true, width: true, height: true, title: true, description: true, projectName: true, location: true, year: true, position: true, status: true, reviewNote: true },
     });
+    await alertModeration();
     return NextResponse.json({ item }, { status: 201 });
   } catch (e) {
     if (e instanceof UploadError) return NextResponse.json({ error: e.message }, { status: 400 });
