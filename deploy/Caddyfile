@@ -1,0 +1,12 @@
+# HTTPS automatique (Let's Encrypt) ; www redirige vers le domaine principal.
+www.sefikh.com {
+	redir https://sefikh.com{uri} permanent
+}
+
+sefikh.com {
+	encode zstd gzip
+	request_body {
+		max_size 25MB
+	}
+	reverse_proxy 127.0.0.1:3000
+}

@@ -1,0 +1,17 @@
+[Unit]
+Description=SEFIKH (Next.js)
+After=network.target postgresql.service
+
+[Service]
+User=sefikh
+WorkingDirectory=/srv/sefikh/app
+EnvironmentFile=/srv/sefikh/.env
+Environment=NODE_ENV=production PORT=3000
+ExecStart=/usr/bin/npm run start -- -p 3000 -H 127.0.0.1
+Restart=always
+RestartSec=5
+# Limite de sécurité : redémarrage si l'application dépasse 3 Go
+MemoryMax=3G
+
+[Install]
+WantedBy=multi-user.target
