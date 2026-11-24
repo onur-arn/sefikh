@@ -28,7 +28,8 @@ export function PlanPicker({ audience, currentPlan, currentTerm, loggedInRole, i
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const wrongAudience = loggedInRole && loggedInRole !== "ADMIN" && (loggedInRole === "PRO" ? "PRO" : "CLIENT") !== audience;
-  const euros = (n: number) => new Intl.NumberFormat(tr.locale === "en" ? "en-GB" : tr.locale, { maximumFractionDigits: 2 }).format(n);
+  // Centimes affichés seulement s'il y en a, et alors toujours sur deux chiffres (119,20 €).
+  const euros = (n: number) => new Intl.NumberFormat(tr.locale === "en" ? "en-GB" : tr.locale, Number.isInteger(n) ? {} : { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
   async function choose(id: PlanId) {
     setError(null);
