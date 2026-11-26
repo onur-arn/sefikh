@@ -50,7 +50,7 @@ export default async function QuotePage({ params }: PageProps<"/messages/quotes/
         {expired && <p className="mt-3 text-[14px] text-danger">{tr("The validity date of this quote has passed.")}</p>}
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <PdfButtons targetId="quote-sheet" filename={`${quote.number}.pdf`} />
+          <PdfButtons targetId="quote-sheet" filename={`SEFIKH-${quote.number}.pdf`} href={`/api/quotes/${id}/pdf`} />
           {side === "pro" && quote.status === "DRAFT" && (
             <>
               <ButtonLink href={`/messages/quotes/${id}/edit`} variant="secondary" size="sm" className="h-10">

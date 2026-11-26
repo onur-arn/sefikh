@@ -15,8 +15,13 @@ const nextConfig: NextConfig = {
   cacheComponents: false,
   poweredByHeader: false,
   // Modules natifs à ne pas bundler (CLIP / ONNX, traitement d'image).
-  serverExternalPackages: ["@huggingface/transformers", "onnxruntime-node", "sharp"],
+  serverExternalPackages: ["@huggingface/transformers", "onnxruntime-node", "sharp", "@react-pdf/renderer"],
   // CLIP est coupé sur Vercel (CLIP_MODE=off) : son moteur dépasserait la taille maximale d'une fonction.
+  // Polices embarquées dans les PDF (devis, factures) : lues sur disque par @react-pdf/renderer.
+  outputFileTracingIncludes: {
+    "/api/quotes/[id]/pdf": ["./src/assets/fonts/**"],
+    "/api/invoices/[id]/pdf": ["./src/assets/fonts/**"],
+  },
   outputFileTracingExcludes: {
     "*": ["node_modules/onnxruntime-node/**", "node_modules/onnxruntime-web/**", "node_modules/@huggingface/transformers/**", ".cache/**", "storage/**", "prisma/*.db"],
   },

@@ -70,28 +70,35 @@ async function downloadPdf(el: HTMLElement, filename: string) {
   pdf.save(filename);
 }
 
-export function PdfButtons({ targetId, filename }: { targetId: string; filename: string }) {
+/** `href` : PDF « vrai texte » généré par le serveur (net, sélectionnable) ; sinon capture de `targetId`. */
+export function PdfButtons({ targetId, filename, href }: { targetId: string; filename: string; href?: string }) {
   const tr = useT();
   const [busy, setBusy] = useState(false);
   return (
     <div className="flex flex-wrap gap-3 print:hidden">
-      <button
-        type="button"
-        disabled={busy}
-        onClick={async () => {
-          const el = document.getElementById(targetId);
-          if (!el) return;
-          setBusy(true);
-          try {
-            await downloadPdf(el, filename);
-          } finally {
-            setBusy(false);
-          }
-        }}
-        className={buttonClass("primary", "sm", "h-10")}
-      >
-        <Download className="size-3.5" /> {busy ? tr("Preparing the PDF…") : tr("Download")}
-      </button>
+      {href ? (
+        <a href={href} download={filename} className={buttonClass("primary", "sm", "h-10")}>
+          <Download className="size-3.5" /> {tr("Download")}
+        </a>
+      ) : (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={async () => {
+            const el = document.getElementById(targetId);
+            if (!el) return;
+            setBusy(true);
+            try {
+              await downloadPdf(el, filename);
+            } finally {
+              setBusy(false);
+            }
+          }}
+          className={buttonClass("primary", "sm", "h-10")}
+        >
+          <Download className="size-3.5" /> {busy ? tr("Preparing the PDF…") : tr("Download")}
+        </button>
+      )}
       <button type="button" onClick={() => window.print()} className={buttonClass("secondary", "sm", "h-10")}>
         <Printer className="size-3.5" /> {tr("Print")}
       </button>

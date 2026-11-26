@@ -30,7 +30,7 @@ export default async function InvoicePage({ params }: PageProps<"/dashboard/bill
         </Link>
         <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
           <h1 className="display text-3xl">{tr("Invoice {number}", { number })}</h1>
-          <PdfButtons targetId="invoice-sheet" filename={`SEFIKH-${number}.pdf`} />
+          <PdfButtons targetId="invoice-sheet" filename={`SEFIKH-${number}.pdf`} href={`/api/invoices/${id}/pdf`} />
         </div>
         <p className="mt-2 text-[13px] text-muted">
           {tr("Billing details can be changed on the Plan & billing page.")}
