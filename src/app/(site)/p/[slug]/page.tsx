@@ -55,7 +55,7 @@ export default async function SharedProfilePage({ params }: PageProps<"/p/[slug]
 
   return (
     <div className="container-x pb-24 pt-10 sm:pt-14">
-      <p className="folio">{tr("Artisan presented on SEFIKH")}</p>
+      <p className="kicker self-start">{tr("Artisan presented on SEFIKH")}</p>
       <div className="mt-4 grid gap-10 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <p className="folio">{tr(kind)}</p>

@@ -84,7 +84,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
     <header
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={cn("sticky top-0 z-40 transition-colors duration-300", overlay ? "bg-transparent text-paper [&_.text-ink-soft]:!text-paper" : "border-b border-line bg-ivory")}
+      className={cn("sticky top-0 z-40 border-t-[3px] border-t-brass transition-colors duration-300", overlay ? "bg-transparent text-paper [&_.text-ink-soft]:!text-paper" : "border-b border-line bg-ivory")}
     >
       <div className="container-x grid h-[68px] grid-cols-[1fr_auto_1fr] items-center gap-4">
         <nav className="hidden items-center gap-4 lg:flex xl:gap-5" aria-label={tr("Main")}>
@@ -92,7 +92,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
             // Page en cours : en gras, sans soulignement.
             const active = isActive(n.href);
             return (
-              <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined} className={cn(navClass, active && "font-semibold text-ink [background-image:none]")}>
+              <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined} className={cn(navClass, active && "font-semibold text-ink [background-size:100%_1px]")}>
                 {tr(n.label)}
               </Link>
             );
@@ -109,7 +109,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
             href="/search"
             aria-label={tr("Search")}
             aria-current={pathname.startsWith("/search") ? "page" : undefined}
-            className={cn("mr-2 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink", pathname.startsWith("/search") && "font-semibold text-ink")}
+            className={cn("mr-2 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink", pathname.startsWith("/search") && "font-semibold text-ink link-underline [background-size:100%_1px]")}
           >
             <Search className="size-[17px] sm:size-3.5" strokeWidth={1.6} />
             <span className="hidden sm:inline">{tr("Search")}</span>

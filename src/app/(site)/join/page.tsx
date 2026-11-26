@@ -15,7 +15,7 @@ export default async function JoinPage() {
     <>
       <section className="container-x grid items-center gap-12 py-16 lg:grid-cols-[1fr_1fr] lg:py-24">
         <div>
-          <p className="folio">{tr("Showcase your craft. Get discovered.")}</p>
+          <p className="kicker self-start">{tr("Showcase your craft. Get discovered.")}</p>
           <h1 className="display mt-4 text-5xl sm:text-[3rem]">{tr("Create your business profile.")}</h1>
           <p className="mt-6 max-w-lg text-[16px] leading-relaxed text-muted">
             {tr("Join SEFIKH and connect with architects, designers and creative professionals looking for unique skills, materials and expertise. Tell us about your skills, materials and capabilities — it only takes a few minutes.")}</p>
@@ -46,7 +46,7 @@ export default async function JoinPage() {
             [tr("Understand demand"), tr("Analytics and market insights show what the industry is looking for.")],
           ].map(([t, d], i) => (
             <div key={t} className="border-b border-line py-6 lg:border-b-0 lg:border-l lg:px-6 lg:first:border-l-0 lg:first:pl-0">
-              <p className="folio">{["i", "ii", "iii", "iv"][i]}</p>
+              <p className="folio !text-brass">{["i", "ii", "iii", "iv"][i]}</p>
               <h2 className="display mt-3 text-3xl">{t}</h2>
               <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{d}</p>
             </div>

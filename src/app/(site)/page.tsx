@@ -46,7 +46,7 @@ export default async function HomePage() {
       {/* ── Trouver l'expertise ────────────────────────────── */}
       <section id="site" className="container-x scroll-mt-[68px] py-20 sm:py-24">
         <div className="grid gap-8 lg:grid-cols-12">
-          <p className="folio lg:col-span-3">{tr("Find the right expertise")}</p>
+          <p className="kicker self-start lg:col-span-3">{tr("Find the right expertise")}</p>
           <div className="lg:col-span-9">
             <h2 className="display text-3xl sm:text-4xl">{tr("The right skills make all the difference.")}</h2>
             <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-soft">
@@ -65,7 +65,7 @@ export default async function HomePage() {
       <section className="border-t border-line">
         <div className="container-x py-16 sm:py-20">
           <div className="grid gap-4 lg:grid-cols-12">
-            <p className="folio lg:col-span-3">{tr("Areas of expertise")}</p>
+            <p className="kicker self-start lg:col-span-3">{tr("Areas of expertise")}</p>
             <p className="max-w-xl text-[15px] leading-relaxed text-ink-soft lg:col-span-9">{tr("Explore a diverse range of skills, techniques and specialities across creative and artisanal fields.")}</p>
           </div>
           <ul className="mt-10 border-t border-ink/70">
@@ -91,7 +91,7 @@ export default async function HomePage() {
           <Image src="/images/join-1.webp" alt={tr("A cabinetmaker's hands planing wood")} fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
         </div>
         <div className="flex flex-col justify-center bg-paper px-4 py-14 sm:px-10 lg:px-16">
-          <p className="folio">{tr("Join SEFIKH")}</p>
+          <p className="kicker self-start">{tr("Join SEFIKH")}</p>
           <h2 className="display mt-4 text-3xl sm:text-4xl">{tr("Bring your expertise into the spotlight.")}</h2>
           <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink-soft">{tr("Showcase your work and connect with architects, designers and creative professionals seeking exceptional craftsmanship.")}</p>
           <div className="mt-8 flex flex-wrap gap-3">

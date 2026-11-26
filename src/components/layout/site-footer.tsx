@@ -13,7 +13,7 @@ const COLUMNS = [
 export async function SiteFooter() {
   const tr = await getT();
   return (
-    <footer className="mt-auto border-t border-line bg-ivory text-ink-soft">
+    <footer className="mt-auto border-t border-brass/50 bg-ivory text-ink-soft">
       <div className="container-x grid gap-12 py-14 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <p className="display max-w-xs text-2xl text-ink">{tr("Where Ideas Take Shape")}</p>

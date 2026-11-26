@@ -41,12 +41,12 @@ export default async function JournalPage() {
   return (
     <div className="container-x pb-24 pt-12 sm:pt-16">
       <header className="mx-auto max-w-2xl text-center">
-        <p className="folio">{tr("The Journal")}</p>
+        <p className="kicker self-start">{tr("The Journal")}</p>
         <h1 className="display mt-4 text-3xl sm:text-4xl">{tr("An evolving view of what the creative industry is looking for, shaped by real-time activity on SEFIKH.")}</h1>
       </header>
 
       <section className="mt-16 border-t border-ink/70 pt-8">
-        <p className="folio">{tr("Section 1")}</p>
+        <p className="kicker self-start">{tr("Section 1")}</p>
         <h2 className="display mt-2 text-3xl">{tr("SEFIKH Projects")}</h2>
 
         <div className="mt-10">

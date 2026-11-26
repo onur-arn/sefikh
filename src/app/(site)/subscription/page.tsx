@@ -30,7 +30,7 @@ export default async function PricingPage({ searchParams }: PageProps<"/subscrip
   return (
     <div className="container-x pb-24 pt-14">
       <header className="grid gap-4 lg:grid-cols-12">
-        <p className="folio lg:col-span-3">{tr("Memberships")}</p>
+        <p className="kicker self-start lg:col-span-3">{tr("Memberships")}</p>
         <div className="lg:col-span-9">
           <h1 className="display text-5xl">{tr("Find your place within SEFIKH.")}</h1>
           <p className="mt-4 max-w-xl text-[15px] text-ink-soft">
@@ -51,7 +51,7 @@ export default async function PricingPage({ searchParams }: PageProps<"/subscrip
           ["CLIENT", tr("For creatives"), "/subscription?for=creative"],
           ["PRO", tr("For artisans"), "/subscription?for=pro"],
         ].map(([a, label, href]) => (
-          <Link key={a} href={href!} scroll={false} className={cn("-mb-px border-b py-3 font-mono text-[11.5px] uppercase tracking-[0.05em]", audience === a ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink")}>
+          <Link key={a} href={href!} scroll={false} className={cn("-mb-px border-b py-3 font-mono text-[11.5px] uppercase tracking-[0.05em]", audience === a ? "border-brass text-ink" : "border-transparent text-muted hover:text-ink")}>
             {label}
           </Link>
         ))}

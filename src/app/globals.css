@@ -60,6 +60,8 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    /* Cases à cocher, boutons radio, curseurs : bordeaux. */
+    accent-color: var(--color-brass);
     scroll-behavior: smooth;
   }
   body {
@@ -119,7 +121,24 @@
     font-weight: 400;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-brass);
+  }
+  /* Étiquette de section : légende bordeaux précédée d'un court filet. */
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    color: var(--color-brass);
+  }
+  .kicker::before {
+    content: "";
+    width: 1.4rem;
+    height: 1px;
+    flex: none;
+    background: currentColor;
   }
   .folio {
     font-family: var(--font-mono);
@@ -157,12 +176,12 @@
   .field:hover { border-color: color-mix(in srgb, var(--color-ink) 60%, transparent); }
   .field:focus {
     outline: none;
-    border-color: var(--color-ink);
+    border-color: var(--color-brass);
   }
   .field[aria-invalid="true"] { border-color: var(--color-danger); }
 
   .link-underline {
-    background-image: linear-gradient(currentColor, currentColor);
+    background-image: linear-gradient(var(--color-brass), var(--color-brass));
     background-size: 0% 1px;
     background-position: 0 100%;
     background-repeat: no-repeat;

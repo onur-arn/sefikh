@@ -24,7 +24,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
 
   return (
     <div className="container-x py-12 sm:py-20">
-      <p className="folio">{tr("Account")}</p>
+      <p className="kicker self-start">{tr("Account")}</p>
       <div className="mt-8 grid border-t border-ink/70 lg:grid-cols-2">
         {/* Nouveau sur SEFIKH */}
         <section className="order-first border-b border-line py-10 lg:order-last lg:border-b-0 lg:border-l lg:py-14 lg:pl-14">

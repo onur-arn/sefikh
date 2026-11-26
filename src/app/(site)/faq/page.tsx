@@ -61,12 +61,12 @@ export default async function FaqPage() {
   return (
     <div className="container-x pb-24 pt-12 sm:pt-16">
       <header className="grid gap-4 lg:grid-cols-12">
-        <p className="folio lg:col-span-3">{tr("FAQ")}</p>
+        <p className="kicker self-start lg:col-span-3">{tr("FAQ")}</p>
         <div className="lg:col-span-9">
           <h1 className="display text-4xl">{tr("Frequently asked questions")}</h1>
           <p className="mt-3 text-[14px] text-muted">
             {tr("Another question?")}{" "}
-            <Link href="/contact" className="text-ink underline underline-offset-4 hover:text-brass">
+            <Link href="/contact" className="text-ink underline decoration-brass underline-offset-4 hover:text-brass">
               {tr("Contact us")}
             </Link>
           </p>
@@ -83,8 +83,8 @@ export default async function FaqPage() {
                 <summary className="flex cursor-pointer list-none items-baseline justify-between gap-6 py-4 [&::-webkit-details-marker]:hidden">
                   <span className="text-[15px] leading-snug transition-colors group-hover:text-brass">{tr(q)}</span>
                   <span aria-hidden className="relative size-3 shrink-0 self-center">
-                    <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-ink" />
-                    <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-ink transition-transform duration-300 group-open:scale-y-0" />
+                    <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-brass" />
+                    <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-brass transition-transform duration-300 group-open:scale-y-0" />
                   </span>
                 </summary>
                 <p className="-mt-1 max-w-2xl pb-5 text-[14px] leading-relaxed text-ink-soft">{tr(a)}</p>

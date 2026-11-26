@@ -32,7 +32,7 @@ export default async function AboutPage() {
     <>
       <section className="container-x pb-16 pt-12">
         <div className="grid gap-8 lg:grid-cols-12">
-          <p className="folio lg:col-span-3">{tr("Behind SEFIKH")}</p>
+          <p className="kicker self-start lg:col-span-3">{tr("Behind SEFIKH")}</p>
           <div className="lg:col-span-9">
             <h1 className="display text-4xl sm:text-5xl">{tr("A story of curiosity and creation")}</h1>
             <div className="mt-8 max-w-2xl space-y-5 text-[15px] leading-relaxed text-ink-soft">
@@ -50,7 +50,7 @@ export default async function AboutPage() {
             [tr.number(portfolioCount), tr("Portfolio pieces")],
           ].map(([n, l], i) => (
             <div key={l} className={i ? "border-l border-line py-5 pl-5" : "py-5"}>
-              <dd className="display text-4xl">{n}</dd>
+              <dd className="display text-4xl text-brass">{n}</dd>
               <dt className="folio mt-2">{l}</dt>
             </div>
           ))}
@@ -73,7 +73,7 @@ export default async function AboutPage() {
             [tr("How we work"), tr("An AI search engine that understands materials, techniques and images — and a team that curates the platform by hand.")],
           ].map(([t, d], i) => (
             <div key={t} className={i ? "border-t border-line py-8 md:border-l md:border-t-0 md:pl-8" : "py-8 md:pr-8"}>
-              <p className="folio">{["i", "ii", "iii"][i]}</p>
+              <p className="folio !text-brass">{["i", "ii", "iii"][i]}</p>
               <h2 className="display mt-3 text-2xl">{t}</h2>
               <p className="mt-3 leading-relaxed text-ink-soft">{d}</p>
             </div>
@@ -83,7 +83,7 @@ export default async function AboutPage() {
       {/* ── Deux chemins ───────────────────────────────────── */}
       <section className="border-t border-line bg-paper">
         <div className="container-x py-16 sm:py-24">
-        <p className="folio">{tr("How it works")}</p>
+        <p className="kicker self-start">{tr("How it works")}</p>
         <div className="mt-8 grid border-t border-ink/70 lg:grid-cols-2">
           {[
             {
@@ -110,7 +110,7 @@ export default async function AboutPage() {
               <ol className="mt-8">
                 {col.steps.map(([t, d], i) => (
                   <li key={t} className="grid grid-cols-[2.5rem_1fr] border-t border-line py-4">
-                    <span className="folio pt-1">{["i", "ii", "iii"][i]}</span>
+                    <span className="folio pt-1 !text-brass">{["i", "ii", "iii"][i]}</span>
                     <div>
                       <p className="text-[15.5px] font-medium">{t}</p>
                       <p className="mt-1 text-[14px] leading-relaxed text-muted">{d}</p>
