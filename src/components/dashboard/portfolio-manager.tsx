@@ -88,7 +88,7 @@ export function PortfolioManager({ initialItems, limit }: { initialItems: Item[]
       {uploads.length > 0 && (
         <ul className="space-y-2">
           {uploads.map((u) => (
-            <li key={u.name} className="flex items-center gap-3 rounded-xl border border-line bg-paper px-4 py-3 text-sm">
+            <li key={u.name} className="flex items-center gap-3 rounded-none border border-line bg-paper px-4 py-3 text-sm">
               {u.status === "uploading" ? <span className="size-4 animate-spin rounded-full border-2 border-ink border-r-transparent" /> : <span className="size-2 rounded-full bg-danger" />}
               <span className="truncate">{u.name}</span>
               <span className={cn("ml-auto text-[12px]", u.status === "error" ? "text-danger" : "text-muted")}>{u.status === "uploading" ? tr("Optimising & analysing…") : tr(u.error)}</span>
@@ -125,7 +125,7 @@ function PortfolioItem({ item, index, total, onMove, onRemove }: { item: Item; i
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm({ ...form, [k]: e.target.value });
 
   return (
-    <li className="overflow-hidden rounded-2xl border border-line bg-paper">
+    <li className="overflow-hidden rounded-none border border-line bg-paper">
       <div className="relative aspect-[4/3] bg-sand">
         <Image src={fileUrl(item.thumbKey ?? item.key)!} alt={item.title ?? ""} fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />
         {index === 0 && (

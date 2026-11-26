@@ -79,7 +79,7 @@ export function MonthPicker({ name, defaultValue = [] }: { name: string; default
       {labels.map((l, i) => {
         const on = months.includes(i + 1);
         return (
-          <label key={l} className={cn("cursor-pointer rounded-lg border py-2 text-center text-[12px] transition", on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40")}>
+          <label key={l} className={cn("cursor-pointer rounded-none border py-2 text-center text-[12px] transition", on ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink/40")}>
             <input type="checkbox" name={name} value={i + 1} checked={on} onChange={() => setMonths((m) => (on ? m.filter((x) => x !== i + 1) : [...m, i + 1]))} className="sr-only" />
             {tr(l)}
           </label>

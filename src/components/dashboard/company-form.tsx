@@ -195,7 +195,7 @@ export function CompanyForm({ company, onboarding, accountEmail, listed }: { com
 
       {!onboarding && listed && (
         <Section title={tr("Visibility")}>
-          <label className="flex items-start gap-3 rounded-xl border border-line bg-paper p-4">
+          <label className="flex items-start gap-3 rounded-none border border-line bg-paper p-4">
             <input type="checkbox" name="published" defaultChecked={company.published} className="mt-0.5 size-4 accent-ink" />
             <span>
               <span className="block text-sm font-medium">{tr("Publish my profile")}</span>

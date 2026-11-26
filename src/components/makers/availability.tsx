@@ -15,7 +15,7 @@ export function AvailabilityCalendar({ months }: { months: number[] }) {
           const on = months.includes(i + 1);
           return (
             <div key={m} className="text-center">
-              <div className={cn("h-9 rounded-md transition", on ? "bg-ink" : "bg-sand", i + 1 === now && "ring-2 ring-brass ring-offset-2 ring-offset-ivory")} title={`${m}: ${on ? "available" : "busy"}`} />
+              <div className={cn("h-9 rounded-none transition", on ? "bg-ink" : "bg-sand", i + 1 === now && "ring-2 ring-brass ring-offset-2 ring-offset-ivory")} title={`${m}: ${on ? "available" : "busy"}`} />
               <span className="mt-1.5 block text-[10px] text-muted">{m[0]}</span>
             </div>
           );

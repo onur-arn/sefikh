@@ -15,7 +15,7 @@ export default async function AdminRequestsPage() {
   return (
     <ul className="space-y-3">
       {requests.map((r) => (
-        <li key={r.id} className="rounded-2xl border border-line bg-paper p-5">
+        <li key={r.id} className="rounded-none border border-line bg-paper p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-sm font-medium">
               {r.name} · <a href={`mailto:${r.email}`} className="underline">{r.email}</a>

@@ -28,7 +28,7 @@ export default async function AdminMakersPage() {
     select: { id: true, slug: true, name: true, city: true, country: true, published: true, verified: true, user: { select: { email: true } }, _count: { select: { portfolio: true } } },
   });
   return (
-    <div className="overflow-x-auto rounded-2xl border border-line">
+    <div className="overflow-x-auto rounded-none border border-line">
       <table className="w-full min-w-[720px] text-left text-sm">
         <thead className="bg-paper text-[12px] text-muted">
           <tr>

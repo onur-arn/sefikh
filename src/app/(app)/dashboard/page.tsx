@@ -27,7 +27,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const notice = sp.notice === "password-reset" ? tr("Your password has been updated.") : sp.welcome ? tr("Welcome to SEFIKH — your profile is ready.") : null;
   return (
     <>
-      {notice && <p className="mb-6 rounded-xl bg-success/10 px-4 py-3 text-sm text-success">{notice}</p>}
+      {notice && <p className="mb-6 rounded-none bg-success/10 px-4 py-3 text-sm text-success">{notice}</p>}
       {user.role === "PRO" ? <ProOverview user={user} /> : <ClientOverview user={user} />}
     </>
   );
@@ -151,7 +151,7 @@ async function ClientOverview({ user }: { user: CurrentUser }) {
         </section>
       ) : (
         !plan.limits.savedLibrary && (
-          <div className="rounded-2xl grain flex flex-col items-start gap-5 overflow-hidden bg-espresso p-8 text-paper sm:flex-row sm:items-center">
+          <div className="rounded-none grain flex flex-col items-start gap-5 overflow-hidden bg-espresso p-8 text-paper sm:flex-row sm:items-center">
             <div className="flex-1">
               <p className="display text-3xl">{tr("Go further with Pro")}</p>
               <p className="mt-2 text-sm text-paper/60">

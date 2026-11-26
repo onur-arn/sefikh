@@ -274,7 +274,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
             </AccordionItem>
           </div>
 
-          <div className="mt-8 rounded-2xl border border-line bg-paper p-6">
+          <div className="mt-8 rounded-none border border-line bg-paper p-6">
             <p className="text-sm font-semibold">{tr("Contact details")}</p>
             {canSeeContact ? (
               <ul className="mt-4 space-y-2.5 text-sm">

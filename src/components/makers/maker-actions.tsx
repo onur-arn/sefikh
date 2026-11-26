@@ -37,7 +37,7 @@ export function SaveButton({ companyId, initialSaved, viewer }: { companyId: str
         {saved ? tr("Saved") : tr("Save")}
       </button>
       {msg && (
-        <div className="absolute right-0 top-13 z-10 w-64 rounded-xl border border-line bg-paper p-4 text-sm shadow-lg">
+        <div className="absolute right-0 top-13 z-10 w-64 rounded-none border border-line bg-paper p-4 text-sm shadow-lg">
           <p>{tr(msg)}</p>
           <Link href="/subscription" className="mt-2 inline-block font-medium text-brass-dark underline">
             {tr("See plans")}</Link>
@@ -117,7 +117,7 @@ export function ContactButton({ company, viewer, projects, className }: { compan
             <p className="eyebrow">{tr("New conversation")}</p>
             <h2 className="display mt-2 text-3xl">{tr("Write to {name}", { name: company.name })}</h2>
             {!viewer.verified ? (
-              <div className="mt-6 rounded-xl bg-brass-light/50 p-4 text-sm">
+              <div className="mt-6 rounded-none bg-brass-light/50 p-4 text-sm">
                 {tr("Please confirm your e-mail address before contacting makers. Check your inbox, or resend the link from your")}{" "}
                 <Link href="/dashboard" className="font-medium underline">
                   {tr("dashboard")}</Link>

@@ -78,7 +78,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
   // Accueil : barre transparente sur l'image d'ouverture, blanche au survol et après le défilement.
   const overlay = pathname === "/" && !pastIntro && !hovered && !mobileOpen;
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
-  const navClass = "link-underline font-mono text-[11.5px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink";
+  const navClass = "nav-item link-underline py-1 text-ink-soft hover:text-ink";
 
   return (
     <header
@@ -109,7 +109,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
             href="/search"
             aria-label={tr("Search")}
             aria-current={pathname.startsWith("/search") ? "page" : undefined}
-            className={cn("mr-2 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink", pathname.startsWith("/search") && "font-semibold !text-brass")}
+            className={cn("nav-item link-underline mr-2 inline-flex items-center gap-1.5 py-1 text-ink-soft hover:text-ink", pathname.startsWith("/search") && "font-semibold !text-brass")}
           >
             <Search className="size-[17px] sm:size-3.5" strokeWidth={1.6} />
             <span className="hidden sm:inline">{tr("Search")}</span>
@@ -124,7 +124,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
               <AccountMenu user={user} />
             </>
           ) : (
-            <Link href="/account" className="hidden px-1 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink sm:inline">
+            <Link href="/account" className="nav-item link-underline hidden py-1 text-ink-soft hover:text-ink sm:inline">
               {tr("Log in")}
             </Link>
           )}
@@ -210,7 +210,7 @@ function NotificationsMenu({ count, onRead }: { count: number; onRead: () => voi
         {count > 0 && <span className="absolute right-1 top-1 flex min-w-4 items-center justify-center rounded-full bg-brass px-1 text-[10px] font-bold leading-4 text-paper">{count > 9 ? "9+" : count}</span>}
       </button>
       {open && (
-        <div className="absolute right-0 top-12 w-[min(92vw,360px)] animate-fade-in overflow-hidden rounded-2xl border border-line bg-paper shadow-xl shadow-ink/5">
+        <div className="absolute right-0 top-12 w-[min(92vw,360px)] animate-fade-in overflow-hidden rounded-none border border-line bg-paper shadow-xl shadow-ink/5">
           <p className="border-b border-line px-5 py-3.5 text-sm font-semibold">{tr("Notifications")}</p>
           <div className="scrollbar-thin max-h-96 overflow-y-auto">
             {items === null ? (
@@ -259,11 +259,11 @@ function AccountMenu({ user }: { user: HeaderUser }) {
     <div className="relative" ref={ref}>
       <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={tr("Account menu")} className="ml-1 flex items-center gap-1.5 rounded-sm p-1 pr-2 hover:bg-sand">
         <Avatar name={user.name} imageKey={user.avatarKey} size={28} />
-        <span className="hidden font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft sm:inline">{tr("Account")}</span>
+        <span className="nav-item hidden text-ink-soft sm:inline">{tr("Account")}</span>
         <ChevronDown className="hidden size-3.5 text-muted sm:block" />
       </button>
       {open && (
-        <div className="absolute right-0 top-12 w-64 animate-fade-in overflow-hidden rounded-2xl border border-line bg-paper py-2 shadow-xl shadow-ink/5">
+        <div className="absolute right-0 top-12 w-64 animate-fade-in overflow-hidden rounded-none border border-line bg-paper py-2 shadow-xl shadow-ink/5">
           <div className="border-b border-line px-4 pb-3 pt-1">
             <p className="truncate text-sm font-semibold">{user.name}</p>
             <p className="text-xs text-muted">{user.role === "PRO" ? tr("Maker account") : tr("Project owner account")}</p>

@@ -48,7 +48,7 @@ export function DocumentsManager({ initialDocs, projects, initialProject, used }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-paper p-5 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4 rounded-none border border-line bg-paper p-5 sm:flex-row sm:items-center">
         <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="field sm:w-64" aria-label={tr("Attach to project")}>
           <option value="">{tr("No project")}</option>
           {projects.map((p) => (
@@ -81,11 +81,11 @@ export function DocumentsManager({ initialDocs, projects, initialProject, used }
       </div>
 
       {visible.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line p-12 text-center text-sm text-muted">{tr("No document here yet.")}</p>
+        <p className="rounded-none border border-dashed border-line p-12 text-center text-sm text-muted">{tr("No document here yet.")}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {visible.map((d) => (
-            <li key={d.id} className="group overflow-hidden rounded-2xl border border-line bg-paper">
+            <li key={d.id} className="group overflow-hidden rounded-none border border-line bg-paper">
               <a href={d.url} target="_blank" rel="noopener" className="block aspect-[16/10] bg-sand">
                 {d.mime.startsWith("image/") ? (
                   // eslint-disable-next-line @next/next/no-img-element

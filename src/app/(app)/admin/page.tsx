@@ -35,7 +35,7 @@ export default async function AdminPage() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {tiles.map(([label, value]) => (
-        <div key={label} className="rounded-2xl border border-line bg-paper p-5">
+        <div key={label} className="rounded-none border border-line bg-paper p-5">
           <p className="text-[13px] text-muted">{label}</p>
           <p className="display mt-2 text-4xl">{value}</p>
         </div>

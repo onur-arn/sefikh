@@ -41,7 +41,7 @@ export function FormMessage({ state }: { state?: { error?: string; success?: str
   const tr = useT();
   if (!state?.error && !state?.success) return null;
   return (
-    <p role={state.error ? "alert" : "status"} className={cn("rounded-lg px-4 py-3 text-sm", state.error ? "bg-danger/10 text-danger" : "bg-success/10 text-success")}>
+    <p role={state.error ? "alert" : "status"} className={cn("rounded-none px-4 py-3 text-sm", state.error ? "bg-danger/10 text-danger" : "bg-success/10 text-success")}>
       {tr(state.error ?? state.success)}
     </p>
   );

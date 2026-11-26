@@ -43,7 +43,7 @@ export function LocaleMenu({ tone = "light", className }: { tone?: "light" | "da
 
   return (
     <div ref={ref} className={cn("relative", className)}>
-      <button type="button" aria-haspopup="menu" aria-expanded={open} aria-label={tr("Language")} onClick={() => setOpen((o) => !o)} className={cn("link-underline font-mono text-[11px] tracking-[0.05em]", tone === "dark" ? "text-paper" : "text-ink-soft hover:text-ink", pending && "opacity-50")}>
+      <button type="button" aria-haspopup="menu" aria-expanded={open} aria-label={tr("Language")} onClick={() => setOpen((o) => !o)} className={cn("nav-item link-underline py-1", tone === "dark" ? "text-paper" : "text-ink-soft hover:text-ink", pending && "opacity-50")}>
         {CODES[tr.locale]}
       </button>
       {open && (
@@ -59,7 +59,7 @@ export function LocaleMenu({ tone = "light", className }: { tone?: "light" | "da
                   if (l !== tr.locale) choose(l);
                 }}
                 aria-label={LOCALE_LABELS[l]}
-                className={cn("block w-full px-4 py-1.5 text-left font-mono text-[11.5px] tracking-[0.05em] text-ink-soft transition-colors hover:text-ink", l === tr.locale && "font-semibold text-ink")}
+                className={cn("nav-item block w-full px-4 py-2 text-left text-ink-soft transition-colors hover:text-ink", l === tr.locale && "font-semibold !text-brass")}
               >
                 {CODES[l]}
               </button>

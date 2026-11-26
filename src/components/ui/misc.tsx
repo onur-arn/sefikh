@@ -17,7 +17,7 @@ export function Badge({ children, tone = "neutral", className }: { children: Rea
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("rounded-2xl border border-line bg-paper", className)}>{children}</div>;
+  return <div className={cn("rounded-none border border-line bg-paper", className)}>{children}</div>;
 }
 
 export function Avatar({ name, imageKey, size = 40, className }: { name: string; imageKey?: string | null; size?: number; className?: string }) {
@@ -31,7 +31,7 @@ export function Avatar({ name, imageKey, size = 40, className }: { name: string;
 
 export function EmptyState({ icon, title, children, action }: { icon?: ReactNode; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center rounded-none border border-dashed border-line px-6 py-14 text-center">
       {icon && <div className="mb-4 text-brass">{icon}</div>}
       <h3 className="display text-2xl">{title}</h3>
       {children && <div className="mt-2 max-w-md text-sm text-muted">{children}</div>}

@@ -37,7 +37,7 @@ export default async function ProjectsPage() {
         <ul className="grid gap-4 md:grid-cols-2">
           {projects.map((p) => (
             <li key={p.id}>
-              <Link href={`/dashboard/projects/${p.id}`} className="block h-full rounded-2xl border border-line bg-paper p-6 transition hover:border-ink/30">
+              <Link href={`/dashboard/projects/${p.id}`} className="block h-full rounded-none border border-line bg-paper p-6 transition hover:border-ink/30">
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="display text-2xl">{tr(p.title)}</h2>
                   <Badge tone={p.status === "ACTIVE" ? "success" : "neutral"}>{p.status === "ACTIVE" ? tr("Active") : tr("Archived")}</Badge>

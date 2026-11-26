@@ -59,7 +59,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps<"/
   return (
     <div className="space-y-12">
       {created && (
-        <p className="rounded-xl bg-success/10 px-4 py-3 text-sm text-success">
+        <p className="rounded-none bg-success/10 px-4 py-3 text-sm text-success">
           {tr("Your project is saved. Here are the makers and specialists matching your requirements — contact them directly from their profile.")}</p>
       )}
       <header className="flex flex-col gap-5 sm:flex-row sm:items-end">

@@ -37,7 +37,7 @@ export function PortfolioGallery({ items, companyName }: { items: GalleryItem[];
       <div className="columns-1 gap-4 sm:columns-2 [&>*]:mb-4">
         {items.map((p, i) => (
           <button key={p.id} onClick={() => setIndex(i)} className="group block w-full break-inside-avoid text-left">
-            <div className="relative overflow-hidden rounded-2xl bg-sand" style={{ aspectRatio: `${p.width} / ${p.height}` }}>
+            <div className="relative overflow-hidden rounded-none bg-sand" style={{ aspectRatio: `${p.width} / ${p.height}` }}>
               <Image src={fileUrl(p.thumbKey ?? p.key)!} alt={p.title ?? tr("Work by {companyName}", { companyName })} fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
             </div>
             {(p.title || p.projectName) && (

@@ -13,7 +13,7 @@ function ChartTooltip({ active, payload, label, unit }: { active?: boolean; payl
   const tr = useT();
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-line bg-paper px-3 py-2 text-[12px] shadow-md">
+    <div className="rounded-none border border-line bg-paper px-3 py-2 text-[12px] shadow-md">
       <p className="text-muted">{label}</p>
       <p className="mt-0.5 font-semibold text-ink">
         {tr.number(payload[0]!.value)} {unit}

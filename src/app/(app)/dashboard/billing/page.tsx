@@ -71,15 +71,15 @@ export default async function BillingPage() {
             {sub && <BillingControls cancelAtPeriodEnd={sub.cancelAtPeriodEnd} provider={sub.provider} hasCustomer={!!user.stripeCustomerId} />}
           </div>
         </div>
-        {sub?.provider === "simulated" && <p className="mt-6 rounded-lg bg-sand px-3 py-2 text-[12px] text-muted">{tr("Demo subscription (simulated payment, no real charge).")}</p>}
+        {sub?.provider === "simulated" && <p className="mt-6 rounded-none bg-sand px-3 py-2 text-[12px] text-muted">{tr("Demo subscription (simulated payment, no real charge).")}</p>}
       </Card>
 
       <section className="mt-10">
         <h2 className="display text-3xl">{tr("Invoices & payments")}</h2>
         {payments.length === 0 ? (
-          <p className="mt-4 rounded-2xl border border-dashed border-line p-10 text-center text-sm text-muted">{tr("No payment yet.")}</p>
+          <p className="mt-4 rounded-none border border-dashed border-line p-10 text-center text-sm text-muted">{tr("No payment yet.")}</p>
         ) : (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-paper">
+          <div className="mt-4 overflow-x-auto rounded-none border border-line bg-paper">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-[12px] uppercase tracking-[0.12em] text-muted">

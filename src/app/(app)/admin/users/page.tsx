@@ -24,7 +24,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/admin
       <form className="mb-5 max-w-sm">
         <input name="q" defaultValue={q} placeholder={tr("Search by name or e-mail")} aria-label={tr("Search by name or e-mail")} className="field" />
       </form>
-      <div className="overflow-x-auto rounded-2xl border border-line">
+      <div className="overflow-x-auto rounded-none border border-line">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="bg-paper text-[12px] text-muted">
             <tr>

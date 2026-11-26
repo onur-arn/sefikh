@@ -95,7 +95,7 @@ export function SearchPanel({ compact = false, initial }: { compact?: boolean; i
           {preview && (
             <span className="relative shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={preview} alt={tr("Selected reference")} className="size-20 rounded-xl object-cover" />
+              <img src={preview} alt={tr("Selected reference")} className="size-20 rounded-none object-cover" />
               <button type="button" onClick={removeFile} aria-label={tr("Remove image")} className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-ink text-paper">
                 <X className="size-3.5" />
               </button>

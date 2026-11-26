@@ -373,7 +373,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 
 function Q({ title, hint, required, children }: { title: string; hint?: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
+    <div className="rounded-none border border-line bg-paper p-5 sm:p-6">
       <p className={cn("text-[15px]", required ? "font-semibold" : "font-medium text-ink-soft")}>
         {title}
         {required && <span className="text-brass"> *</span>}

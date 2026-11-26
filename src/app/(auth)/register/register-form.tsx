@@ -27,7 +27,7 @@ export function RegisterForm({ initialRole }: { initialRole: "CLIENT" | "PRO" })
         <legend className="mb-2 text-[13px] font-medium text-ink-soft">{tr("Your profile")}</legend>
         <div className="grid grid-cols-2 gap-3">
           {ROLES.map(({ value, title, text, icon: Icon }) => (
-            <label key={value} className={cn("cursor-pointer rounded-xl border p-4 transition", role === value ? "border-ink bg-paper shadow-sm" : "border-line hover:border-ink/40")}>
+            <label key={value} className={cn("cursor-pointer rounded-none border p-4 transition", role === value ? "border-ink bg-paper shadow-sm" : "border-line hover:border-ink/40")}>
               <input type="radio" name="role" value={value} checked={role === value} onChange={() => setRole(value)} className="sr-only" />
               <Icon className={cn("mb-3 size-5", role === value ? "text-brass" : "text-muted")} strokeWidth={1.6} />
               <span className="block text-sm font-semibold">{tr(title)}</span>

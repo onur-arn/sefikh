@@ -572,14 +572,14 @@ function AttachmentView({ a }: { a: AttachmentT }) {
   const tr = useT();
   if (a.mime.startsWith("image/")) {
     return (
-      <a href={a.url} target="_blank" rel="noopener" className="block overflow-hidden rounded-xl border border-line">
+      <a href={a.url} target="_blank" rel="noopener" className="block overflow-hidden rounded-none border border-line">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={a.url} alt={a.name} className="max-h-60 max-w-[260px] object-cover" loading="lazy" />
       </a>
     );
   }
   return (
-    <a href={`${a.url}?download=${encodeURIComponent(a.name)}`} className="flex items-center gap-3 rounded-xl border border-line bg-paper px-3.5 py-2.5 text-[13px] hover:border-ink/40">
+    <a href={`${a.url}?download=${encodeURIComponent(a.name)}`} className="flex items-center gap-3 rounded-none border border-line bg-paper px-3.5 py-2.5 text-[13px] hover:border-ink/40">
       <FileText className="size-5 text-brass" strokeWidth={1.5} />
       <span>
         <span className="block max-w-[180px] truncate font-medium">{a.name}</span>
@@ -620,7 +620,7 @@ function Composer({ onSend, onTyping }: { onSend: (body: string, files: File[]) 
 
   return (
     <div className="border-t border-line p-3 sm:p-4">
-      <div className="rounded-2xl border border-line bg-paper focus-within:border-ink/60">
+      <div className="rounded-none border border-line bg-paper focus-within:border-ink/60">
         {files.length > 0 && (
           <div className="flex flex-wrap gap-1.5 border-b border-line p-2.5">
             {files.map((f, i) => (
@@ -686,18 +686,18 @@ function FilesView({ onOpen }: { onOpen: (conversationId: string) => void }) {
         {files === null ? (
           <p className="mt-10 text-sm text-muted">{tr("Loading…")}</p>
         ) : files.length === 0 ? (
-          <div className="mt-10 rounded-2xl border border-dashed border-line p-12 text-center text-sm text-muted">
+          <div className="mt-10 rounded-none border border-dashed border-line p-12 text-center text-sm text-muted">
             <FolderOpen className="mx-auto mb-3 size-8 text-line" />
             {tr("No files yet.")}</div>
         ) : (
-          <ul className="mt-8 divide-y divide-line rounded-2xl border border-line bg-paper">
+          <ul className="mt-8 divide-y divide-line rounded-none border border-line bg-paper">
             {files.map((f) => (
               <li key={f.id} className="flex items-center gap-4 p-4">
                 {f.mime.startsWith("image/") ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={f.url} alt="" className="size-12 rounded-lg object-cover" />
+                  <img src={f.url} alt="" className="size-12 rounded-none object-cover" />
                 ) : (
-                  <span className="flex size-12 items-center justify-center rounded-lg bg-sand">
+                  <span className="flex size-12 items-center justify-center rounded-none bg-sand">
                     <FileText className="size-5 text-brass" />
                   </span>
                 )}

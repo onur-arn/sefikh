@@ -9,7 +9,7 @@ export function VerifyBanner({ email }: { email: string }) {
   const tr = useT();
   const [state, action, pending] = useActionState(resendVerificationAction, null);
   return (
-    <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-brass/30 bg-brass-light/40 p-4 sm:flex-row sm:items-center">
+    <div className="mb-8 flex flex-col gap-3 rounded-none border border-brass/30 bg-brass-light/40 p-4 sm:flex-row sm:items-center">
       <MailWarning className="size-5 shrink-0 text-brass-dark" strokeWidth={1.6} />
       <p className="flex-1 text-sm">
         <span className="font-medium">{tr("Confirm your e-mail address.")}</span> {" "}{tr("We sent a link to {email}. Searches and messaging are unlocked once your address is confirmed.", { email })}{" "}{state && <span className={state.error ? " text-danger" : " text-success"}> {state.error ?? tr(state.success)}</span>}
