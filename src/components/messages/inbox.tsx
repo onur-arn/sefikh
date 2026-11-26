@@ -120,9 +120,9 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
     <div className="flex h-[calc(100dvh-68px)] flex-col">
       <div className="flex items-center gap-6 border-b border-line px-4 sm:px-6">
         {(["inbox", "files"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={cn("relative py-3.5 text-[13.5px] font-medium", tab === t ? "text-ink" : "text-muted hover:text-ink")}>
+          <button key={t} onClick={() => setTab(t)} className={cn("relative py-3.5 text-[13.5px] font-medium", tab === t ? "font-semibold text-brass" : "text-muted hover:text-ink")}>
             {t === "inbox" ? tr("Inbox") : tr("Shared files")}
-            {tab === t && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-ink" />}
+            {tab === t && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-brass" />}
           </button>
         ))}
       </div>
@@ -140,7 +140,7 @@ export function Inbox({ initialId, me }: { initialId: string | null; me: { id: s
               </label>
               <div className="flex gap-1">
                 {FILTERS.map((f) => (
-                  <button key={f.id} onClick={() => setFilter(f.id)} className={cn("rounded-sm px-3 py-1 text-[12.5px]", filter === f.id ? "bg-ink text-paper" : "text-muted hover:bg-sand hover:text-ink")}>
+                  <button key={f.id} onClick={() => setFilter(f.id)} className={cn("rounded-sm px-3 py-1 text-[12.5px]", filter === f.id ? "bg-brass text-paper" : "text-muted hover:bg-sand hover:text-ink")}>
                     {tr(f.label)}
                   </button>
                 ))}

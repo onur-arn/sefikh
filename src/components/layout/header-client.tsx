@@ -92,7 +92,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
             // Page en cours : en gras, sans soulignement.
             const active = isActive(n.href);
             return (
-              <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined} className={cn(navClass, active && "font-semibold text-ink [background-size:100%_1px]")}>
+              <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined} className={cn(navClass, active && "font-semibold !text-brass [background-image:none]")}>
                 {tr(n.label)}
               </Link>
             );
@@ -109,7 +109,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
             href="/search"
             aria-label={tr("Search")}
             aria-current={pathname.startsWith("/search") ? "page" : undefined}
-            className={cn("mr-2 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink", pathname.startsWith("/search") && "font-semibold text-ink link-underline [background-size:100%_1px]")}
+            className={cn("mr-2 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-ink-soft hover:text-ink", pathname.startsWith("/search") && "font-semibold !text-brass")}
           >
             <Search className="size-[17px] sm:size-3.5" strokeWidth={1.6} />
             <span className="hidden sm:inline">{tr("Search")}</span>
@@ -138,7 +138,7 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
         <div className="border-t border-line bg-paper text-ink lg:hidden">
           <nav className="container-x flex flex-col py-4" aria-label={tr("Mobile")}>
             {NAV.map((n) => (
-              <Link key={n.href} href={n.href} aria-current={isActive(n.href) ? "page" : undefined} className={cn("display border-b border-line/70 py-3 text-2xl", isActive(n.href) && "font-semibold")}>
+              <Link key={n.href} href={n.href} aria-current={isActive(n.href) ? "page" : undefined} className={cn("display border-b border-line/70 py-3 text-2xl", isActive(n.href) && "font-semibold text-brass")}>
                 {tr(n.label)}
               </Link>
             ))}

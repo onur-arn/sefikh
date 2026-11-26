@@ -51,7 +51,7 @@ export default async function PricingPage({ searchParams }: PageProps<"/subscrip
           ["CLIENT", tr("For creatives"), "/subscription?for=creative"],
           ["PRO", tr("For artisans"), "/subscription?for=pro"],
         ].map(([a, label, href]) => (
-          <Link key={a} href={href!} scroll={false} className={cn("-mb-px border-b py-3 font-mono text-[11.5px] uppercase tracking-[0.05em]", audience === a ? "border-brass text-ink" : "border-transparent text-muted hover:text-ink")}>
+          <Link key={a} href={href!} scroll={false} className={cn("-mb-px border-b py-3 font-mono text-[11.5px] uppercase tracking-[0.05em]", audience === a ? "border-brass font-semibold text-brass" : "border-transparent text-muted hover:text-ink")}>
             {label}
           </Link>
         ))}
