@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { activateSubscription, BillingError, cancelSubscription, isIndependent, priceFor, resumeSubscription } from "@/lib/billing";
 import { db } from "@/lib/db";
+import { ensureInvoiceNumber } from "@/lib/invoices";
 import { simulatedPayments } from "@/lib/env";
 import { LAUNCH_DISCOUNT, planName, PLANS, type PlanId, type Term } from "@/lib/plans";
 import { getT } from "@/i18n/server";
@@ -22,7 +23,7 @@ export async function simulateCheckoutAction(planId: PlanId, term: Term) {
   // Offre de lancement : −20 % sur le premier mois d'un abonnement mensuel (le 2e est remisé au renouvellement).
   const amount = term === "MONTHLY" ? Math.round((full * (100 - LAUNCH_DISCOUNT.percent)) / 100) : full;
   const description = term === "ANNUAL" ? tr("SEFIKH {plan} — first year (simulated)", { plan: planName(plan, tr) }) : tr("SEFIKH {plan} — first month, launch offer −20% (simulated)", { plan: planName(plan, tr) });
-  await db.payment.create({ data: { userId: user.id, amount, status: "PAID", description } });
+  await ensureInvoiceNumber(await db.payment.create({ data: { userId: user.id, amount, status: "PAID", description, periodStart: new Date(), periodEnd: end } }));
   redirect("/checkout/success");
 }
 
@@ -46,4 +47,13 @@ export async function resumeAction() {
   }
   revalidatePath("/dashboard/billing");
   return { ok: true };
+}
+
+/** Coordonnées de facturation (imprimées sur les factures). Champ vide = reprise du profil. */
+export async function saveBillingDetailsAction(_: { error?: string; success?: string } | null, formData: FormData) {
+  const user = await requireUser();
+  const clean = (k: string, max: number) => String(formData.get(k) ?? "").trim().slice(0, max) || null;
+  await db.user.update({ where: { id: user.id }, data: { billingCompany: clean("company", 160), billingAddress: clean("address", 300), billingVat: clean("vat", 60) } });
+  revalidatePath("/dashboard/billing");
+  return { success: "Billing details saved." };
 }

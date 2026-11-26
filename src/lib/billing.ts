@@ -1,6 +1,7 @@
 import "server-only";
 import Stripe from "stripe";
 import { db } from "@/lib/db";
+import { ensureInvoiceNumber } from "@/lib/invoices";
 import { translatorFor } from "@/i18n/server";
 import { env, simulatedPayments } from "@/lib/env";
 import { sendEmail } from "@/lib/mail";
@@ -272,8 +273,9 @@ export async function expireSimulated(userId: string) {
       await downgrade(userId);
     } else {
       // Renouvellement simulé
-      await db.subscription.update({ where: { id: sub.id }, data: { currentPeriodEnd: addMonths(sub.currentPeriodEnd!, sub.term === "ANNUAL" ? 12 : 1) } });
-      await db.payment.create({ data: { userId, amount: sub.amount, status: "PAID", description: `${getPlan(sub.plan).name} — renewal (simulated)` } });
+      const periodEnd = addMonths(sub.currentPeriodEnd!, sub.term === "ANNUAL" ? 12 : 1);
+      await db.subscription.update({ where: { id: sub.id }, data: { currentPeriodEnd: periodEnd } });
+      await ensureInvoiceNumber(await db.payment.create({ data: { userId, amount: sub.amount, status: "PAID", description: `${getPlan(sub.plan).name} — renewal (simulated)`, periodStart: sub.currentPeriodEnd, periodEnd } }));
     }
   }
 }
@@ -351,7 +353,7 @@ export async function handleStripeEvent(event: Stripe.Event) {
       const userId = row?.userId ?? (await db.user.findUnique({ where: { stripeCustomerId: String(inv.customer) } }))?.id;
       if (!userId || !inv.id) break;
       const paid = event.type === "invoice.paid";
-      await db.payment.upsert({
+      const payment = await db.payment.upsert({
         where: { stripeInvoiceId: inv.id },
         create: {
           userId,
@@ -361,9 +363,12 @@ export async function handleStripeEvent(event: Stripe.Event) {
           description: inv.lines.data[0]?.description ?? "SEFIKH subscription",
           stripeInvoiceId: inv.id,
           invoiceUrl: inv.hosted_invoice_url ?? null,
+          periodStart: inv.lines.data[0]?.period?.start ? new Date(inv.lines.data[0].period.start * 1000) : null,
+          periodEnd: inv.lines.data[0]?.period?.end ? new Date(inv.lines.data[0].period.end * 1000) : null,
         },
         update: { status: paid ? "PAID" : "FAILED", invoiceUrl: inv.hosted_invoice_url ?? null },
       });
+      if (paid) await ensureInvoiceNumber(payment);
       if (!paid) {
         if (row) await db.subscription.update({ where: { id: row.id }, data: { status: "PAST_DUE" } });
         const user = await db.user.findUnique({ where: { id: userId } });

@@ -22,6 +22,10 @@ model User {
   emailVerifiedAt  DateTime?
   suspendedAt      DateTime? // compte suspendu par un administrateur
   avatarKey        String?
+  // Coordonnées de facturation (factures d'abonnement) ; à défaut, celles du profil.
+  billingCompany   String?
+  billingAddress   String?
+  billingVat       String?
   locale           String    @default("en")
   // Abonnement courant (dénormalisé pour les contrôles d'accès rapides)
   plan             String    @default("FREE") // voir src/lib/plans.ts
@@ -412,9 +416,19 @@ model Payment {
   description     String?
   stripeInvoiceId String?  @unique
   invoiceUrl      String?
+  // Facture SEFIKH (gabarit du modèle) : numéro séquentiel FAC-AAAA-NNNN attribué à la première consultation.
+  invoiceNumber   String?
+  periodStart     DateTime?
+  periodEnd       DateTime?
   createdAt       DateTime @default(now())
 
   @@index([userId])
+}
+
+/// Compteur des numéros de facture par année (incrément atomique : FAC-AAAA-NNNN sans doublon).
+model InvoiceCounter {
+  year Int @id
+  last Int @default(0)
 }
 
 /// Évènements webhook déjà traités (idempotence)

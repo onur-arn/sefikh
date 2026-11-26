@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { ExternalLink, Receipt } from "lucide-react";
+import Link from "next/link";
+import { Download, Receipt } from "lucide-react";
+import { BillingDetailsForm } from "@/components/billing/billing-details-form";
+import { billingParty } from "@/lib/invoices";
 import { requireUser } from "@/lib/auth/session";
 import { activeSubscription, expireSimulated } from "@/lib/billing";
 import { db } from "@/lib/db";
@@ -18,7 +21,7 @@ export default async function BillingPage() {
   const tr = await getT();
   const user = await requireUser("/dashboard/billing");
   await expireSimulated(user.id);
-  const [sub, payments] = await Promise.all([activeSubscription(user.id), db.payment.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 24 })]);
+  const [sub, payments, billing] = await Promise.all([activeSubscription(user.id), db.payment.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 120 }), billingParty(user.id)]);
   const plan = getPlan(sub?.plan ?? user.plan);
   const inCommitment = !!sub?.commitmentEndsAt && sub.commitmentEndsAt > new Date();
 
@@ -97,10 +100,10 @@ export default async function BillingPage() {
                       <Badge tone={p.status === "PAID" ? "success" : p.status === "FAILED" ? "danger" : "neutral"}>{p.status === "PAID" ? tr("Paid") : p.status === "FAILED" ? tr("Failed") : tr("Refunded")}</Badge>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      {p.invoiceUrl ? (
-                        <a href={p.invoiceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[12.5px] font-medium hover:underline">
-                          {tr("Invoice")}{" "}<ExternalLink className="size-3" />
-                        </a>
+                      {p.status !== "FAILED" ? (
+                        <Link href={`/dashboard/billing/invoices/${p.id}`} className="inline-flex items-center gap-1.5 whitespace-nowrap text-[12.5px] font-medium underline decoration-brass underline-offset-4 hover:text-brass">
+                          <Download className="size-3.5" /> {tr("Invoice (PDF)")}
+                        </Link>
                       ) : (
                         <Receipt className="ml-auto size-4 text-line" />
                       )}
@@ -111,6 +114,14 @@ export default async function BillingPage() {
             </table>
           </div>
         )}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="display text-3xl">{tr("Billing details")}</h2>
+        <p className="mt-1 text-sm text-muted">{tr("Printed on your invoices. Left empty, the details of your profile are used.")}</p>
+        <div className="mt-5">
+          <BillingDetailsForm initial={{ company: billing.company, address: billing.address, vat: billing.vat }} />
+        </div>
       </section>
     </>
   );
