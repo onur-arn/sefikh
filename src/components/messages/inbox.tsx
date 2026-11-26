@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Archive, ArchiveRestore, ArrowLeft, Camera, Check, CheckCheck, ExternalLink, FileText, FolderOpen, Inbox as InboxIcon, Info, Mail, MapPin, Paperclip, Phone, Search, Send, X } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, Camera, Check, CheckCheck, ExternalLink, FileSignature, FileText, FolderOpen, Inbox as InboxIcon, Info, Mail, MapPin, Paperclip, Phone, Search, Send, X } from "lucide-react";
 import { Avatar } from "@/components/ui/misc";
 import { useRealtime, useRealtimeConnected } from "@/lib/realtime-client";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,8 @@ type ListItem = {
   lastMessageAt: string;
 };
 type AttachmentT = { id: string; name: string; mime: string; size: number; url: string; width: number | null; height: number | null };
-type Msg = { id: string; body: string; createdAt: string; mine: boolean; senderName: string; attachments: AttachmentT[]; nonce?: string; pending?: boolean; failed?: boolean };
+type QuoteCardT = { id: string; number: string; status: string; totalTtc: number; event: "sent" | "accepted" | "declined" };
+type Msg = { id: string; body: string; createdAt: string; mine: boolean; senderName: string; attachments: AttachmentT[]; nonce?: string; pending?: boolean; failed?: boolean; quote?: QuoteCardT | null };
 type Detail = {
   id: string;
   side: "client" | "pro";
@@ -396,6 +397,16 @@ function Thread({ id, me, wideOpen, drawerOpen, onToggleDetails, onBack, onChang
                 <p className="truncate text-[14.5px] font-semibold">{detail.other.name}</p>
                 <p className="truncate text-[12px] text-muted">{typing ? <span className="text-brass-dark">{tr("typing…")}</span> : online ? <>{tr("Online ·")}{" "}{detail.project?.title ?? subjectLabel(tr, detail.subject)}</> : detail.project?.title ?? subjectLabel(tr, detail.subject)}</p>
               </div>
+              {detail.side === "pro" && (
+                <Link href={`/messages/quotes/new?c=${detail.id}`} className="hidden h-9 items-center gap-1.5 border border-ink/30 px-3 font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink hover:border-brass hover:text-brass sm:inline-flex" title={tr("Create a quote")}>
+                  <FileSignature className="size-3.5" /> {tr("Quote")}
+                </Link>
+              )}
+              {detail.side === "pro" && (
+                <Link href={`/messages/quotes/new?c=${detail.id}`} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink sm:hidden" aria-label={tr("Create a quote")} title={tr("Create a quote")}>
+                  <FileSignature className="size-[18px]" />
+                </Link>
+              )}
               <button onClick={toggleArchive} className="flex size-9 items-center justify-center rounded-full text-muted hover:bg-sand hover:text-ink" title={detail.archived ? tr("Unarchive") : tr("Archive")} aria-label={detail.archived ? tr("Unarchive") : tr("Archive")}>
                 {detail.archived ? <ArchiveRestore className="size-[18px]" /> : <Archive className="size-[18px]" />}
               </button>
@@ -436,7 +447,7 @@ function Thread({ id, me, wideOpen, drawerOpen, onToggleDetails, onBack, onChang
                         ))}
                       </div>
                     )}
-                    {m.body && <MessageBody message={m} />}
+                    {m.quote ? <QuoteCard quote={m.quote} mine={m.mine} /> : m.body && <MessageBody message={m} />}
                     <p className={cn("mt-1 flex items-center gap-1 text-[10.5px] text-muted", m.mine && "justify-end")}>
                       {m.failed ? <span className="text-danger">{tr("Not sent")}</span> : tr.date(m.createdAt, { hour: "2-digit", minute: "2-digit" })}
                       {m.mine && m.id === lastMine?.id && (otherReadAt && otherReadAt >= m.createdAt ? <CheckCheck className="size-3.5 text-brass" aria-label={tr("Read")} /> : <Check className="size-3.5" aria-label={tr("Sent")} />)}
@@ -710,6 +721,26 @@ function FilesView({ onOpen }: { onOpen: (conversationId: string) => void }) {
 }
 
 /** Bulle de message ; les messages reçus peuvent être traduits vers la langue de l'utilisateur. */
+/** Carte d'un devis dans la conversation (envoi par l'artisan, acceptation ou refus par le client). */
+function QuoteCard({ quote, mine }: { quote: QuoteCardT; mine: boolean }) {
+  const tr = useT();
+  const title = quote.event === "accepted" ? tr("Quote {number} accepted", { number: quote.number }) : quote.event === "declined" ? tr("Quote {number} declined", { number: quote.number }) : tr("Quote {number}", { number: quote.number });
+  const status = quote.status === "ACCEPTED" ? tr("Accepted") : quote.status === "DECLINED" ? tr("Declined") : tr("Awaiting response");
+  return (
+    <Link href={`/messages/quotes/${quote.id}`} className={cn("block w-72 max-w-full border bg-paper p-4 transition hover:border-brass", quote.event === "declined" ? "border-danger/40" : quote.event === "accepted" ? "border-success/40" : "border-ink/25", mine && "ml-auto")}>
+      <span className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-brass">
+        <FileSignature className="size-3.5" /> {tr("Quote")}
+      </span>
+      <span className="mt-2 block font-display text-xl leading-tight">{title}</span>
+      <span className="mt-1 block text-[13px] tabular-nums text-ink-soft">
+        {new Intl.NumberFormat(tr.locale === "zh" ? "zh-CN" : tr.locale, { style: "currency", currency: "EUR", minimumFractionDigits: 2 }).format(quote.totalTtc)} {tr("incl. VAT")}
+      </span>
+      {quote.event === "sent" && <span className="mt-2 block text-[12px] text-muted">{status}</span>}
+      <span className="mt-3 block font-mono text-[10.5px] uppercase tracking-[0.06em] text-ink underline decoration-brass underline-offset-4">{tr("View the quote")}</span>
+    </Link>
+  );
+}
+
 function MessageBody({ message }: { message: Msg }) {
   const state = useAutoTranslate("message", message.id);
   return (

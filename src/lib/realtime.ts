@@ -7,7 +7,8 @@ import { db } from "@/lib/db";
 // messages, lectures et notifications arrivent en 4 s environ ; ce bus ne sert plus qu'en local.
 
 export type WireAttachment = { id: string; name: string; mime: string; size: number; url: string; width: number | null; height: number | null };
-export type WireMessage = { id: string; body: string; createdAt: Date | string; mine: boolean; senderName: string; attachments: WireAttachment[]; nonce?: string };
+export type WireQuote = { id: string; number: string; status: string; totalTtc: number; event: "sent" | "accepted" | "declined" };
+export type WireMessage = { id: string; body: string; createdAt: Date | string; mine: boolean; senderName: string; attachments: WireAttachment[]; nonce?: string; quote?: WireQuote | null };
 
 export type RealtimeEvent =
   | { type: "message"; conversationId: string; message: WireMessage }

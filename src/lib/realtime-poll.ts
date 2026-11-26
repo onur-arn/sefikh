@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
+import { QUOTE_SELECT, wireQuote } from "@/lib/quotes-server";
 import type { RealtimeEvent } from "@/lib/realtime";
 
 // Temps réel par interrogations courtes (v2, 24/11/2026).
@@ -24,7 +25,7 @@ export async function eventsSince(userId: string, since: Date): Promise<Realtime
     // Les messages de l'utilisateur lui-même arrivent déjà par la réponse à son envoi.
     db.message.findMany({
       where: { createdAt: { gt: from }, senderId: { not: userId }, conversation: mine },
-      include: { attachments: true, sender: { select: { name: true } } },
+      include: { attachments: true, sender: { select: { name: true } }, quote: QUOTE_SELECT, conversation: { select: { company: { select: { userId: true } } } } },
       orderBy: { createdAt: "asc" },
       take: 50,
     }),
@@ -50,6 +51,7 @@ export async function eventsSince(userId: string, since: Date): Promise<Realtime
       mine: false,
       senderName: m.sender.name,
       attachments: m.attachments.map((a) => ({ id: a.id, name: a.name, mime: a.mime, size: a.size, url: `/files/${a.key}`, width: a.width, height: a.height })),
+      quote: wireQuote(m, m.conversation.company.userId),
     },
   }));
   for (const c of reads) {

@@ -213,3 +213,19 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Devis : feuille A4 à l'écran, impression / PDF sans en-tête du site. */
+.quote-sheet {
+  width: 210mm;
+  max-width: 100%;
+  min-height: 297mm;
+  padding: 16mm 15mm;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08), 0 0 0 1px var(--color-line);
+}
+@media print {
+  @page { size: A4; margin: 12mm; }
+  header.sticky, body footer:not(.quote-footer) { display: none !important; }
+  .quote-page { background: #fff !important; padding: 0 !important; }
+  .quote-sheet { width: auto; min-height: 0; padding: 0; box-shadow: none; }
+  main img, aside img { filter: none; }
+}

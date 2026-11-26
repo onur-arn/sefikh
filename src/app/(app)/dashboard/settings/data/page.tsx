@@ -5,14 +5,14 @@ import { db } from "@/lib/db";
 import { getPlan, planName } from "@/lib/plans";
 import { parseList } from "@/lib/utils";
 import { getT } from "@/i18n/server";
-import { PrintButton } from "./print-button";
+import { PdfButtons } from "@/components/ui/pdf-buttons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tr = await getT();
   return { title: tr("My data"), robots: { index: false } };
 }
 
-/** Données personnelles présentées lisiblement (v2) : remplace le fichier JSON brut, qui reste disponible à part. */
+/** Données personnelles présentées lisiblement (v2), téléchargeables en PDF ou imprimables. Le fichier JSON brut a été retiré (26/11/2026). */
 export default async function MyDataPage() {
   const tr = await getT();
   const me = await requireUser("/dashboard/settings/data");
@@ -90,14 +90,14 @@ export default async function MyDataPage() {
   });
 
   return (
-    <div className="max-w-3xl">
+    <div id="my-data" className="max-w-3xl bg-ivory">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">{tr("Settings")}</p>
           <h1 className="display mt-1 text-4xl">{tr("My data")}</h1>
           <p className="mt-2 text-sm text-muted">{tr("Summary of the personal data SEFIKH keeps about you, as of {date}.", { date: tr.date(new Date()) })}</p>
         </div>
-        <PrintButton />
+        <PdfButtons targetId="my-data" filename="sefikh-mes-donnees.pdf" />
       </header>
 
       {sections.map((s) => (

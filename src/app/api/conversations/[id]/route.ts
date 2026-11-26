@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { canContactMakers, getConversationForUser, markConversationRead, otherUserId } from "@/lib/messaging";
 import { isOnline } from "@/lib/realtime";
 import { getPlan } from "@/lib/plans";
+import { QUOTE_SELECT, wireQuote } from "@/lib/quotes-server";
 
 /** Détail d'une conversation + messages. `?after=<ISO>` pour ne récupérer que les nouveaux (polling). */
 export async function GET(request: Request, ctx: RouteContext<"/api/conversations/[id]">) {
@@ -20,7 +21,7 @@ export async function GET(request: Request, ctx: RouteContext<"/api/conversation
     where: { conversationId: id, ...(after ? { createdAt: { gt: new Date(after) } } : {}) },
     orderBy: { createdAt: "asc" },
     take: after ? undefined : 200,
-    include: { attachments: true, sender: { select: { id: true, name: true } } },
+    include: { attachments: true, sender: { select: { id: true, name: true } }, quote: QUOTE_SELECT },
   });
 
   // Accusé de lecture
@@ -54,6 +55,7 @@ export async function GET(request: Request, ctx: RouteContext<"/api/conversation
       mine: m.senderId === me.id,
       senderName: m.sender.name,
       attachments: m.attachments.map((a) => ({ id: a.id, name: a.name, mime: a.mime, size: a.size, url: `/files/${a.key}`, width: a.width, height: a.height })),
+      quote: wireQuote(m, conv.company.userId),
     })),
   });
 }

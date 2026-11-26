@@ -271,6 +271,7 @@ model Conversation {
   createdAt        DateTime  @default(now())
 
   messages Message[]
+  quotes   Quote[]
 
   @@unique([clientId, companyId, projectId])
   @@index([companyId])
@@ -285,6 +286,9 @@ model Message {
   sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
   body           String
   createdAt      DateTime     @default(now())
+  // Message généré par l'outil de devis (envoi, acceptation, refus) : affiché comme une carte.
+  quoteId        String?
+  quote          Quote?       @relation(fields: [quoteId], references: [id], onDelete: SetNull)
 
   attachments Attachment[]
 
@@ -469,4 +473,27 @@ model DesignChoice {
   comment    String?
   theme      String // JSON, voir src/lib/visuel/theme.ts
   createdAt  DateTime @default(now())
+}
+
+/// Devis établi par un artisan dans une conversation (lot 2). Contenu complet dans `data` (JSON, voir src/lib/quotes.ts).
+model Quote {
+  id             String       @id @default(cuid())
+  number         String // DEV-2026-001, propre à chaque atelier
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  companyId      String
+  status         String       @default("DRAFT") // DRAFT | SENT | ACCEPTED | DECLINED
+  data           String
+  totalTtc       Float        @default(0)
+  sentAt         DateTime?
+  respondedAt    DateTime?
+  acceptedName   String? // « Nom et fonction » saisis par le client au « Bon pour accord »
+  declineReason  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  messages Message[]
+
+  @@unique([companyId, number])
+  @@index([conversationId])
 }

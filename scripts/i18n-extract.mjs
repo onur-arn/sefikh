@@ -11,7 +11,7 @@ const LOCALES = ["fr", "it", "es", "zh"];
 // Textes de données affichés via tr(variable).
 const DATA_PROPS = new Set(["label", "title", "description", "text", "heading", "hint", "subtitle", "eyebrow", "cta", "body", "excerpt", "category", "tagline", "name", "q", "a", "copy", "who", "note", "sub"]);
 const ERROR_PROPS = new Set(["error", "success", "message"]);
-const DATA_FILES = new Set(["src/lib/constants.ts", "src/lib/plans.ts", "src/lib/expertise.ts"]);
+const DATA_FILES = new Set(["src/lib/constants.ts", "src/lib/plans.ts", "src/lib/expertise.ts", "src/lib/quotes.ts"]);
 const SKIP_ARRAYS = new Set(["synonyms", "keywords", "legacy"]);
 const SKIP_DIRS = [/^src\/i18n\//, /^src\/app\/dev\//];
 

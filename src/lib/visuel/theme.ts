@@ -165,7 +165,7 @@ export const DETAIL_OPTIONS: { key: keyof Details; label: string; hint: string; 
 export const PREVIEW_PAGES: { path: string; label: string }[] = [
   { path: "/", label: "Accueil" },
   { path: "/about", label: "À propos" },
-  { path: "/journal", label: "Journal" },
+  { path: "/journal", label: "Blog" },
   { path: "/insights", label: "Tendances" },
   { path: "/subscription", label: "Tarifs" },
   { path: "/journal/the-return-of-patinated-brass", label: "Article" },

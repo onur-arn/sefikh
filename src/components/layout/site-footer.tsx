@@ -4,7 +4,7 @@ import { getT } from "@/i18n/server";
 
 // Pied de page v2 (cahier de la cliente du 24/11/2026).
 const COLUMNS = [
-  { title: "Explore", links: [["Explore the craft", "/search"], ["Trends & Insights", "/insights"], ["The Journal", "/journal"]] },
+  { title: "Explore", links: [["Explore the craft", "/search"], ["Trends & Insights", "/insights"], ["Blog", "/journal"]] },
   { title: "For professionals", links: [["Join as an artisan", "/join"], ["Business solutions", "/subscription?for=pro"]] },
   { title: "About", links: [["Our story", "/about"], ["Contact", "/contact"], ["FAQ", "/faq"]] },
   { title: "Legal", links: [["Terms & Conditions", "/legal/terms"], ["Privacy Policy", "/legal/privacy"], ["Cookie Policy", "/legal/cookies"]] },

@@ -70,9 +70,6 @@ export default async function SettingsPage() {
             <a href="/dashboard/settings/data" className="inline-flex h-10 items-center rounded-sm border border-ink/70 px-5 text-sm hover:bg-ink hover:text-paper">
               {tr("View and download my data")}
             </a>
-            <a href="/api/me/export" className="folio underline underline-offset-4 hover:text-ink">
-              {tr("Technical file (JSON)")}
-            </a>
           </div>
         </Card>
         <Card className="border-danger/30 p-6 sm:p-8">
