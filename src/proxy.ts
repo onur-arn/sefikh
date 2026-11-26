@@ -38,6 +38,7 @@ export function proxy(request: NextRequest) {
   return response;
 }
 
+// Les sondages GET (temps réel, compteurs) sont exclus : ni cookie visiteur ni contrôle CSRF utiles, une invocation de moins à chaque passage.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|files/|images/|favicon.ico|robots.txt|sitemap.xml).*)"],
+  matcher: ["/((?!_next/static|_next/image|files/|images/|api/realtime|api/me/counts|favicon.ico|robots.txt|sitemap.xml).*)"],
 };

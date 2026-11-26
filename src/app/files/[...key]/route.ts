@@ -38,7 +38,8 @@ export async function GET(request: Request, ctx: RouteContext<"/files/[...key]">
     headers: {
       "Content-Type": MIME_BY_EXT[ext] ?? "application/octet-stream",
       "Content-Length": String(file.size),
-      "Cache-Control": isPublic ? "public, max-age=31536000, immutable" : "private, max-age=3600",
+      // Fichiers publics (clés uniques, jamais réécrites) : mis en cache par le CDN Vercel (s-maxage), la fonction n'est appelée qu'une fois par fichier.
+      "Cache-Control": isPublic ? "public, max-age=31536000, s-maxage=31536000, immutable" : "private, max-age=3600",
       "X-Content-Type-Options": "nosniff",
       ...(name ? { "Content-Disposition": `attachment; filename="${name}"` } : {}),
     },

@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
     "*": ["node_modules/onnxruntime-node/**", "node_modules/onnxruntime-web/**", "node_modules/@huggingface/transformers/**", ".cache/**", "storage/**", "prisma/*.db"],
   },
   images: {
+    // Photos déjà redimensionnées et converties en WebP à l'envoi (sharp) : pas d'optimisation Vercel
+    // (quota de transformations du plan Hobby, et un appel de fonction de moins par image et par taille).
+    unoptimized: true,
     qualities: [60, 75, 85],
     localPatterns: [{ pathname: "/files/**" }, { pathname: "/images/**" }],
   },
