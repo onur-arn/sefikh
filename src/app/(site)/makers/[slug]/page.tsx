@@ -347,7 +347,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
       {similar.length > 0 && (
         <section className="border-t border-line bg-paper py-20">
           <div className="container-x">
-            <p className="eyebrow">{tr("Visually similar")}</p>
+            <p className="eyebrow">{tr("Similar suggestions")}</p>
             <h2 className="display mt-3 text-4xl">{tr("You may also like")}</h2>
             <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 lg:gap-x-6">
               {similar.map((o) => (
