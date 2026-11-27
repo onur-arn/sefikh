@@ -10,4 +10,4 @@ Toutes en licence CC0 (domaine public), trouvées via Openverse.
 
 ## Diaporama actuel (27/11/2026)
 
-- artisan-1.jpg, artisan-2.jpg, artisan-3.jpg : photos fournies par SEFIKH (envoi WeTransfer du 27/11/2026). 1.webp à 5.webp ne sont plus affichées.
+- artisan-1-hd.jpg, artisan-2-hd.jpg, artisan-3-hd.jpg : photos fournies par SEFIKH (envoi WeTransfer du 27/11/2026), agrandies ×4 avec Real-ESRGAN (x4plus), raccords de tuiles fondus, ramenées à 2000 px de large. 1.webp à 5.webp ne sont plus affichées.

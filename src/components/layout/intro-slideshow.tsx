@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 // Photos portrait cadrées en paysage : `pos` place la partie à garder (mains, outil, motif) au centre du cadre.
 const SLIDES = [
-  { src: "/images/intro/artisan-1.jpg", pos: "50% 30%" },
-  { src: "/images/intro/artisan-2.jpg", pos: "50% 60%" },
-  { src: "/images/intro/artisan-3.jpg", pos: "50% 45%" },
+  { src: "/images/intro/artisan-1-hd.jpg", pos: "50% 30%" },
+  { src: "/images/intro/artisan-2-hd.jpg", pos: "50% 60%" },
+  { src: "/images/intro/artisan-3-hd.jpg", pos: "50% 45%" },
 ];
 const DELAY_MS = 6000;
 
