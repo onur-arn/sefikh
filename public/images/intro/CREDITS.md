@@ -7,3 +7,7 @@ Toutes en licence CC0 (domaine public), trouvées via Openverse.
 - 3.webp : Free white building image (rawpixel, cc0) https://www.rawpixel.com/image/5927878/photo-image-background-public-domain-shadow
 - 4.webp : Industrial Concrete (stocksnap, cc0) https://stocksnap.io/photo/industrial-concrete-TOWQ4GNEM9
 - 5.webp : Modern building, MAAT, Lisboa, Portugal (rawpixel, cc0) https://www.rawpixel.com/image/3295956/free-photo-image-abstract-minimal-architecture-background
+
+## Diaporama actuel (27/11/2026)
+
+- artisan-1.jpg, artisan-2.jpg, artisan-3.jpg : photos fournies par SEFIKH (envoi WeTransfer du 27/11/2026). 1.webp à 5.webp ne sont plus affichées.
