@@ -4,7 +4,7 @@ import type { Translator } from "@/i18n/config";
 import { eur, quoteTotals, type QuoteData } from "@/lib/quotes";
 import { C, Meta, Party, Sheet, Table, Totals, clean, s } from "./kit";
 
-export function QuotePdf({ number, data, tr, platformLegal, accepted }: { number: string; data: QuoteData; tr: Translator; platformLegal: string; accepted?: { name: string; at: Date } | null }) {
+export function QuotePdf({ number, data, tr, platformLegal, accepted, issuerSigned }: { number: string; data: QuoteData; tr: Translator; platformLegal: string; accepted?: { name: string; at: Date } | null; issuerSigned?: { name: string; at: Date } | null }) {
   const t = quoteTotals(data);
   const money = (n: number) => eur(tr.locale, n);
   const date = (iso: string) => (iso ? tr.date(iso, { day: "2-digit", month: "2-digit", year: "numeric" }) : "—");
@@ -133,17 +133,17 @@ export function QuotePdf({ number, data, tr, platformLegal, accepted }: { number
         <Text style={s.h2}>{tr("Approved")}</Text>
         <P>{tr("To accept this quote, the client returns it signed, preceded by the words « Approved », to {email}, together with payment of the deposit. It can also be accepted online from the SEFIKH messaging.", { email: v(data.issuer.email) })}</P>
         <View style={{ flexDirection: "row", marginTop: 6 }}>
-          {[tr("For the client"), tr("For the issuer")].map((title, i) => (
+          {([[tr("For the client"), accepted, tr("« Approved » given online on SEFIKH.")], [tr("For the issuer"), issuerSigned, tr("Signed online on SEFIKH.")]] as const).map(([title, who, note], i) => (
             <View key={title} style={{ flex: 1, borderWidth: 0.5, borderColor: C.line, padding: 8, minHeight: 90, marginRight: i === 0 ? 12 : 0 }}>
               <Text style={s.partyTitle}>{title}</Text>
               <Text>
-                {tr("Name and position:")} {i === 0 && accepted ? <Text style={{ fontWeight: 500 }}>{clean(accepted.name)}</Text> : null}
+                {tr("Name and position:")} {who ? <Text style={{ fontWeight: 500 }}>{clean(who.name)}</Text> : null}
               </Text>
               <Text>
-                {tr("Date:")} {i === 0 && accepted ? <Text style={{ fontWeight: 500 }}>{tr.date(accepted.at, { day: "2-digit", month: "2-digit", year: "numeric" })}</Text> : null}
+                {tr("Date:")} {who ? <Text style={{ fontWeight: 500 }}>{tr.date(who.at, { day: "2-digit", month: "2-digit", year: "numeric" })}</Text> : null}
               </Text>
               <Text>{tr("Signature and stamp:")}</Text>
-              {i === 0 && accepted ? <Text style={{ marginTop: 6, color: C.success, fontSize: 8 }}>{tr("« Approved » given online on SEFIKH.")}</Text> : null}
+              {who ? <Text style={{ marginTop: 6, color: C.success, fontSize: 8 }}>{note}</Text> : null}
             </View>
           ))}
         </View>

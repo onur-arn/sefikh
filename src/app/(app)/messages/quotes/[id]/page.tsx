@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth/session";
 import { getQuoteForUser } from "@/lib/quotes-server";
 import { parseQuoteData, platformLegal, type QuoteStatus } from "@/lib/quotes";
 import { QuoteDocument } from "@/components/quotes/quote-document";
+import { QuoteIssuerSign } from "@/components/quotes/quote-issuer-sign";
 import { QuoteResponse } from "@/components/quotes/quote-response";
 import { PdfButtons } from "@/components/ui/pdf-buttons";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
@@ -70,6 +71,11 @@ export default async function QuotePage({ params }: PageProps<"/messages/quotes/
           )}
         </div>
         {side === "pro" && quote.status === "DRAFT" && <p className="mt-3 text-[13px] text-muted">{tr("Only you can see this draft. Edit it, then send it to the client from the edit page.")}</p>}
+        {side === "pro" && (quote.status === "SENT" || quote.status === "ACCEPTED") && !quote.issuerSignedAt && (
+          <div className="mt-8">
+            <QuoteIssuerSign quoteId={id} defaultName={user.name} />
+          </div>
+        )}
         {side === "client" && quote.status === "SENT" && (
           <div className="mt-8">
             <QuoteResponse quoteId={id} defaultName={user.name} />
@@ -78,7 +84,7 @@ export default async function QuotePage({ params }: PageProps<"/messages/quotes/
       </div>
 
       <div className="mt-8 overflow-x-auto px-4 print:mt-0 print:overflow-visible print:px-0">
-        <QuoteDocument number={quote.number} data={data} tr={tr} platformLegal={platformLegal()} accepted={quote.status === "ACCEPTED" && quote.respondedAt ? { name: quote.acceptedName ?? "", at: quote.respondedAt } : null} />
+        <QuoteDocument number={quote.number} data={data} tr={tr} platformLegal={platformLegal()} accepted={quote.status === "ACCEPTED" && quote.respondedAt ? { name: quote.acceptedName ?? "", at: quote.respondedAt } : null} issuerSigned={quote.issuerSignedAt ? { name: quote.issuerSignedName ?? "", at: quote.issuerSignedAt } : null} />
       </div>
     </div>
   );

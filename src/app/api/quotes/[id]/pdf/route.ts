@@ -15,5 +15,5 @@ export async function GET(_: Request, ctx: RouteContext<"/api/quotes/[id]/pdf">)
   const { quote } = found;
   const tr = await getT();
   const accepted = quote.status === "ACCEPTED" && quote.respondedAt ? { name: quote.acceptedName ?? "", at: quote.respondedAt } : null;
-  return pdfResponse(QuotePdf({ number: quote.number, data: parseQuoteData(quote.data), tr, platformLegal: platformLegal(), accepted }), `SEFIKH-${quote.number}.pdf`, `${tr("Quote")} ${quote.number}`);
+  return pdfResponse(QuotePdf({ number: quote.number, data: parseQuoteData(quote.data), tr, platformLegal: platformLegal(), accepted, issuerSigned: quote.issuerSignedAt ? { name: quote.issuerSignedName ?? "", at: quote.issuerSignedAt } : null }), `SEFIKH-${quote.number}.pdf`, `${tr("Quote")} ${quote.number}`);
 }

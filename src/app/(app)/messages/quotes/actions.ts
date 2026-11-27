@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth/session";
 import { getConversationForUser, notifyNewMessage, otherUserId } from "@/lib/messaging";
 import { publish } from "@/lib/realtime";
+import { notify } from "@/lib/notifications";
 import { translatorFor } from "@/i18n/server";
 import { defaultQuote, formatQuoteNumber, parseQuoteData, quoteSchema, quoteTotals } from "@/lib/quotes";
 
@@ -123,6 +124,28 @@ export async function respondQuoteAction(_: State, formData: FormData): Promise<
     const reason = String(formData.get("reason") ?? "").trim().slice(0, 1000) || null;
     await db.quote.update({ where: { id: quote.id }, data: { status: "DECLINED", respondedAt: new Date(), declineReason: reason } });
     await postQuoteMessage(me, found.conv, "client", quote, "declined", reason);
+  }
+  redirect(`/messages/quotes/${quote.id}`);
+}
+
+/** Signature en ligne de l'émetteur (l'artisan), une fois le devis envoyé ; le client en est averti. */
+export async function signQuoteAction(_: State, formData: FormData): Promise<State> {
+  const me = await requireUser();
+  const quote = await db.quote.findUnique({ where: { id: String(formData.get("quoteId") ?? "") } });
+  if (!quote) return { error: "Not found" };
+  const found = await getConversationForUser(me, quote.conversationId);
+  if (!found || found.side !== "pro") return { error: "Not found" };
+  if (quote.status === "DRAFT" || quote.status === "DECLINED") return { error: "Send the quote before signing it." };
+  if (quote.issuerSignedAt) return { error: "This quote is already signed." };
+  const name = String(formData.get("name") ?? "").trim().slice(0, 160);
+  if (!name) return { error: "Enter your name and position." };
+  if (formData.get("agree") !== "on") return { error: "Tick the box to sign the quote." };
+  await db.quote.update({ where: { id: quote.id }, data: { issuerSignedName: name, issuerSignedAt: new Date() } });
+  const clientId = otherUserId(found.conv, "pro");
+  const client = await db.user.findUnique({ where: { id: clientId } });
+  if (client) {
+    const tr = translatorFor(client.locale);
+    await notify(clientId, { type: "MESSAGE", title: tr("Quote {number} signed by {name}", { number: quote.number, name: found.conv.company.name }), link: `/messages/quotes/${quote.id}` });
   }
   redirect(`/messages/quotes/${quote.id}`);
 }

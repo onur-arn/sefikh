@@ -504,6 +504,8 @@ model Quote {
   sentAt         DateTime?
   respondedAt    DateTime?
   acceptedName   String? // « Nom et fonction » saisis par le client au « Bon pour accord »
+  issuerSignedName String? // signature en ligne de l'émetteur (artisan), après l'envoi
+  issuerSignedAt   DateTime?
   declineReason  String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

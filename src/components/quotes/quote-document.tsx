@@ -6,7 +6,7 @@ import { eur, quoteTotals, type QuoteData } from "@/lib/quotes";
  * Devis au gabarit du modèle « Devis-type-artisan-décorateur » : feuille A4, imprimable en PDF (window.print).
  * Les champs vides restent des lignes à compléter, comme sur le modèle papier.
  */
-export function QuoteDocument({ number, data, tr, platformLegal, accepted }: { number: string; data: QuoteData; tr: Translator; platformLegal: string; accepted?: { name: string; at: Date } | null }) {
+export function QuoteDocument({ number, data, tr, platformLegal, accepted, issuerSigned }: { number: string; data: QuoteData; tr: Translator; platformLegal: string; accepted?: { name: string; at: Date } | null; issuerSigned?: { name: string; at: Date } | null }) {
   const t = quoteTotals(data);
   const money = (n: number) => eur(tr.locale, n);
   const date = (iso: string) => (iso ? tr.date(iso, { day: "2-digit", month: "2-digit", year: "numeric" }) : "—");
@@ -191,7 +191,7 @@ export function QuoteDocument({ number, data, tr, platformLegal, accepted }: { n
         <p>{tr("To accept this quote, the client returns it signed, preceded by the words « Approved », to {email}, together with payment of the deposit. It can also be accepted online from the SEFIKH messaging.", { email: v(data.issuer.email) })}</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Signature title={tr("For the client")} tr={tr} accepted={accepted} />
-          <Signature title={tr("For the issuer")} tr={tr} />
+          <Signature title={tr("For the issuer")} tr={tr} accepted={issuerSigned} note={tr("Signed online on SEFIKH.")} />
         </div>
       </Section>
 
@@ -269,7 +269,7 @@ function Clause({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Signature({ title, tr, accepted }: { title: string; tr: Translator; accepted?: { name: string; at: Date } | null }) {
+function Signature({ title, tr, accepted, note }: { title: string; tr: Translator; accepted?: { name: string; at: Date } | null; note?: string }) {
   return (
     <div className="break-inside-avoid border border-line p-3">
       <p className="font-mono text-[9.5px] uppercase tracking-[0.08em] text-brass">{title}</p>
@@ -280,7 +280,7 @@ function Signature({ title, tr, accepted }: { title: string; tr: Translator; acc
         {tr("Date:")} {accepted ? <span className="font-medium">{tr.date(accepted.at, { day: "2-digit", month: "2-digit", year: "numeric" })}</span> : null}
       </p>
       <p>{tr("Signature and stamp:")}</p>
-      {accepted ? <p className="mt-2 text-[11.5px] text-success">{tr("« Approved » given online on SEFIKH.")}</p> : <div className="h-12" />}
+      {accepted ? <p className="mt-2 text-[11.5px] text-success">{note ?? tr("« Approved » given online on SEFIKH.")}</p> : <div className="h-12" />}
     </div>
   );
 }
