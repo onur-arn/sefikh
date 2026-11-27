@@ -53,7 +53,7 @@ export function PlanPicker({ audience, currentPlan, currentTerm, loggedInRole, i
   const toggle = (options: [string, string, boolean, () => void][], label: string) => (
     <div className="flex w-fit border border-line bg-paper p-1" role="radiogroup" aria-label={label}>
       {options.map(([key, text, on, onClick]) => (
-        <button key={key} role="radio" aria-checked={on} onClick={onClick} className={cn("px-4 py-1.5 text-[12.5px] font-medium transition sm:px-6", on ? "bg-ink text-paper" : "text-muted hover:text-ink")}>
+        <button key={key} role="radio" aria-checked={on} onClick={onClick} className={cn("px-4 py-1.5 text-[12.5px] font-medium transition sm:px-6", on ? "bg-brass text-paper" : "text-brass/55 hover:font-semibold hover:text-brass")}>
           {text}
         </button>
       ))}
