@@ -10,7 +10,7 @@ import { getT } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const tr = await getT();
-  return { title: tr("Blog"), description: tr("An evolving view of what the creative industry is looking for, shaped by real-time activity on SEFIKH.") };
+  return { title: tr("Journal"), description: tr("An evolving view of what the creative industry is looking for, shaped by real-time activity on SEFIKH.") };
 }
 
 /** Projets réalisés : les réalisations nommées (projet renseigné) des ateliers en ligne, les plus récentes d'abord. */
@@ -41,7 +41,7 @@ export default async function JournalPage() {
   return (
     <div className="container-x pb-24 pt-12 sm:pt-16">
       <header className="mx-auto max-w-2xl text-center">
-        <p className="kicker self-start">{tr("Blog")}</p>
+        <p className="kicker self-start">{tr("Journal")}</p>
         <h1 className="display mt-4 text-3xl sm:text-4xl">{tr("An evolving view of what the creative industry is looking for, shaped by real-time activity on SEFIKH.")}</h1>
       </header>
 

@@ -18,7 +18,7 @@ type Notif = { id: string; title: string; body: string | null; link: string | nu
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About us" },
-  { href: "/journal", label: "Blog" },
+  { href: "/journal", label: "Journal" },
   { href: "/insights", label: "Trends & Insights" },
   { href: "/subscription", label: "Memberships" },
 ];

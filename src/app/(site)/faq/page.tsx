@@ -64,12 +64,6 @@ export default async function FaqPage() {
         <p className="kicker self-start lg:col-span-3">{tr("FAQ")}</p>
         <div className="lg:col-span-9">
           <h1 className="display text-4xl">{tr("Frequently asked questions")}</h1>
-          <p className="mt-3 text-[14px] text-muted">
-            {tr("Another question?")}{" "}
-            <Link href="/contact" className="text-ink underline decoration-brass underline-offset-4 hover:text-brass">
-              {tr("Contact us")}
-            </Link>
-          </p>
         </div>
       </header>
 
@@ -93,6 +87,15 @@ export default async function FaqPage() {
           </div>
         </section>
       ))}
+
+      <section className="mt-14 grid gap-6 border-t border-ink/70 pt-8 lg:grid-cols-12">
+        <p className="display text-2xl sm:text-[1.75rem] lg:col-span-9 lg:col-start-4">
+          {tr("Another question?")}{" "}
+          <Link href="/contact" className="text-ink underline decoration-brass decoration-1 underline-offset-[6px] hover:text-brass">
+            {tr("Contact us")}
+          </Link>
+        </p>
+      </section>
     </div>
   );
 }
