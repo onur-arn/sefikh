@@ -118,7 +118,7 @@ export default async function AboutPage() {
                   </li>
                 ))}
               </ol>
-              <ButtonLink href={col.cta[1]!} variant="secondary" className="mt-6">
+              <ButtonLink href={col.cta[1]!} size="lg" className="mt-6">
                 {col.cta[0]} <ArrowRight className="size-3.5" />
               </ButtonLink>
             </div>
