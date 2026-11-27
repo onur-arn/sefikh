@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Bookmark, BookmarkCheck, Send, Share2, X } from "lucide-react";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink, buttonClass } from "@/components/ui/button";
 import { toggleSaveAction } from "@/app/(site)/makers/actions";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/client";
@@ -62,7 +62,7 @@ export function ShareButton({ name, slug, label = false }: { name: string; slug:
           setTimeout(() => setCopied(false), 1800);
         }
       }}
-      className={label ? "inline-flex h-10 items-center gap-2 border border-ink/70 px-4 text-[13px] hover:bg-ink hover:text-paper" : "inline-flex size-11 items-center justify-center rounded-full border border-line bg-paper hover:border-ink/50"}
+      className={label ? buttonClass("secondary", "lg", "hover:border-brass hover:bg-brass hover:text-paper") : "inline-flex size-11 items-center justify-center rounded-full border border-line bg-paper hover:border-ink/50"}
       aria-label={tr("Share this page")}
       title={copied ? tr("Link copied") : tr("Share")}
     >
