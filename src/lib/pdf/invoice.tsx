@@ -86,7 +86,7 @@ export function InvoicePdf(p: {
 
       <View style={{ marginTop: 18 }}>
         <Text style={s.small}>{tr("Subscription payable in advance for the period invoiced. No discount for early payment.")}</Text>
-        <Text style={[s.small, { marginTop: 3 }]}>{clean(tr("For professional clients, any late payment incurs penalties at three times the legal interest rate and a fixed recovery fee of €40."))}</Text>
+        <Text style={[s.small, { marginTop: 3 }]}>{clean(tr("Monthly automatic payment. If a payment fails, access to the subscription is suspended after 7 days."))}</Text>
         {p.simulated && <Text style={[s.small, { marginTop: 3, color: C.danger }]}>{tr("Demo invoice: simulated payment, no real charge.")}</Text>}
       </View>
     </Sheet>

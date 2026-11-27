@@ -102,7 +102,7 @@ export function InvoiceDocument(props: {
 
       <section className="mt-7 space-y-1.5 text-[11.5px] text-ink-soft">
         <p>{tr("Subscription payable in advance for the period invoiced. No discount for early payment.")}</p>
-        <p>{tr("For professional clients, any late payment incurs penalties at three times the legal interest rate and a fixed recovery fee of €40.")}</p>
+        <p>{tr("Monthly automatic payment. If a payment fails, access to the subscription is suspended after 7 days.")}</p>
         {props.simulated && <p className="text-danger">{tr("Demo invoice: simulated payment, no real charge.")}</p>}
       </section>
 
