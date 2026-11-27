@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { ButtonLink } from "@/components/ui/button";
 import { APPROVED_PHOTO, canSeeMakers, LISTED_COMPANY } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth/session";
 import { COMPANY_KINDS } from "@/lib/constants";
@@ -40,14 +42,14 @@ export default async function JournalPage() {
 
   return (
     <div className="container-x pb-24 pt-12 sm:pt-16">
-      <header className="mx-auto max-w-2xl text-center">
+      <header className="mx-auto max-w-4xl text-center">
         <p className="kicker self-start">{tr("Journal")}</p>
-        <h1 className="display mt-4 text-3xl sm:text-4xl">{tr("An evolving view of what the creative industry is looking for, shaped by real-time activity on SEFIKH.")}</h1>
+        {/* deux lignes sur ordinateur : largeur et taille calées, coupure équilibrée */}
+        <h1 className="display mx-auto mt-4 max-w-[50rem] text-balance text-2xl sm:text-[1.6rem] sm:leading-snug">{tr("An evolving view of what the creative industry is looking for, shaped by real-time activity on SEFIKH.")}</h1>
       </header>
 
       <section className="mt-16 border-t border-ink/70 pt-8">
-        <p className="kicker self-start">{tr("Section 1")}</p>
-        <h2 className="display mt-2 text-3xl">{tr("SEFIKH Projects")}</h2>
+        <h2 className="kicker self-start">{tr("SEFIKH Projects")}</h2>
 
         <div className="mt-10">
           <h3 className="font-mono text-[11.5px] uppercase tracking-[0.06em] text-ink">{tr("Realised projects")}</h3>
@@ -85,12 +87,12 @@ export default async function JournalPage() {
         </div>
 
         <div className="mt-16">
-          <h3 className="font-mono text-[11.5px] uppercase tracking-[0.06em] text-ink">{tr("Requests for proposal (RFP)")}</h3>
-          <div className="mt-5 border border-line bg-paper p-8 sm:p-10">
+          <h3 className="kicker self-start">{tr("Requests for proposal (RFP)")}</h3>
+          <div className="mt-5 border border-brass/25 bg-brass-light p-8 sm:p-10">
             <p className="max-w-xl text-[14.5px] leading-relaxed text-ink-soft">{tr("Calls for tenders from architects, interior designers and hospitality groups looking for artisans and workshops. This section opens soon.")}</p>
-            <Link href="/contact" className="folio mt-4 inline-block underline underline-offset-4 hover:text-ink">
-              {tr("Have a project to submit? Contact us")}
-            </Link>
+            <ButtonLink href="/contact" size="lg" className="mt-6">
+              {tr("Have a project to submit? Contact us")} <ArrowRight className="size-3.5" />
+            </ButtonLink>
           </div>
         </div>
       </section>
