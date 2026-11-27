@@ -78,9 +78,9 @@ export default async function InsightsPage({ searchParams }: PageProps<"/insight
             [kpis.matches, tr("Qualified matches")],
             [kpis.connections, tr("Connection requests")],
           ].map(([n, l]) => (
-            <div key={l as string} className="rounded-3xl bg-ink p-6 text-paper">
+            <div key={l as string} className="rounded-3xl bg-brass p-6 text-paper">
               <p className="display text-5xl">{tr.number(n as number)}</p>
-              <p className="mt-1 text-[13px] text-muted">{l as string}</p>
+              <p className="mt-1 text-[13px] text-paper/70">{l as string}</p>
             </div>
           ))}
         </div>

@@ -43,16 +43,14 @@ export default async function JournalPage() {
   return (
     <div className="container-x pb-24 pt-12 sm:pt-16">
       <header className="mx-auto max-w-4xl text-center">
-        <p className="kicker self-start">{tr("Journal")}</p>
         {/* deux lignes sur ordinateur : largeur et taille calées, coupure équilibrée */}
-        <h1 className="display mx-auto mt-4 max-w-[50rem] text-balance text-2xl sm:text-[1.6rem] sm:leading-snug">{tr("An evolving view of what the creative industry is looking for, shaped by real-time activity on SEFIKH.")}</h1>
+        <h1 className="display mx-auto max-w-[50rem] text-balance text-2xl sm:text-[1.6rem] sm:leading-snug">{tr("An evolving view of what the creative industry is looking for, shaped by real-time activity on SEFIKH.")}</h1>
       </header>
 
       <section className="mt-16 border-t border-ink/70 pt-8">
         <h2 className="kicker self-start">{tr("SEFIKH Projects")}</h2>
 
         <div className="mt-10">
-          <h3 className="font-mono text-[11.5px] uppercase tracking-[0.06em] text-ink">{tr("Realised projects")}</h3>
           {projects.length === 0 ? (
             <p className="mt-5 border border-dashed border-line p-10 text-center text-[14px] text-muted">{tr("The first projects realised through SEFIKH will be published here.")}</p>
           ) : (
@@ -89,7 +87,7 @@ export default async function JournalPage() {
         <div className="mt-16">
           <h3 className="kicker self-start">{tr("Requests for proposal (RFP)")}</h3>
           <div className="mt-5 border border-brass/25 bg-brass-light p-8 sm:p-10">
-            <p className="max-w-xl text-[14.5px] leading-relaxed text-ink-soft">{tr("Calls for tenders from architects, interior designers and hospitality groups looking for artisans and workshops. This section opens soon.")}</p>
+            <p className="max-w-xl text-[14.5px] leading-relaxed text-ink-soft">{tr("Architects, interior designers or hospitality groups: do you have a call for tenders for artisans and workshops? Send us a message.")}</p>
             <ButtonLink href="/contact" size="lg" className="mt-6">
               {tr("Have a project to submit? Contact us")} <ArrowRight className="size-3.5" />
             </ButtonLink>

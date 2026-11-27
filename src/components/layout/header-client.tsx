@@ -99,8 +99,8 @@ export function HeaderClient({ user, initialCounts }: { user: HeaderUser | null;
           })}
         </nav>
 
-        <Link href="/" aria-label={tr("SEFIKH — home")} className="col-start-2 shrink-0">
-          <Logo light={overlay} />
+        <Link href="/" aria-label={tr("SEFIKH — home")} className="group col-start-2 shrink-0">
+          <Logo light={overlay} className="transition-colors duration-200 group-hover:text-brass" />
         </Link>
 
         <div className="col-start-3 flex items-center justify-end gap-1.5">
