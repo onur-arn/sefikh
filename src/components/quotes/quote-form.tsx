@@ -197,15 +197,18 @@ export function QuoteForm({ conversationId, quoteId, number, initial }: { conver
             </div>
           ))}
           {d.payments.length < 6 && <AddButton onClick={() => set("payments", [...d.payments, { label: "", pct: 0 }])}>{tr("Add an instalment")}</AddButton>}
-          <div className="grid gap-5 pt-2 sm:grid-cols-3">
+          <div className="grid gap-5 pt-2 sm:grid-cols-2">
             <Field label={tr("Payment within (days of invoice)")}>
               <Input value={d.paymentDays} onChange={(e) => set("paymentDays", e.target.value)} />
             </Field>
             <Field label={tr("Late-payment penalty rate (%)")}>
               <Input value={d.latePenaltyPct} onChange={(e) => set("latePenaltyPct", e.target.value)} />
             </Field>
-            <Field label={tr("Bank details (IBAN / BIC)")}>
-              <Input value={d.iban} onChange={(e) => set("iban", e.target.value)} />
+            <Field label="IBAN">
+              <Input value={d.iban} onChange={(e) => set("iban", e.target.value)} placeholder="FR76 …" autoComplete="off" />
+            </Field>
+            <Field label="BIC">
+              <Input value={d.bic} onChange={(e) => set("bic", e.target.value.toUpperCase())} placeholder="BNPAFRPP" autoComplete="off" />
             </Field>
           </div>
         </div>

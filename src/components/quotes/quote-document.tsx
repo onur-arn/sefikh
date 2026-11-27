@@ -160,7 +160,7 @@ export function QuoteDocument({ number, data, tr, platformLegal, accepted }: { n
           </table>
         )}
         <p className="mt-3">
-          {tr("Payment by bank transfer, {days} days from receipt of invoice. Bank details: {iban}. Any late payment incurs penalties at a rate of {pct} % and a fixed recovery fee of €40.", { days: v(data.paymentDays), iban: v(data.iban), pct: v(data.latePenaltyPct) })}
+          {tr("Payment by bank transfer, {days} days from receipt of invoice. Bank details: {iban}. Any late payment incurs penalties at a rate of {pct} % and a fixed recovery fee of €40.", { days: v(data.paymentDays), iban: v([data.iban && `IBAN ${data.iban}`, data.bic && `BIC ${data.bic}`].filter(Boolean).join(" · ")), pct: v(data.latePenaltyPct) })}
         </p>
       </Section>
 

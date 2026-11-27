@@ -400,6 +400,8 @@ model Subscription {
   commitmentEndsAt     DateTime?
   cancelAtPeriodEnd    Boolean   @default(false)
   canceledAt           DateTime?
+  // Premier paiement refusé non régularisé : l'accès est coupé UNPAID_GRACE_DAYS jours après.
+  pastDueSince         DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 

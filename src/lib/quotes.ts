@@ -37,6 +37,7 @@ export const quoteSchema = z.object({
   payments: z.array(z.object({ label: text(160), pct: num(0, 100) })).max(6).default([]),
   paymentDays: text(20),
   iban: text(80),
+  bic: text(20),
   latePenaltyPct: text(20),
   toleranceMm: text(20),
   receptionDays: text(20),
@@ -69,12 +70,12 @@ export function isoDate(d: Date) {
 /** Textes par défaut du modèle (clés anglaises, traduites à l'affichage). */
 const DEFAULT_SUBTITLE = { subtitle: "Custom manufacturing and supply" };
 const DEFAULT_PAYMENTS = [
-  { label: "On order (signed quote)", pct: 30 },
-  { label: "On approval of end of production", pct: 40 },
-  { label: "Before shipment / on delivery", pct: 30 },
+  { label: "On order (signed quote)", pct: 0 },
+  { label: "On approval of end of production", pct: 0 },
+  { label: "Before shipment / on delivery", pct: 0 },
 ];
 
-/** Valeurs par défaut du modèle : 30 / 40 / 30 %, TVA 20 %, validité 30 jours. */
+/** Valeurs par défaut du modèle : échéancier à compléter (0 %), TVA 20 %, validité 30 jours. */
 export function defaultQuote(prefill: { issuer: Partial<QuoteData["issuer"]>; client: Partial<QuoteData["client"]>; project: Partial<QuoteData["project"]> }): QuoteData {
   const now = new Date();
   return quoteSchema.parse({

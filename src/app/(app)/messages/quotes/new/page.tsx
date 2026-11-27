@@ -27,8 +27,7 @@ export default async function NewQuotePage({ searchParams }: PageProps<"/message
       <Link href={`/messages?c=${conversationId}`} className="folio inline-flex items-center gap-1.5 hover:text-ink">
         <ArrowLeft className="size-3.5" /> {tr("Back to the conversation")}
       </Link>
-      <p className="kicker mt-8">{tr("Quote")}</p>
-      <h1 className="display mt-3 text-3xl sm:text-4xl">{tr("New quote for {name}", { name: pre.data.client.company })}</h1>
+      <h1 className="display mt-8 text-3xl sm:text-4xl">{tr("New quote for {name}", { name: pre.data.client.company })}</h1>
       <p className="mt-3 max-w-2xl text-[14px] text-muted">{tr("Pre-filled from your business profile and the client's profile. Save it as a draft, preview it, then send it: it will appear in the conversation.")}</p>
       <div className="mt-10">
         <QuoteForm conversationId={conversationId} number={pre.nextNumber} initial={pre.data} />

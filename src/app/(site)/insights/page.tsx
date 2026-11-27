@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Lock, TrendingUp } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -46,11 +47,14 @@ export default async function InsightsPage({ searchParams }: PageProps<"/insight
 
   return (
     <div className="pb-24">
-      <section className="bg-sand py-16 sm:py-20">
-        <div className="container-x text-center">
+      <section className="relative isolate overflow-hidden py-16 sm:py-20">
+        {/* Marbre veiné bordeaux en fond, voile clair pour garder le texte lisible. */}
+        <Image src="/images/insights-marble.jpg" alt="" fill priority sizes="100vw" className="-z-10 object-cover" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-paper/55" />
+        <div className="container-x relative text-center">
           <p className="display text-6xl tracking-[0.18em] sm:text-7xl">{tr("SEFIKH")}</p>
-          <p className="mt-2 font-display text-2xl italic text-muted">{tr("Search Engine For Know-How")}</p>
-          <p className="mx-auto mt-8 max-w-xl text-sm text-muted">{tr("A live, anonymised view of what architects, designers and hoteliers are looking for — generated automatically from activity on the platform.")}</p>
+          <p className="mt-2 font-display text-2xl italic text-ink-soft">{tr("Search Engine For Know-How")}</p>
+          <p className="mx-auto mt-8 max-w-xl text-sm text-ink">{tr("A live, anonymised view of what architects, designers and hoteliers are looking for — generated automatically from activity on the platform.")}</p>
         </div>
       </section>
 

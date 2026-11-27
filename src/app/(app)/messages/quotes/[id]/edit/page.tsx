@@ -26,8 +26,7 @@ export default async function EditQuotePage({ params }: PageProps<"/messages/quo
       <Link href={`/messages/quotes/${id}`} className="folio inline-flex items-center gap-1.5 hover:text-ink">
         <ArrowLeft className="size-3.5" /> {tr("Back to the quote")}
       </Link>
-      <p className="kicker mt-8">{tr("Quote")}</p>
-      <h1 className="display mt-3 text-3xl sm:text-4xl">{tr("Quote {number}", { number: found.quote.number })}</h1>
+      <h1 className="display mt-8 text-3xl sm:text-4xl">{tr("Quote {number}", { number: found.quote.number })}</h1>
       <div className="mt-10">
         <QuoteForm conversationId={found.quote.conversationId} quoteId={id} number={found.quote.number} initial={data} />
       </div>

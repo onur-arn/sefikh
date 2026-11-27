@@ -222,6 +222,31 @@ export async function activateSubscription(opts: {
   return sub;
 }
 
+/** Délai avant la coupure de l'accès après un paiement refusé (mentionné sur les factures). */
+export const UNPAID_GRACE_DAYS = 7;
+
+export const suspensionDate = (pastDueSince: Date) => new Date(pastDueSince.getTime() + UNPAID_GRACE_DAYS * 86_400_000);
+
+/**
+ * Coupe l'accès des abonnés dont le paiement est refusé depuis plus de UNPAID_GRACE_DAYS jours :
+ * le compte repasse sur l'offre gratuite (profil artisan masqué), l'abonnement reste « PAST_DUE »
+ * pour que Stripe continue ses relances. Un paiement réussi rend l'accès (webhook invoice.paid).
+ * Lancé chaque jour par le cron Vercel /api/cron/billing.
+ */
+export async function suspendUnpaid(now = new Date()) {
+  const cutoff = new Date(now.getTime() - UNPAID_GRACE_DAYS * 86_400_000);
+  const due = await db.subscription.findMany({ where: { status: "PAST_DUE", pastDueSince: { lte: cutoff } }, include: { user: true } });
+  let suspended = 0;
+  for (const sub of due) {
+    if (sub.user.plan === defaultPlanFor(sub.user.role)) continue; // déjà coupé
+    await downgrade(sub.userId);
+    const tr = translatorFor(sub.user.locale);
+    await notify(sub.userId, { type: "BILLING", title: tr("Subscription suspended"), body: tr("Your payment has not gone through for 7 days. Update your payment method to restore access."), link: "/dashboard/billing" });
+    suspended++;
+  }
+  return suspended;
+}
+
 async function downgrade(userId: string) {
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return;
@@ -337,6 +362,7 @@ export async function handleStripeEvent(event: Stripe.Event) {
           currentPeriodEnd: periodEnd(sub),
           cancelAtPeriodEnd: sub.cancel_at_period_end || !!sub.cancel_at,
           canceledAt: status === "CANCELED" ? new Date() : null,
+          pastDueSince: status === "PAST_DUE" ? row.pastDueSince ?? new Date() : null,
         },
       });
       if (status === "CANCELED") {
@@ -368,9 +394,16 @@ export async function handleStripeEvent(event: Stripe.Event) {
         },
         update: { status: paid ? "PAID" : "FAILED", invoiceUrl: inv.hosted_invoice_url ?? null },
       });
-      if (paid) await ensureInvoiceNumber(payment);
+      if (paid) {
+        await ensureInvoiceNumber(payment);
+        // Régularisation : l'abonnement repart, et l'accès revient s'il avait été coupé.
+        if (row && row.status !== "CANCELED") {
+          await db.subscription.update({ where: { id: row.id }, data: { status: "ACTIVE", pastDueSince: null } });
+          await db.user.updateMany({ where: { id: row.userId, NOT: { plan: row.plan } }, data: { plan: row.plan } });
+        }
+      }
       if (!paid) {
-        if (row) await db.subscription.update({ where: { id: row.id }, data: { status: "PAST_DUE" } });
+        if (row) await db.subscription.update({ where: { id: row.id }, data: { status: "PAST_DUE", pastDueSince: row.pastDueSince ?? new Date() } });
         const user = await db.user.findUnique({ where: { id: userId } });
         if (user) {
           await notify(userId, { type: "BILLING", title: translatorFor(user.locale)("Payment failed"), body: translatorFor(user.locale)("Please update your payment method."), link: "/dashboard/billing" });

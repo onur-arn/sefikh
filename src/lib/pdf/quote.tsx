@@ -112,7 +112,7 @@ export function QuotePdf({ number, data, tr, platformLegal, accepted }: { number
         />
       )}
       <Text style={{ marginTop: 6 }}>
-        {clean(tr("Payment by bank transfer, {days} days from receipt of invoice. Bank details: {iban}. Any late payment incurs penalties at a rate of {pct} % and a fixed recovery fee of €40.", { days: v(data.paymentDays), iban: v(data.iban), pct: v(data.latePenaltyPct) }))}
+        {clean(tr("Payment by bank transfer, {days} days from receipt of invoice. Bank details: {iban}. Any late payment incurs penalties at a rate of {pct} % and a fixed recovery fee of €40.", { days: v(data.paymentDays), iban: v([data.iban && `IBAN ${data.iban}`, data.bic && `BIC ${data.bic}`].filter(Boolean).join(" · ")), pct: v(data.latePenaltyPct) }))}
       </Text>
 
       <Text style={s.h2} break>

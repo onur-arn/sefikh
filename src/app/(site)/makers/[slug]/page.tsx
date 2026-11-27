@@ -229,10 +229,10 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
                 {(["SKILL", "MATERIAL", "TECHNIQUE"] as TagKind[]).map((k) =>
                   byKind(k).length ? (
                     <div key={k}>
-                      <p className="mb-2 font-display text-xl">{tr(TAG_KIND_LABEL[k])}</p>
+                      <p className="mb-2 font-display text-xl text-brass">{tr(TAG_KIND_LABEL[k])}</p>
                       <div className="flex flex-wrap gap-1.5">
                         {byKind(k).map((n) => (
-                          <Link key={n} href={`/search?${k === "SKILL" ? "skills" : k === "MATERIAL" ? "materials" : "techniques"}=${encodeURIComponent(n)}`} className="rounded-sm border border-line bg-paper px-3 py-1 text-[12.5px] hover:border-ink/40">
+                          <Link key={n} href={`/search?${k === "SKILL" ? "skills" : k === "MATERIAL" ? "materials" : "techniques"}=${encodeURIComponent(n)}`} className="rounded-sm border border-brass/15 bg-brass-light px-3 py-1 text-[12.5px] text-brass-dark transition-colors hover:border-brass hover:bg-brass hover:text-paper">
                             {tr(n)}
                           </Link>
                         ))}
@@ -253,8 +253,8 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
               <p className="text-sm text-muted">{tr("Based in")}{" "}{company.city ?? company.country}{tr(". Delivers and installs in:")}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {areas.map((a) => (
-                  <span key={a} className="flex items-center gap-1.5 rounded-sm bg-sand px-3 py-1 text-[12.5px]">
-                    <Globe className="size-3.5 text-muted" /> {tr(a)}
+                  <span key={a} className="flex items-center gap-1.5 rounded-sm bg-brass-light px-3 py-1 text-[12.5px] text-brass-dark">
+                    <Globe className="size-3.5 text-brass" /> {tr(a)}
                   </span>
                 ))}
               </div>
@@ -274,13 +274,13 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
             </AccordionItem>
           </div>
 
-          <div className="mt-8 rounded-none border border-line bg-paper p-6">
-            <p className="text-sm font-semibold">{tr("Contact details")}</p>
+          <div className="mt-8 rounded-none border border-brass/25 bg-brass-light/50 p-6">
+            <p className="text-sm font-semibold text-brass">{tr("Contact details")}</p>
             {canSeeContact ? (
               <ul className="mt-4 space-y-2.5 text-sm">
                 {company.publicEmail && (
                   <li className="flex items-center gap-2.5">
-                    <Mail className="size-4 text-muted" />
+                    <Mail className="size-4 text-brass" />
                     <a href={`mailto:${company.publicEmail}`} className="hover:underline">
                       {company.publicEmail}
                     </a>
@@ -288,7 +288,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
                 )}
                 {company.phone && (
                   <li className="flex items-center gap-2.5">
-                    <Phone className="size-4 text-muted" />
+                    <Phone className="size-4 text-brass" />
                     <a href={`tel:${company.phone.replace(/\s/g, "")}`} className="hover:underline">
                       {company.phone}
                     </a>
@@ -296,7 +296,7 @@ export default async function MakerPage({ params, searchParams }: PageProps<"/ma
                 )}
                 {company.website && (
                   <li className="flex items-center gap-2.5">
-                    <Globe className="size-4 text-muted" />
+                    <Globe className="size-4 text-brass" />
                     <a href={company.website} target="_blank" rel="noopener noreferrer nofollow" className="truncate hover:underline">
                       {company.website.replace(/^https?:\/\//, "")}
                     </a>

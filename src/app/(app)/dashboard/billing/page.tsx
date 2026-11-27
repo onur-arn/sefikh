@@ -4,7 +4,7 @@ import { Download, Receipt } from "lucide-react";
 import { BillingDetailsForm } from "@/components/billing/billing-details-form";
 import { billingParty } from "@/lib/invoices";
 import { requireUser } from "@/lib/auth/session";
-import { activeSubscription, expireSimulated } from "@/lib/billing";
+import { activeSubscription, expireSimulated, suspensionDate } from "@/lib/billing";
 import { db } from "@/lib/db";
 import { getPlan, planName } from "@/lib/plans";
 import { ButtonLink } from "@/components/ui/button";
@@ -24,6 +24,8 @@ export default async function BillingPage() {
   const [sub, payments, billing] = await Promise.all([activeSubscription(user.id), db.payment.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 120 }), billingParty(user.id)]);
   const plan = getPlan(sub?.plan ?? user.plan);
   const inCommitment = !!sub?.commitmentEndsAt && sub.commitmentEndsAt > new Date();
+  // Paiement refusé : date de coupure (7 jours), ou accès déjà coupé.
+  const unpaid = sub?.status === "PAST_DUE" && sub.pastDueSince ? { suspended: user.plan !== sub.plan, on: suspensionDate(sub.pastDueSince) } : null;
 
   return (
     <>
@@ -31,6 +33,14 @@ export default async function BillingPage() {
         <h1 className="display text-4xl sm:text-5xl">{tr("Plan & billing")}</h1>
         <p className="mt-2 text-sm text-muted">{tr("Manage your subscription, payment methods and invoices.")}</p>
       </header>
+
+      {unpaid && (
+        <div role="alert" className="mb-6 border border-danger/40 bg-danger/5 px-5 py-4 text-sm text-danger">
+          {unpaid.suspended
+            ? tr("Your access is suspended because your last payment did not go through. Update your payment method to restore it.")
+            : tr("Your last payment did not go through. Update your payment method before {date}, otherwise your access will be suspended.", { date: tr.date(unpaid.on) })}
+        </div>
+      )}
 
       <Card className="p-6 sm:p-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
